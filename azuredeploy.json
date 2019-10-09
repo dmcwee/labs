@@ -21,7 +21,7 @@
         "2012-Datacenter",
         "2012-R2-Datacenter",
         "2016-Datacenter",
-        "Windows-Server-Technical-Preview"
+        "2019-Datacenter"
       ]
     },
     "ClientOsVersion":{
@@ -101,52 +101,52 @@
   },
   "variables": {
     "tmpDemoStorageName": "[concat('Storage', uniqueString(resourceGroup().id))]",
-    "AdvDemoStorageName": "[toLower(substring(variables('tmpDemoStorageName'), 0, min(16, length(variables('tmpDemoStorageName')))))]",
+    "StorageAccountName": "[toLower(substring(variables('tmpDemoStorageName'), 0, min(16, length(variables('tmpDemoStorageName')))))]",
 
     "AdvDemoNet": "[concat(resourceGroup().name, '-net')]",
 
     /* Windows OS Publisher Variables */
-    "AdvDemoWinImagePublisher": "MicrosoftWindowsServer",
-    "AdvDemoWinImageOffer": "WindowsServer",
-    "AdvDemoClientImagePublisher":"MicrosoftVisualStudio",
-    "AdvDemoClientImageOffer":"Windows",
+    "WindowsServerImagePublisher": "MicrosoftWindowsServer",
+    "WindowsServerImageOffer": "WindowsServer",
+    "WindowsClientImagePublisher":"MicrosoftVisualStudio",
+    "WindowsClientImageOffer":"Windows",
 
     /* VNet Variables */
-    "AdvDemoNetPrefix": "10.0.0.0/16",
-    "AdvDemoNetSubnet1Name": "Subnet-1",
-    "AdvDemoNetSubnet1Prefix": "10.0.0.0/24",
-    "AdvDemoGatewaySubnetPrefix":"10.0.2.0/24",
-    "AdvDemoVnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('AdvDemoNet'))]",
-    "AdvDemoSubnetRef": "[concat(variables('AdvDemoVnetID'), '/subnets/', variables('AdvDemoNetSubnet1Name'))]",
-    "AdvDemoGatwayPIPName": "VNet-GWPip",
+    "NetworkPrefix": "10.0.0.0/16",
+    "SubNet1Name": "Subnet-1",
+    "SubNet1Prefix": "10.0.0.0/24",
+    "GatewaySubnetPrefix":"10.0.2.0/24",
+    "VNetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('AdvDemoNet'))]",
+    "SubnetReference": "[concat(variables('VNetId'), '/subnets/', variables('SubNet1Name'))]",
+    "GatewayPIPName": "VNet-GWPip",
 
     /* VM VHD Storage location */
-    "AdvDemoStorageAccountContainerName": "vhds",
+    "VhdContainerName": "vhds",
 
     /* DC VM Variables */
-    "AdvDemoDCNicName": "[concat(parameters('DcServerName'), '-NIC')]",
-    "AdvDemoDCScheduleName":"[toLower(concat('shutdown-computevm-', parameters('DcServerName')))]",
+    "ADNicName": "[concat(parameters('DcServerName'), '-NIC')]",
+    "ADScheduleName":"[toLower(concat('shutdown-computevm-', parameters('DcServerName')))]",
 
     /* ADFS VM Variables */
-    "AdvDemoADFSNicName": "[concat(parameters('ADFSServerName'), '-NIC')]",
-    "AdvDemoADFSScheduleName":"[toLower(concat('shutdown-computevm-', parameters('ADFSServerName')))]",
+    "ADFSNicName": "[concat(parameters('ADFSServerName'), '-NIC')]",
+    "ADFSScheduleName":"[toLower(concat('shutdown-computevm-', parameters('ADFSServerName')))]",
 
     /* WAP VM Variables */
-    "AdvDemoWAPNicName": "[concat(parameters('WAPServerName'), '-NIC')]",
-    "AdvDemoWAP-pipName": "[concat(parameters('WAPServerName'), '-PIP')]",
-    "AdvDemoWAPScheduleName":"[toLower(concat('shutdown-computevm-', parameters('WAPServerName')))]",
+    "WAPNicName": "[concat(parameters('WAPServerName'), '-NIC')]",
+    "WAPPIPName": "[concat(parameters('WAPServerName'), '-PIP')]",
+    "WAPScheduleName":"[toLower(concat('shutdown-computevm-', parameters('WAPServerName')))]",
 
     /* Client VM Variables */
-    "AdvDemoClientNICName":"[concat(parameters('ClientComputerName'), '-NIC')]",
-    "AdvDemoClientPIP":"[concat(parameters('ClientComputerName'), '-PIP')]",
-    "AdvDemoClientScheduleName":"[toLower(concat('shutdown-computevm-', parameters('ClientComputerName')))]",
+    "ClientNicName":"[concat(parameters('ClientComputerName'), '-NIC')]",
+    "ClientPipName":"[concat(parameters('ClientComputerName'), '-PIP')]",
+    "ClientScheduleName":"[toLower(concat('shutdown-computevm-', parameters('ClientComputerName')))]",
   },
   "resources": [
     /*
     Create Storage Account
     */
     {
-      "name": "[variables('AdvDemoStorageName')]",
+      "name": "[variables('StorageAccountName')]",
       "type": "Microsoft.Storage/storageAccounts",
       "location": "[resourceGroup().location]",
       "apiVersion": "2016-01-01",
@@ -155,7 +155,7 @@
       },
       "dependsOn": [],
       "tags": {
-        "displayName": "AdvDemoStorage"
+        "displayName": "StorageAccount"
       },
       "kind": "Storage"
     },
@@ -170,25 +170,25 @@
       "apiVersion": "2016-03-30",
       "dependsOn": [],
       "tags": {
-        "displayName": "AdvDemoNet"
+        "displayName": "VirtualNetwork"
       },
       "properties": {
         "addressSpace": {
           "addressPrefixes": [
-            "[variables('AdvDemoNetPrefix')]"
+            "[variables('NetworkPrefix')]"
           ]
         },
         "subnets": [
           {
-            "name": "[variables('AdvDemoNetSubnet1Name')]",
+            "name": "[variables('SubNet1Name')]",
             "properties": {
-              "addressPrefix": "[variables('AdvDemoNetSubnet1Prefix')]"
+              "addressPrefix": "[variables('SubNet1Prefix')]"
             }
           },
           {
             "name": "GatewaySubnet",
             "properties":{
-              "addressPrefix": "[variables('AdvDemoGatewaySubnetPrefix')]"
+              "addressPrefix": "[variables('GatewaySubnetPrefix')]"
             }
           }
         ]
@@ -199,15 +199,15 @@
     Create NIC for Domain Controller
     */
     {
-      "name": "[variables('AdvDemoDCNicName')]",
+      "name": "[variables('ADNicName')]",
       "type": "Microsoft.Network/networkInterfaces",
       "location": "[resourceGroup().location]",
       "apiVersion": "2016-03-30",
       "dependsOn": [
-        "[variables('AdvDemoVnetID')]"
+        "[variables('VNetId')]"
       ],
       "tags": {
-        "displayName": "AdvDemoDCNic"
+        "displayName": "ADNic"
       },
       "properties": {
         "ipConfigurations": [
@@ -217,7 +217,7 @@
               "privateIPAllocationMethod": "Static",
               "privateIPAddress": "10.0.0.10",
               "subnet": {
-                "id": "[variables('AdvDemoSubnetRef')]"
+                "id": "[variables('SubnetReference')]"
               }
             }
           }
@@ -234,11 +234,11 @@
       "location": "[resourceGroup().location]",
       "apiVersion": "2015-06-15",
       "dependsOn": [
-        "[resourceId('Microsoft.Storage/storageAccounts', variables('AdvDemoStorageName'))]",
-        "[resourceId('Microsoft.Network/networkInterfaces', variables('AdvDemoDCNicName'))]"
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('ADNicName'))]"
       ],
       "tags": {
-        "displayName": "AdvDemoDC"
+        "displayName": "ADServer"
       },
       "properties": {
         "hardwareProfile": {
@@ -251,15 +251,15 @@
         },
         "storageProfile": {
           "imageReference": {
-            "publisher": "[variables('AdvDemoWinImagePublisher')]",
-            "offer": "[variables('AdvDemoWinImageOffer')]",
+            "publisher": "[variables('WindowsServerImagePublisher')]",
+            "offer": "[variables('WindowsServerImageOffer')]",
             "sku": "[parameters('ServerOsVersion')]",
             "version": "latest"
           },
           "osDisk": {
             "name": "AdvDemoDCOSDisk",
             "vhd": {
-              "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('AdvDemoStorageName')), '2016-01-01').primaryEndpoints.blob, variables('AdvDemoStorageAccountContainerName'), '/', parameters('DcServerName'), '-osdisk.vhd')]"
+              "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), '2016-01-01').primaryEndpoints.blob, variables('VhdContainerName'), '/', parameters('DcServerName'), '-osdisk.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -272,7 +272,7 @@
               "diskSizeGB": "50",
               "lun": 0,
               "vhd": {
-                "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('AdvDemoStorageName')), '2016-01-01').primaryEndpoints.blob, variables('AdvDemoStorageAccountContainerName'), '/', parameters('DcServerName'), '-datadisk.vhd')]"
+                "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), '2016-01-01').primaryEndpoints.blob, variables('VhdContainerName'), '/', parameters('DcServerName'), '-datadisk.vhd')]"
               }
             }
           ]
@@ -280,7 +280,7 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('AdvDemoDCNicName'))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('ADNicName'))]"
             }
           ]
         }
@@ -295,7 +295,7 @@
             "[resourceId('Microsoft.Compute/virtualMachines', parameters('DcServerName'))]"
           ],
           "tags": {
-            "displayName": "DomainControllerDSC"
+            "displayName": "ADDSC"
           },
           "properties": {
             "publisher": "Microsoft.Powershell",
@@ -328,7 +328,7 @@
     {
       "comments": "",
       "type": "microsoft.devtestlab/schedules",
-      "name": "[variables('AdvDemoDCScheduleName')]",
+      "name": "[variables('ADScheduleName')]",
       "apiVersion": "2016-05-15",
       "location": "eastus",
       "scale": null,
@@ -355,15 +355,15 @@
     Create ADFS VM NIC
     */
     {
-      "name": "[variables('AdvDemoADFSNicName')]",
+      "name": "[variables('ADFSNicName')]",
       "type": "Microsoft.Network/networkInterfaces",
       "location": "[resourceGroup().location]",
       "apiVersion": "2016-03-30",
       "dependsOn": [
-        "[variables('AdvDemoVnetID')]"
+        "[variables('VNetId')]"
       ],
       "tags": {
-        "displayName": "AdvDemoADFSNic"
+        "displayName": "ADFSNic"
       },
       "properties": {
         "ipConfigurations": [
@@ -373,7 +373,7 @@
               "privateIPAllocationMethod": "Static",
               "privateIPAddress": "10.0.0.11",
               "subnet": {
-                "id": "[variables('AdvDemoSubnetRef')]"
+                "id": "[variables('SubnetReference')]"
               }
             }
           }
@@ -389,11 +389,11 @@
       "location": "[resourceGroup().location]",
       "apiVersion": "2015-06-15",
       "dependsOn": [
-        "[resourceId('Microsoft.Storage/storageAccounts', variables('AdvDemoStorageName'))]",
-        "[resourceId('Microsoft.Network/networkInterfaces', variables('AdvDemoADFSNicName'))]"
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('ADFSNicName'))]"
       ],
       "tags": {
-        "displayName": "AdvDemoADFS"
+        "displayName": "ADFSServer"
       },
       "properties": {
         "hardwareProfile": {
@@ -406,15 +406,15 @@
         },
         "storageProfile": {
           "imageReference": {
-            "publisher": "[variables('AdvDemoWinImagePublisher')]",
-            "offer": "[variables('AdvDemoWinImageOffer')]",
+            "publisher": "[variables('WindowsServerImagePublisher')]",
+            "offer": "[variables('WindowsServerImageOffer')]",
             "sku": "[parameters('ServerOsVersion')]",
             "version": "latest"
           },
           "osDisk": {
             "name": "AdvDemoADFSOSDisk",
             "vhd": {
-              "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('AdvDemoStorageName')), '2016-01-01').primaryEndpoints.blob, variables('AdvDemoStorageAccountContainerName'), '/', parameters('ADFSServerName'), '-osdisk.vhd')]"
+              "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), '2016-01-01').primaryEndpoints.blob, variables('VhdContainerName'), '/', parameters('ADFSServerName'), '-osdisk.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -423,7 +423,7 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('AdvDemoADFSNicName'))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('ADFSNicName'))]"
             }
           ]
         }
@@ -462,7 +462,7 @@
     {
       "comments": "",
       "type": "microsoft.devtestlab/schedules",
-      "name": "[variables('AdvDemoADFSScheduleName')]",
+      "name": "[variables('ADFSScheduleName')]",
       "apiVersion": "2016-05-15",
       "location": "eastus",
       "scale": null,
@@ -489,16 +489,16 @@
     Create WAP NIC
     */
     {
-      "name": "[variables('AdvDemoWAPNicName')]",
+      "name": "[variables('WAPNicName')]",
       "type": "Microsoft.Network/networkInterfaces",
       "location": "[resourceGroup().location]",
       "apiVersion": "2016-03-30",
       "dependsOn": [
-        "[variables('AdvDemoVnetID')]",
-        "[resourceId('Microsoft.Network/publicIPAddresses', variables('AdvDemoWAP-pipName'))]"
+        "[variables('VNetId')]",
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('WAPPIPName'))]"
       ],
       "tags": {
-        "displayName": "AdvDemoWAPENic"
+        "displayName": "WAPNic"
       },
       "properties": {
         "ipConfigurations": [
@@ -508,10 +508,10 @@
               "privateIPAllocationMethod": "Static",
               "privateIPAddress": "10.0.0.12",
               "subnet": {
-                "id": "[variables('AdvDemoSubnetRef')]"
+                "id": "[variables('SubnetReference')]"
               },
               "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('AdvDemoWAP-pipName'))]"
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('WAPPIPName'))]"
               }
             }
           }
@@ -528,11 +528,11 @@
       "location": "[resourceGroup().location]",
       "apiVersion": "2015-06-15",
       "dependsOn": [
-        "[resourceId('Microsoft.Storage/storageAccounts', variables('AdvDemoStorageName'))]",
-        "[resourceId('Microsoft.Network/networkInterfaces', variables('AdvDemoWAPNicName'))]"
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('WAPNicName'))]"
       ],
       "tags": {
-        "displayName": "AdvDemoWAP"
+        "displayName": "WAPServer"
       },
       "properties": {
         "hardwareProfile": {
@@ -545,15 +545,15 @@
         },
         "storageProfile": {
           "imageReference": {
-            "publisher": "[variables('AdvDemoWinImagePublisher')]",
-            "offer": "[variables('AdvDemoWinImageOffer')]",
+            "publisher": "[variables('WindowsServerImagePublisher')]",
+            "offer": "[variables('WindowsServerImageOffer')]",
             "sku": "[parameters('ServerOsVersion')]",
             "version": "latest"
           },
           "osDisk": {
             "name": "AdvDemoWAPOSDisk",
             "vhd": {
-              "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('AdvDemoStorageName')), '2016-01-01').primaryEndpoints.blob, variables('AdvDemoStorageAccountContainerName'), '/', parameters('WAPServerName'), '-osdisk.vhd')]"
+              "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), '2016-01-01').primaryEndpoints.blob, variables('VhdContainerName'), '/', parameters('WAPServerName'), '-osdisk.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -562,7 +562,7 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('AdvDemoWAPNicName'))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('WAPNicName'))]"
             }
           ]
         }
@@ -601,7 +601,7 @@
     {
       "comments": "",
       "type": "microsoft.devtestlab/schedules",
-      "name": "[variables('AdvDemoWAPScheduleName')]",
+      "name": "[variables('WAPScheduleName')]",
       "apiVersion": "2016-05-15",
       "location": "eastus",
       "scale": null,
@@ -628,18 +628,18 @@
     Create Public IP for WAP
     */
     {
-      "name": "[variables('AdvDemoWAP-pipName')]",
+      "name": "[variables('WAPPIPName')]",
       "type": "Microsoft.Network/publicIPAddresses",
       "location": "[resourceGroup().location]",
       "apiVersion": "2016-03-30",
       "dependsOn": [],
       "tags": {
-        "displayName": "AdvDemoWAP-pip"
+        "displayName": "WAPPublicIP"
       },
       "properties": {
         "publicIPAllocationMethod": "Dynamic"
         //, "dnsSettings": {
-        //  "domainNameLabel": "[concat(variables('AdvDemoWAP-pipName'), "-wappip")]"
+        //  "domainNameLabel": "[concat(variables('WAPPIPName'), "-wappip")]"
         //}
       }
     },
@@ -650,7 +650,7 @@
       "apiVersion": "2016-03-30",
       "dependsOn": [],
       "tags": {
-        "displayName": "AdvDemoGW-pip"
+        "displayName": "GatewayPublicIP"
       },
       "properties": {
         "publicIPAllocationMethod": "Dynamic"
@@ -663,13 +663,13 @@
     Create Public IP for Client VM
     */
     {
-      "name": "[variables('AdvDemoClientPIP')]",
+      "name": "[variables('ClientPipName')]",
       "type": "Microsoft.Network/publicIPAddresses",
       "location": "[resourceGroup().location]",
       "apiVersion": "2016-03-30",
       "dependsOn": [],
       "tags": {
-        "displayName": "AdvDemoClient-PIP"
+        "displayName": "ClientPublicIP"
       },
       "properties": {
         "publicIPAllocationMethod": "Dynamic"
@@ -682,16 +682,16 @@
     Create Client NIC
     */
     {
-      "name": "[variables('AdvDemoClientNICName')]",
+      "name": "[variables('ClientNicName')]",
       "type": "Microsoft.Network/networkInterfaces",
       "location": "[resourceGroup().location]",
       "apiVersion": "2016-03-30",
       "dependsOn": [
-        "[variables('AdvDemoVnetID')]",
-        "[resourceId('Microsoft.Network/publicIPAddresses', variables('AdvDemoClientPIP'))]"
+        "[variables('VNetId')]",
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('ClientPipName'))]"
       ],
       "tags": {
-        "displayName": "AdvDemoClientNic"
+        "displayName": "ClientNic"
       },
       "properties": {
         "ipConfigurations": [
@@ -701,10 +701,10 @@
               "privateIPAllocationMethod": "Static",
               "privateIPAddress": "10.0.0.13",
               "subnet": {
-                "id": "[variables('AdvDemoSubnetRef')]"
+                "id": "[variables('SubnetReference')]"
               },
               "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('AdvDemoClientPIP'))]"
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('ClientPipName'))]"
               }
             }
           }
@@ -720,11 +720,11 @@
       "location": "[resourceGroup().location]",
       "apiVersion": "2015-06-15",
       "dependsOn": [
-        "[resourceId('Microsoft.Storage/storageAccounts', variables('AdvDemoStorageName'))]",
-        "[resourceId('Microsoft.Network/networkInterfaces', variables('AdvDemoWAPNicName'))]"
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('WAPNicName'))]"
       ],
       "tags": {
-        "displayName": "AdvDemoClient"
+        "displayName": "Client-VM"
       },
       "properties": {
         "hardwareProfile": {
@@ -737,15 +737,15 @@
         },
         "storageProfile": {
           "imageReference": {
-            "publisher": "[variables('AdvDemoClientImagePublisher')]",
-            "offer": "[variables('AdvDemoClientImageOffer')]",
+            "publisher": "[variables('WindowsClientImagePublisher')]",
+            "offer": "[variables('WindowsClientImageOffer')]",
             "sku": "[parameters('ClientOsVersion')]",
             "version": "latest"
           },
           "osDisk": {
             "name": "AdvDemoClientOSDisk",
             "vhd": {
-              "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('AdvDemoStorageName')), '2016-01-01').primaryEndpoints.blob, variables('AdvDemoStorageAccountContainerName'), '/', parameters('ClientComputerName'), '-osdisk.vhd')]"
+              "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), '2016-01-01').primaryEndpoints.blob, variables('VhdContainerName'), '/', parameters('ClientComputerName'), '-osdisk.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -754,7 +754,7 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('AdvDemoClientNICName'))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('ClientNicName'))]"
             }
           ]
         }
@@ -764,7 +764,7 @@
     {
       "comments": "",
       "type": "microsoft.devtestlab/schedules",
-      "name": "[variables('AdvDemoClientScheduleName')]",
+      "name": "[variables('ClientScheduleName')]",
       "apiVersion": "2016-05-15",
       "location": "eastus",
       "scale": null,
