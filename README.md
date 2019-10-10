@@ -8,7 +8,7 @@
 - [X] List the default size of VMs created
 - [X] List the daily shutdown schedule of the VMs
 - [X] List the default admin username for this template
-- [] Detail the DSC settings?
+- [ ] Detail the DSC settings?
 
 ### VMs Created
 1. One Active Directory Server
@@ -27,9 +27,9 @@ The default name for the admin account is `labadmin`.
 
 ## How To deploy this template
 #### TODO in this section
-- [] Document Assumptions
-- [] Document the steps to deploy this into a user's Azure Environment
-- [] What are next steps after deployment
+- [X] Document Assumptions
+- [X] Document the steps to deploy this into a user's Azure Environment
+- [ ] What are next steps after deployment
 
 ### Assumptions
 * You have the necessary Azure Powershell Module installed on your machines
@@ -37,9 +37,9 @@ The default name for the admin account is `labadmin`.
 
 ### Steps
 1. Cloning the repository or downloading [azuredeploy.json](https://raw.githubusercontent.com/dmcwee/idamlab/master/azuredeploy.json) to your local machine
-1. Use the following Powershell command to create an Azure Resource Group 
->New-AzureRmResourceGroup -Name [resource group name] -Location [desired azure region]`
-1. Use the following Powershell command to start the Deployment to your recently
+2. Use the following Powershell command to create an Azure Resource Group 
+>New-AzureRmResourceGroup -Name [resource group name] -Location [desired azure region]
+3. Use the following Powershell command to start the Deployment to your recently
 >New-AzureRmResourceGroupDeployment -Name [a deployment job name] -ResourceGroupName [resource group name used in the above command] -TemplateFile [relative path to the azuredeploy.json file]
 
 ### Post Deployment Steps
@@ -54,6 +54,7 @@ The default name for the admin account is `labadmin`.
 The following parameters can be overloaded using a deployment parameter file.  
 
 Parameter | Default Value | Allowed Values
+--------- | ------------- | --------------
 StorageType | Standard_LRS | Standard_LRS, Standard_ZRS, Standard_GRS, Standard_RAGRS, Premium_LRS
 ServerOsVersion | 2016-Datacenter | 2008-R2-SP1, 2012-Datacenter, 2012-R2-Datacenter, 2016-Datacenter, 2019-Datacenter
 ClientOsVersion | Windows-10-N-x64 | Win7-SP1-ENT-N-x64, Win81-ENT-N-x64, Windows-10-N-x64
@@ -79,6 +80,6 @@ The following is an example of a parameters JSON file which changes the value of
 }```
 
 ## Project TODOs
-- [] Add a Gateway so only the WAP has a Publicly accessible IP and all VMs can be directly RDP'ed to
-- [] Include automatic download of the AAD Connect application to the AD server
-- [] Fix the AD server DSC so AD folder and files will be located on non-cached disk
+- [ ] Add a Gateway so only the WAP has a Publicly accessible IP and all VMs can be directly RDP'ed to
+- [ ] Include automatic download of the AAD Connect application to the AD server
+- [ ] Fix the AD server DSC so AD folder and files will be located on non-cached disk
