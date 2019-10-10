@@ -69,7 +69,8 @@ DSCLocation | | **Warning:** Modifying this value could cause this template to f
 ### How to change a default parameter's value
 The following is an example of a parameters JSON file which changes the value of the *VmSize* parameter.
 
-```{
+```
+{
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
