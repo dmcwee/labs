@@ -85,3 +85,4 @@ The following is an example of a parameters JSON file which changes the value of
 - [ ] Add a Gateway so only the WAP has a Publicly accessible IP and all VMs can be directly RDP'ed to
 - [ ] Include automatic download of the AAD Connect application to the AD server
 - [ ] Fix the AD server DSC so AD folder and files will be located on non-cached disk
+- [ ] Update Active Directory DSC to use the latest version

@@ -345,9 +345,7 @@
               "status": "Disabled",
               "timeInMinutes": 30
           },
-          "targetResourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('AdServerName'))]",
-          "provisioningState": "Succeeded"
-          //, "uniqueIdentifier": "b6d93b68-528a-47cb-bf49-05b41aab59f1"
+          "targetResourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('AdServerName'))]"
       },
       "dependsOn": [
           "[resourceId('Microsoft.Compute/virtualMachines', parameters('AdServerName'))]"
@@ -479,9 +477,7 @@
               "status": "Disabled",
               "timeInMinutes": 30
           },
-          "targetResourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('ADFSServerName'))]",
-          "provisioningState": "Succeeded"
-          //, "uniqueIdentifier": "b6d93b68-528a-47cb-bf49-05b41aab59f1"
+          "targetResourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('ADFSServerName'))]"
       },
       "dependsOn": [
           "[resourceId('Microsoft.Compute/virtualMachines', parameters('ADFSServerName'))]"
@@ -618,9 +614,7 @@
               "status": "Disabled",
               "timeInMinutes": 30
           },
-          "targetResourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('WAPServerName'))]",
-          "provisioningState": "Succeeded"
-          //, "uniqueIdentifier": "b6d93b68-528a-47cb-bf49-05b41aab59f1"
+          "targetResourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('WAPServerName'))]"
       },
       "dependsOn": [
           "[resourceId('Microsoft.Compute/virtualMachines', parameters('WAPServerName'))]"
@@ -781,9 +775,7 @@
               "status": "Disabled",
               "timeInMinutes": 30
           },
-          "targetResourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('ClientComputerName'))]",
-          "provisioningState": "Succeeded",
-          "uniqueIdentifier": "b6d93b68-528a-47cb-bf49-05b41aab59f1"
+          "targetResourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('ClientComputerName'))]"
       },
       "dependsOn": [
           "[resourceId('Microsoft.Compute/virtualMachines', parameters('ClientComputerName'))]"
