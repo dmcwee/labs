@@ -77,7 +77,8 @@ The following is an example of a parameters JSON file which changes the value of
           "value": "Basic_A1"
       }
   }
-}```
+}
+```
 
 ## Project TODOs
 - [ ] Add a Gateway so only the WAP has a Publicly accessible IP and all VMs can be directly RDP'ed to
