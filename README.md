@@ -37,9 +37,9 @@ The default name for the admin account is `labadmin`.
 
 ### Steps
 1. Cloning the repository or downloading [azuredeploy.json](https://raw.githubusercontent.com/dmcwee/idamlab/master/azuredeploy.json) to your local machine
-2. Use the following Powershell command to create an Azure Resource Group 
+1. Use the following Powershell command to create an Azure Resource Group 
 >New-AzureRmResourceGroup -Name [resource group name] -Location [desired azure region]
-3. Use the following Powershell command to start the Deployment to your recently
+1. Use the following Powershell command to start the Deployment to your recently
 >New-AzureRmResourceGroupDeployment -Name [a deployment job name] -ResourceGroupName [resource group name used in the above command] -TemplateFile [relative path to the azuredeploy.json file]
 
 ### Post Deployment Steps
