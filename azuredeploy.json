@@ -55,7 +55,7 @@
     "AdminPassword": {
       "type": "securestring"
     },
-    "DcServerName": {
+    "AdServerName": {
       "type": "string",
       "minLength": 1,
       "defaultValue": "Demo-AD"
@@ -96,7 +96,9 @@
       "metadata": {
         "description": "Auto-generated container in staging storage account to receive post-build staging folder upload"
       },
-      "defaultValue": "https://raw.githubusercontent.com/dmcwee/azure/master/AdvancedDemo/AdvancedDemo/DSC/AdvDemoDSC.zip"
+      //"defaultValue": "https://raw.githubusercontent.com/dmcwee/azure/master/AdvancedDemo/AdvancedDemo/DSC/AdvDemoDSC.zip"
+      //"defaultValue": "https://github.com/dmcwee/idamlab/blob/master/DSC/AdvDemoDSC.zip?raw=true"
+      "defaultValue": "https://raw.githubusercontent.com/dmcwee/idamlab/master/DSC/AdvDemoDSC.zip"
     }
   },
   "variables": {
@@ -124,8 +126,8 @@
     "VhdContainerName": "vhds",
 
     /* DC VM Variables */
-    "ADNicName": "[concat(parameters('DcServerName'), '-NIC')]",
-    "ADScheduleName":"[toLower(concat('shutdown-computevm-', parameters('DcServerName')))]",
+    "ADNicName": "[concat(parameters('AdServerName'), '-NIC')]",
+    "ADScheduleName":"[toLower(concat('shutdown-computevm-', parameters('AdServerName')))]",
 
     /* ADFS VM Variables */
     "ADFSNicName": "[concat(parameters('ADFSServerName'), '-NIC')]",
@@ -229,7 +231,7 @@
     Create the Domain Controller
     */
     {
-      "name": "[parameters('DcServerName')]",
+      "name": "[parameters('AdServerName')]",
       "type": "Microsoft.Compute/virtualMachines",
       "location": "[resourceGroup().location]",
       "apiVersion": "2015-06-15",
@@ -245,7 +247,7 @@
           "vmSize": "[parameters('VmSize')]"
         },
         "osProfile": {
-          "computerName": "[parameters('DcServerName')]",
+          "computerName": "[parameters('AdServerName')]",
           "adminUsername": "[parameters('AdminUserName')]",
           "adminPassword": "[parameters('AdminPassword')]"
         },
@@ -259,7 +261,7 @@
           "osDisk": {
             "name": "AdvDemoDCOSDisk",
             "vhd": {
-              "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), '2016-01-01').primaryEndpoints.blob, variables('VhdContainerName'), '/', parameters('DcServerName'), '-osdisk.vhd')]"
+              "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), '2016-01-01').primaryEndpoints.blob, variables('VhdContainerName'), '/', parameters('AdServerName'), '-osdisk.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -272,7 +274,7 @@
               "diskSizeGB": "50",
               "lun": 0,
               "vhd": {
-                "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), '2016-01-01').primaryEndpoints.blob, variables('VhdContainerName'), '/', parameters('DcServerName'), '-datadisk.vhd')]"
+                "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), '2016-01-01').primaryEndpoints.blob, variables('VhdContainerName'), '/', parameters('AdServerName'), '-datadisk.vhd')]"
               }
             }
           ]
@@ -292,7 +294,7 @@
           "location": "[resourceGroup().location]",
           "apiVersion": "2016-03-30",
           "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines', parameters('DcServerName'))]"
+            "[resourceId('Microsoft.Compute/virtualMachines', parameters('AdServerName'))]"
           ],
           "tags": {
             "displayName": "ADDSC"
@@ -309,7 +311,7 @@
                 "function": "Main"
               },
               "configurationArguments": {
-                "nodeName": "[parameters('DcServerName')]",
+                "nodeName": "[parameters('AdServerName')]",
                 "domainName":"[parameters('DomainName')]"
               }
             },
@@ -343,12 +345,12 @@
               "status": "Disabled",
               "timeInMinutes": 30
           },
-          "targetResourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('DcServerName'))]",
+          "targetResourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('AdServerName'))]",
           "provisioningState": "Succeeded"
           //, "uniqueIdentifier": "b6d93b68-528a-47cb-bf49-05b41aab59f1"
       },
       "dependsOn": [
-          "[resourceId('Microsoft.Compute/virtualMachines', parameters('DcServerName'))]"
+          "[resourceId('Microsoft.Compute/virtualMachines', parameters('AdServerName'))]"
       ]
   },
     /*
