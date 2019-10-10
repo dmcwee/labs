@@ -1,6 +1,6 @@
 # Lab for IDAM
 
-## Warning: This is in development and should NOT be used yet.  Instructions are still very INCOMPLETE
+**Warning: This is in development and should NOT be used yet.  Instructions are still very INCOMPLETE**
 
 ## Defaults
 #### TODO in this section
