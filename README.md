@@ -8,7 +8,7 @@
 - [X] List the default size of VMs created
 - [X] List the daily shutdown schedule of the VMs
 - [X] List the default admin username for this template
-- [ ] Detail the DSC settings?
+- [X] Detail the DSC settings
 
 ### VMs Created
 1. One Active Directory Server
@@ -20,10 +20,30 @@
 VMs are created using the *Basic_A2* size
 
 ### VM Schedule
-Currently all VMs will shutdown daily at 1900 (7PM)
+Currently all VMs will shutdown daily at 1900 (7PM) EST
 
 ### Admin Account
 The default name for the admin account is `labadmin`.
+
+### DSC Configuration
+#### Active Directory
+Actions performed by the Domain Controller DSC:
+1. The Active Directory DSC installs the AD, AD Tools, and DNS Features.  
+1. The DSC then configures AD with the provided Domain Name and Administrator credentials.
+1. Download Azure Active Directory to the Public Downloads folder
+1. Create the OU 'LabUsers'
+1. Create 3 Users JeffL, RonHD, and SamiraA in the 'LabUsers' OU
+1. Create User AATPService for use with Azure ATP service
+1. Create Group HelpDesk and add user RonHD as a member
+The user accounts JeffL, RonHD, SamiraA, and AATPService are created with the same password as the Lab's default password.  These accounts are created to support the Azure ATP Security Lab found [here](https://docs.microsoft.com/en-us/azure-advanced-threat-protection/atp-playbook-lab-overview)
+
+#### Active Directory Federation Service
+Actions performed by the ADFS DSC:
+1. The ADFS DSC installs the ADFS, AD Powershell, and AD Tools Features
+
+#### Web Application Proxy
+Actions performed by the Web Application Proxy DSC:
+1. The WAP DSC installs the WAP and WAP Management Features
 
 ## How To deploy this template
 #### TODO in this section
@@ -43,7 +63,12 @@ The default name for the admin account is `labadmin`.
 >New-AzureRmResourceGroupDeployment -Name [a deployment job name] -ResourceGroupName [resource group name used in the above command] -TemplateFile [relative path to the azuredeploy.json file]
 
 ### Post Deployment Steps
-1. I recommend rebooting all machines after performing the deployment.  This seems to resolve any lot of the RDP issues you might experience
+1. I recommend rebooting all machines after performing the deployment.  This seems to resolve a lot of the RDP issues you might experience.
+1. Complete configuration of the VNet Gateway to provide Point-to-Site VPN capabilities to the lab.
+   1. In Azure Portal Open the Resource Group and click on the *{resourcegroupname}-GW*
+   1. On the Gateway Blade under *Settings* click on *Point-to-Site Configuration*
+   1. Follow steps [starting here](https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-point-to-site-resource-manager-portal#generatecert) to configure the Point-to-Site settings
+   *You can use the New-P2SCertificate.ps1 powershell script to generate self signed Point-to-Site Authentication certificates*
 1. Verify that the AD Domain has been installed and configured
 1. Verify the ADFS Server has the ADFS feature and tools installed and join it to the domain
 1. Verify the WAP Server has the Web Application Proxy feature and tools installed.  Depending on your deployment plan you may or may not join this to your domain
@@ -82,7 +107,8 @@ The following is an example of a parameters JSON file which changes the value of
 ```
 
 ## Project TODOs
-- [ ] Add a Gateway so only the WAP has a Publicly accessible IP and all VMs can be directly RDP'ed to
-- [ ] Include automatic download of the AAD Connect application to the AD server
-- [ ] Fix the AD server DSC so AD folder and files will be located on non-cached disk
-- [ ] Update Active Directory DSC to use the latest version
+- [X] Add a Gateway so only the WAP has a Publicly accessible IP and all VMs can be directly RDP'ed to
+- [X] Include automatic download of the AAD Connect application to the AD server
+- [ ] *Fix the AD server DSC so AD folder and files will be located on non-cached disk - Removed due to non-production lab setup*
+- [X] Update Active Directory DSC to use the latest version
+- [ ] Add a Windows 10 Admin Workstation
