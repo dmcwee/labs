@@ -15,7 +15,7 @@
     },
     "ServerOsVersion": {
       "type": "string",
-      "defaultValue": "2016-Datacenter",
+      "defaultValue": "2019-Datacenter",
       "allowedValues": [
         "2008-R2-SP1",
         "2012-Datacenter",
@@ -79,6 +79,30 @@
       "type":"string",
       "minLength": 1
     },
+    "gatewayType": {
+      "type": "string",
+      "defaultValue": "Vpn",
+      "allowedValues": [
+          "Vpn",
+          "ExpressRoute"
+      ]
+    },
+    "vpnGatewayGeneration": {
+      "type": "string",
+      "defaultValue": "Generation1"
+    },
+    "vpnType": {
+      "type": "string",
+      "defaultValue": "RouteBased",
+      "allowedValues": [
+          "RouteBased",
+          "PolicyBased"
+      ]
+    },
+    "sku": {
+      "type": "string",
+      "defaultValue": "VpnGw1"
+    },
     /*"AdvDemoWAP-pipDnsName": {
       "type": "string",
       "minLength": 1
@@ -116,11 +140,16 @@
     /* VNet Variables */
     "NetworkPrefix": "10.0.0.0/16",
     "SubNet1Name": "Subnet-1",
+    "GatewaySubnet": "GatewaySubnet",
     "SubNet1Prefix": "10.0.0.0/24",
     "GatewaySubnetPrefix":"10.0.2.0/24",
     "VNetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('AdvDemoNet'))]",
     "SubnetReference": "[concat(variables('VNetId'), '/subnets/', variables('SubNet1Name'))]",
-    "GatewayPIPName": "VNet-GWPip",
+    
+    /* V-Net Gateway Variable */
+    "GatewayName": "[concat(resourceGroup().name, '-GW')]",
+    "GatewayNamePip": "[concat(resourceGroup().name, '-GW-PIP')]",
+    "GWSubnetReference": "[concat(variables('VNetId'), '/subnets/', variables('GatewaySubnet'))]",
 
     /* VM VHD Storage location */
     "VhdContainerName": "vhds",
@@ -142,6 +171,8 @@
     "ClientNicName":"[concat(parameters('ClientComputerName'), '-NIC')]",
     "ClientPipName":"[concat(parameters('ClientComputerName'), '-PIP')]",
     "ClientScheduleName":"[toLower(concat('shutdown-computevm-', parameters('ClientComputerName')))]",
+
+    "lastVariable": ""
   },
   "resources": [
     /*
@@ -151,7 +182,7 @@
       "name": "[variables('StorageAccountName')]",
       "type": "Microsoft.Storage/storageAccounts",
       "location": "[resourceGroup().location]",
-      "apiVersion": "2016-01-01",
+      "apiVersion": "2019-04-01",
       "sku": {
         "name": "[parameters('StorageType')]"
       },
@@ -169,7 +200,7 @@
       "name": "[variables('AdvDemoNet')]",
       "type": "Microsoft.Network/virtualNetworks",
       "location": "[resourceGroup().location]",
-      "apiVersion": "2016-03-30",
+      "apiVersion": "2018-10-01",
       "dependsOn": [],
       "tags": {
         "displayName": "VirtualNetwork"
@@ -188,7 +219,7 @@
             }
           },
           {
-            "name": "GatewaySubnet",
+            "name": "[variables('GatewaySubnet')]",
             "properties":{
               "addressPrefix": "[variables('GatewaySubnetPrefix')]"
             }
@@ -204,7 +235,7 @@
       "name": "[variables('ADNicName')]",
       "type": "Microsoft.Network/networkInterfaces",
       "location": "[resourceGroup().location]",
-      "apiVersion": "2016-03-30",
+      "apiVersion": "2018-10-01",
       "dependsOn": [
         "[variables('VNetId')]"
       ],
@@ -234,7 +265,7 @@
       "name": "[parameters('AdServerName')]",
       "type": "Microsoft.Compute/virtualMachines",
       "location": "[resourceGroup().location]",
-      "apiVersion": "2015-06-15",
+      "apiVersion": "2018-10-01",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]",
         "[resourceId('Microsoft.Network/networkInterfaces', variables('ADNicName'))]"
@@ -267,6 +298,7 @@
             "createOption": "FromImage"
           },
           "dataDisks": [
+            /*
             {
               "name": "AdvDemoDCDataDisk",
               "caching": "None",
@@ -277,6 +309,7 @@
                 "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), '2016-01-01').primaryEndpoints.blob, variables('VhdContainerName'), '/', parameters('AdServerName'), '-datadisk.vhd')]"
               }
             }
+            */
           ]
         },
         "networkProfile": {
@@ -292,9 +325,9 @@
           "name": "Microsoft.Powershell.DSC",
           "type": "extensions",
           "location": "[resourceGroup().location]",
-          "apiVersion": "2016-03-30",
+          "apiVersion": "2018-10-01",
           "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines', parameters('AdServerName'))]"
+            "[resourceId('Microsoft.Compute/virtualMachines', parameters('AdServerName'))]",
           ],
           "tags": {
             "displayName": "ADDSC"
@@ -331,7 +364,7 @@
       "comments": "",
       "type": "microsoft.devtestlab/schedules",
       "name": "[variables('ADScheduleName')]",
-      "apiVersion": "2016-05-15",
+      "apiVersion": "2018-09-15",
       "location": "eastus",
       "scale": null,
       "properties": {
@@ -358,7 +391,7 @@
       "name": "[variables('ADFSNicName')]",
       "type": "Microsoft.Network/networkInterfaces",
       "location": "[resourceGroup().location]",
-      "apiVersion": "2016-03-30",
+      "apiVersion": "2018-10-01",
       "dependsOn": [
         "[variables('VNetId')]"
       ],
@@ -387,7 +420,7 @@
       "name": "[parameters('ADFSServerName')]",
       "type": "Microsoft.Compute/virtualMachines",
       "location": "[resourceGroup().location]",
-      "apiVersion": "2015-06-15",
+      "apiVersion": "2018-10-01",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]",
         "[resourceId('Microsoft.Network/networkInterfaces', variables('ADFSNicName'))]"
@@ -433,7 +466,7 @@
           "name": "Microsoft.Powershell.DSC",
           "type": "extensions",
           "location": "[resourceGroup().location]",
-          "apiVersion": "2016-03-30",
+          "apiVersion": "2018-10-01",
           "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines', parameters('ADFSServerName'))]"
           ],
@@ -463,7 +496,7 @@
       "comments": "",
       "type": "microsoft.devtestlab/schedules",
       "name": "[variables('ADFSScheduleName')]",
-      "apiVersion": "2016-05-15",
+      "apiVersion": "2018-09-15",
       "location": "eastus",
       "scale": null,
       "properties": {
@@ -490,7 +523,7 @@
       "name": "[variables('WAPNicName')]",
       "type": "Microsoft.Network/networkInterfaces",
       "location": "[resourceGroup().location]",
-      "apiVersion": "2016-03-30",
+      "apiVersion": "2018-10-01",
       "dependsOn": [
         "[variables('VNetId')]",
         "[resourceId('Microsoft.Network/publicIPAddresses', variables('WAPPIPName'))]"
@@ -524,7 +557,7 @@
       "name": "[parameters('WAPServerName')]",
       "type": "Microsoft.Compute/virtualMachines",
       "location": "[resourceGroup().location]",
-      "apiVersion": "2015-06-15",
+      "apiVersion": "2018-10-01",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]",
         "[resourceId('Microsoft.Network/networkInterfaces', variables('WAPNicName'))]"
@@ -570,7 +603,7 @@
           "name": "Microsoft.Powershell.DSC",
           "type": "extensions",
           "location": "[resourceGroup().location]",
-          "apiVersion": "2016-03-30",
+          "apiVersion": "2018-10-01",
           "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines', parameters('WAPServerName'))]"
           ],
@@ -600,7 +633,7 @@
       "comments": "",
       "type": "microsoft.devtestlab/schedules",
       "name": "[variables('WAPScheduleName')]",
-      "apiVersion": "2016-05-15",
+      "apiVersion": "2018-09-15",
       "location": "eastus",
       "scale": null,
       "properties": {
@@ -627,7 +660,7 @@
       "name": "[variables('WAPPIPName')]",
       "type": "Microsoft.Network/publicIPAddresses",
       "location": "[resourceGroup().location]",
-      "apiVersion": "2016-03-30",
+      "apiVersion": "2018-10-01",
       "dependsOn": [],
       "tags": {
         "displayName": "WAPPublicIP"
@@ -639,11 +672,12 @@
         //}
       }
     },
+
     {
-      "name": "VNet-GWPip",
+      "name": "[variables('GatewayNamePip')]",
       "type": "Microsoft.Network/publicIPAddresses",
       "location": "[resourceGroup().location]",
-      "apiVersion": "2016-03-30",
+      "apiVersion": "2018-10-01",
       "dependsOn": [],
       "tags": {
         "displayName": "GatewayPublicIP"
@@ -651,8 +685,43 @@
       "properties": {
         "publicIPAllocationMethod": "Dynamic"
         , "dnsSettings": {
-          "domainNameLabel": "[toLower(concat(resourceGroup().name, 'gateway'))]"
+          "domainNameLabel": "[toLower(variables('GatewayName'))]"
         }
+      }
+    },
+    
+    {
+      "apiVersion": "2019-04-01",
+      "name": "[variables('GatewayName')]",
+      "type": "Microsoft.Network/virtualNetworkGateways",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('GatewayNamePip'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('AdvDemoNet'))]"
+      ],
+      "tags": {},
+      "properties": {
+          "gatewayType": "[parameters('gatewayType')]",
+          "ipConfigurations": [
+              {
+                  "name": "default",
+                  "properties": {
+                      "privateIPAllocationMethod": "Dynamic",
+                      "subnet": {
+                          "id": "[variables('GWSubnetReference')]"
+                      },
+                      "publicIpAddress": {
+                          "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('GatewayNamePip'))]"
+                      }
+                  }
+              }
+          ],
+          "vpnType": "[parameters('vpnType')]",
+          "vpnGatewayGeneration": "[parameters('vpnGatewayGeneration')]",
+          "sku": {
+              "name": "[parameters('sku')]",
+              "tier": "[parameters('sku')]"
+          }
       }
     },
     /*
@@ -662,7 +731,7 @@
       "name": "[variables('ClientPipName')]",
       "type": "Microsoft.Network/publicIPAddresses",
       "location": "[resourceGroup().location]",
-      "apiVersion": "2016-03-30",
+      "apiVersion": "2018-10-01",
       "dependsOn": [],
       "tags": {
         "displayName": "ClientPublicIP"
@@ -681,10 +750,10 @@
       "name": "[variables('ClientNicName')]",
       "type": "Microsoft.Network/networkInterfaces",
       "location": "[resourceGroup().location]",
-      "apiVersion": "2016-03-30",
+      "apiVersion": "2018-10-01",
       "dependsOn": [
-        "[variables('VNetId')]",
-        "[resourceId('Microsoft.Network/publicIPAddresses', variables('ClientPipName'))]"
+        "[variables('VNetId')]"
+        // , "[resourceId('Microsoft.Network/publicIPAddresses', variables('ClientPipName'))]"
       ],
       "tags": {
         "displayName": "ClientNic"
@@ -700,7 +769,7 @@
                 "id": "[variables('SubnetReference')]"
               },
               "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('ClientPipName'))]"
+                // "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('ClientPipName'))]"
               }
             }
           }
@@ -714,7 +783,7 @@
       "name": "[parameters('ClientComputerName')]",
       "type": "Microsoft.Compute/virtualMachines",
       "location": "[resourceGroup().location]",
-      "apiVersion": "2015-06-15",
+      "apiVersion": "2018-10-01",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]",
         "[resourceId('Microsoft.Network/networkInterfaces', variables('WAPNicName'))]"
@@ -761,7 +830,7 @@
       "comments": "",
       "type": "microsoft.devtestlab/schedules",
       "name": "[variables('ClientScheduleName')]",
-      "apiVersion": "2016-05-15",
+      "apiVersion": "2018-09-15",
       "location": "eastus",
       "scale": null,
       "properties": {

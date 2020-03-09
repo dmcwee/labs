@@ -67,7 +67,7 @@ Actions performed by the Web Application Proxy DSC:
 1. Complete configuration of the VNet Gateway to provide Point-to-Site VPN capabilities to the lab.
    1. In Azure Portal Open the Resource Group and click on the *{resourcegroupname}-GW*
    1. On the Gateway Blade under *Settings* click on *Point-to-Site Configuration*
-   1. Follow steps [starting here](https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-point-to-site-resource-manager-portal#generatecert) to configure the Point-to-Site settings
+   1. Follow steps [starting here](https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-point-to-site-resource-manager-portal#generatecert) to configure the Point-to-Site settings.
    *You can use the New-P2SCertificate.ps1 powershell script to generate self signed Point-to-Site Authentication certificates*
 1. Verify that the AD Domain has been installed and configured
 1. Verify the ADFS Server has the ADFS feature and tools installed and join it to the domain

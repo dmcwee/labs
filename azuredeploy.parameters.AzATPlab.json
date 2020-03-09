@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "ServerOsVersion": {
+      "value": "2012-R2-Datacenter"
+    },
+    //"ClientVMNames": {
+    //  "value": ["Victim-PC", "Admin-PC"]
+    //},
+    //"IncludeADFS": {
+    //  "value": false
+    //},
+    //"IncludeWAP": {
+    //  "value": false
+    //}
+    "DSCLocation": {
+      "value": "https://raw.githubusercontent.com/dmcwee/idamlab/dev/DSC/AdvDemoDSC.zip"
+    }
+  }
+}
