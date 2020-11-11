@@ -88,7 +88,7 @@ AdminUserName | labadmin | *string*
 AdServerName | Demo-AD | *string*
 ADFSServerName | Demo-ADFS | *string*
 WAPServerName | Demo-WAP | *string*
-ClientComputerName | Demo-Client | *string*
+ClientComputerName | Demo-Client | *array*
 DSCLocation | | **Warning:** Modifying this value could cause this template to fail deployment.
 
 ### How to change a default parameter's value

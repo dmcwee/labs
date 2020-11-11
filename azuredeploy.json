@@ -1,5 +1,5 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
     "StorageType": {
@@ -60,20 +60,27 @@
       "minLength": 1,
       "defaultValue": "Demo-AD"
     },
+    "IncludeADFS": {
+      "type": "bool",
+      "defaultValue": true
+    },
     "ADFSServerName": {
       "type": "string",
       "minLength": 1,
       "defaultValue": "Demo-ADFS"
+    },
+    "IncludeWAP": {
+      "type": "bool",
+      "defaultValue": true
     },
     "WAPServerName": {
       "type": "string",
       "minLength": 1,
       "defaultValue": "Demo-WAP"
     },
-    "ClientComputerName":{
-      "type":"string",
-      "minLength": 1,
-      "defaultValue": "Demo-Client"
+    "ClientComputerNames":{
+      "type":"array",
+      "defaultValue": ["Demo-Client"]
     },
     "DomainName":{
       "type":"string",
@@ -103,26 +110,33 @@
       "type": "string",
       "defaultValue": "VpnGw1"
     },
-    /*"AdvDemoWAP-pipDnsName": {
-      "type": "string",
-      "minLength": 1
-    },
-    "AdvDemoGatwayDns":{
-      "type": "string",
-      "minLength": 1
-    },
-    "AdvDemoClientDNS":{
-      "type":"string",
-      "minLength": 1
-    },*/
     "DSCLocation": {
       "type": "string",
       "metadata": {
         "description": "Auto-generated container in staging storage account to receive post-build staging folder upload"
       },
-      //"defaultValue": "https://raw.githubusercontent.com/dmcwee/azure/master/AdvancedDemo/AdvancedDemo/DSC/AdvDemoDSC.zip"
-      //"defaultValue": "https://github.com/dmcwee/idamlab/blob/master/DSC/AdvDemoDSC.zip?raw=true"
       "defaultValue": "https://raw.githubusercontent.com/dmcwee/idamlab/master/DSC/AdvDemoDSC.zip"
+    },
+    "AdDscFile":{
+      "type": "string",
+      "metadata": {
+        "description": "The DSC settings file for the domain controller"
+      },
+      "defaultValue": "DomainControllerDSC.ps1"
+    },
+    "AdfsDscFile": {
+      "type": "string",
+      "metadata": {
+        "description":"The DSC settings file for the ADFS server"
+      },
+      "defaultValue": "ADFSDSC.ps1"
+    },
+    "WapDscFile": {
+      "type": "string",
+      "metadata": {
+        "description": "The DSC Settings file for the WAP server"
+      },
+      "defaultValue": "WAPDSC.ps1"
     }
   },
   "variables": {
@@ -167,12 +181,8 @@
     "WAPPIPName": "[concat(parameters('WAPServerName'), '-PIP')]",
     "WAPScheduleName":"[toLower(concat('shutdown-computevm-', parameters('WAPServerName')))]",
 
-    /* Client VM Variables */
-    "ClientNicName":"[concat(parameters('ClientComputerName'), '-NIC')]",
-    "ClientPipName":"[concat(parameters('ClientComputerName'), '-PIP')]",
-    "ClientScheduleName":"[toLower(concat('shutdown-computevm-', parameters('ClientComputerName')))]",
-
-    "lastVariable": ""
+    // Just a place holder to end the variable list properly
+    "lastVariable": "NOT_USED"
   },
   "resources": [
     /*
@@ -298,18 +308,6 @@
             "createOption": "FromImage"
           },
           "dataDisks": [
-            /*
-            {
-              "name": "AdvDemoDCDataDisk",
-              "caching": "None",
-              "createOption": "Empty",
-              "diskSizeGB": "50",
-              "lun": 0,
-              "vhd": {
-                "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), '2016-01-01').primaryEndpoints.blob, variables('VhdContainerName'), '/', parameters('AdServerName'), '-datadisk.vhd')]"
-              }
-            }
-            */
           ]
         },
         "networkProfile": {
@@ -327,7 +325,7 @@
           "location": "[resourceGroup().location]",
           "apiVersion": "2018-10-01",
           "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines', parameters('AdServerName'))]",
+            "[resourceId('Microsoft.Compute/virtualMachines', parameters('AdServerName'))]"
           ],
           "tags": {
             "displayName": "ADDSC"
@@ -338,13 +336,14 @@
             "typeHandlerVersion": "2.9",
             "autoUpgradeMinorVersion": true,
             "settings": {
+              "modulesUrl":"",
+              "configurationFunction":"",
               "configuration": {
                 "url": "[parameters('DSCLocation')]",
-                "script": "DomainControllerDSC.ps1",
-                "function": "Main"
+                "script": "[parameters('AdDscFile')]",
+                "Function": "Main"
               },
               "configurationArguments": {
-                "nodeName": "[parameters('AdServerName')]",
                 "domainName":"[parameters('DomainName')]"
               }
             },
@@ -365,7 +364,7 @@
       "type": "microsoft.devtestlab/schedules",
       "name": "[variables('ADScheduleName')]",
       "apiVersion": "2018-09-15",
-      "location": "eastus",
+      "location": "[resourceGroup().location]",
       "scale": null,
       "properties": {
           "status": "Enabled",
@@ -388,6 +387,7 @@
     Create ADFS VM NIC
     */
     {
+      "condition": "[parameters('IncludeADFS')]",
       "name": "[variables('ADFSNicName')]",
       "type": "Microsoft.Network/networkInterfaces",
       "location": "[resourceGroup().location]",
@@ -417,6 +417,7 @@
     Create ADFS VM
     */
     {
+      "condition": "[parameters('IncludeADFS')]",
       "name": "[parameters('ADFSServerName')]",
       "type": "Microsoft.Compute/virtualMachines",
       "location": "[resourceGroup().location]",
@@ -463,10 +464,11 @@
       },
       "resources": [
         {
+          "condition": "[parameters('IncludeADFS')]",
           "name": "Microsoft.Powershell.DSC",
           "type": "extensions",
           "location": "[resourceGroup().location]",
-          "apiVersion": "2018-10-01",
+          "apiVersion": "2019-07-01",
           "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines', parameters('ADFSServerName'))]"
           ],
@@ -479,25 +481,27 @@
             "typeHandlerVersion": "2.9",
             "autoUpgradeMinorVersion": true,
             "settings": {
+              "modulesUrl":"",
+              "configurationFunction":"",
               "configuration": {
                 "url": "[parameters('DSCLocation')]",
-                "script": "ADFSDSC.ps1",
+                "script": "[parameters('AdfsDscFile')]",
                 "function": "Main"
               },
-              "configurationArguments": {
-                "nodeName": "[parameters('ADFSServerName')]"
-              }
-            }
+              "configurationArguments": { }
+            },
+            "protectedSettings": { }
           }
         }
       ]
     },
     {
+      "condition": "[parameters('IncludeADFS')]",
       "comments": "",
       "type": "microsoft.devtestlab/schedules",
       "name": "[variables('ADFSScheduleName')]",
       "apiVersion": "2018-09-15",
-      "location": "eastus",
+      "location": "[resourceGroup().location]",
       "scale": null,
       "properties": {
           "status": "Enabled",
@@ -520,6 +524,7 @@
     Create WAP NIC
     */
     {
+      "condition": "[parameters('IncludeWAP')]",
       "name": "[variables('WAPNicName')]",
       "type": "Microsoft.Network/networkInterfaces",
       "location": "[resourceGroup().location]",
@@ -554,6 +559,7 @@
     Create WAP VM
     */
     {
+      "condition": "[parameters('IncludeWAP')]",
       "name": "[parameters('WAPServerName')]",
       "type": "Microsoft.Compute/virtualMachines",
       "location": "[resourceGroup().location]",
@@ -600,6 +606,7 @@
       },
       "resources": [
         {
+          "condition": "[parameters('IncludeWAP')]",
           "name": "Microsoft.Powershell.DSC",
           "type": "extensions",
           "location": "[resourceGroup().location]",
@@ -616,25 +623,27 @@
             "typeHandlerVersion": "2.9",
             "autoUpgradeMinorVersion": true,
             "settings": {
+              "modulesUrl":"",
+              "configurationFunction":"",
               "configuration": {
                 "url": "[parameters('DSCLocation')]",
-                "script": "WAPDSC.ps1",
+                "script": "[parameters('WapDscFile')]",
                 "function": "Main"
               },
-              "configurationArguments": {
-                "nodeName": "[parameters('WAPServerName')]"
-              }
-            }
+              "configurationArguments": { }
+            },
+            "protectedSettings": { }
           }
         }
       ]
     },
     {
+      "condition": "[parameters('IncludeWAP')]",
       "comments": "",
       "type": "microsoft.devtestlab/schedules",
       "name": "[variables('WAPScheduleName')]",
       "apiVersion": "2018-09-15",
-      "location": "eastus",
+      "location": "[resourceGroup().location]",
       "scale": null,
       "properties": {
           "status": "Enabled",
@@ -657,6 +666,7 @@
     Create Public IP for WAP
     */
     {
+      "condition": "[parameters('IncludeWAP')]",
       "name": "[variables('WAPPIPName')]",
       "type": "Microsoft.Network/publicIPAddresses",
       "location": "[resourceGroup().location]",
@@ -667,9 +677,6 @@
       },
       "properties": {
         "publicIPAllocationMethod": "Dynamic"
-        //, "dnsSettings": {
-        //  "domainNameLabel": "[concat(variables('WAPPIPName'), "-wappip")]"
-        //}
       }
     },
 
@@ -725,35 +732,19 @@
       }
     },
     /*
-    Create Public IP for Client VM
-    */
-    {
-      "name": "[variables('ClientPipName')]",
-      "type": "Microsoft.Network/publicIPAddresses",
-      "location": "[resourceGroup().location]",
-      "apiVersion": "2018-10-01",
-      "dependsOn": [],
-      "tags": {
-        "displayName": "ClientPublicIP"
-      },
-      "properties": {
-        "publicIPAllocationMethod": "Dynamic"
-        //, "dnsSettings": {
-        //  "domainNameLabel": "[parameters('AdvDemoClientDNS')]"
-        //}
-      }
-    },
-    /*
     Create Client NIC
     */
     {
-      "name": "[variables('ClientNicName')]",
+      "copy": {
+        "name":"ClientNICCopy",
+        "count":"[length(parameters('ClientComputerNames'))]"
+      },
+      "name": "[concat(parameters('ClientComputerNames')[copyIndex()], '-NIC')]",
       "type": "Microsoft.Network/networkInterfaces",
       "location": "[resourceGroup().location]",
       "apiVersion": "2018-10-01",
       "dependsOn": [
         "[variables('VNetId')]"
-        // , "[resourceId('Microsoft.Network/publicIPAddresses', variables('ClientPipName'))]"
       ],
       "tags": {
         "displayName": "ClientNic"
@@ -764,12 +755,9 @@
             "name": "ipconfig1",
             "properties": {
               "privateIPAllocationMethod": "Static",
-              "privateIPAddress": "10.0.0.13",
+              "privateIPAddress": "[concat('10.0.0.', copyIndex(50))]",
               "subnet": {
                 "id": "[variables('SubnetReference')]"
-              },
-              "publicIPAddress": {
-                // "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('ClientPipName'))]"
               }
             }
           }
@@ -780,13 +768,17 @@
     Create Client VM 
     */
     {
-      "name": "[parameters('ClientComputerName')]",
+      "copy": {
+        "name": "ClientVMCopy",
+        "count": "[length(parameters('ClientComputerNames'))]"
+      },
+      "name": "[parameters('ClientComputerNames')[copyIndex()]]",
       "type": "Microsoft.Compute/virtualMachines",
       "location": "[resourceGroup().location]",
       "apiVersion": "2018-10-01",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]",
-        "[resourceId('Microsoft.Network/networkInterfaces', variables('WAPNicName'))]"
+        "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('ClientComputerNames')[copyIndex()], '-NIC') )]"
       ],
       "tags": {
         "displayName": "Client-VM"
@@ -796,7 +788,7 @@
           "vmSize": "[parameters('VmSize')]"
         },
         "osProfile": {
-          "computerName": "[parameters('ClientComputerName')]",
+          "computerName": "[parameters('ClientComputerNames')[copyIndex()]]",
           "adminUsername": "[parameters('AdminUserName')]",
           "adminPassword": "[parameters('AdminPassword')]"
         },
@@ -808,9 +800,9 @@
             "version": "latest"
           },
           "osDisk": {
-            "name": "AdvDemoClientOSDisk",
+            "name": "[concat('osdisk-', parameters('ClientComputerNames')[copyIndex()])]",
             "vhd": {
-              "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), '2016-01-01').primaryEndpoints.blob, variables('VhdContainerName'), '/', parameters('ClientComputerName'), '-osdisk.vhd')]"
+              "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), '2016-01-01').primaryEndpoints.blob, variables('VhdContainerName'), '/', parameters('ClientComputerNames')[copyIndex()], '-osdisk.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -819,7 +811,7 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('ClientNicName'))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('ClientComputerNames')[copyIndex()], '-NIC') )]"
             }
           ]
         }
@@ -827,29 +819,37 @@
       "resources": []
     },
     {
-      "comments": "",
-      "type": "microsoft.devtestlab/schedules",
-      "name": "[variables('ClientScheduleName')]",
-      "apiVersion": "2018-09-15",
-      "location": "eastus",
-      "scale": null,
-      "properties": {
-          "status": "Enabled",
-          "taskType": "ComputeVmShutdownTask",
-          "dailyRecurrence": {
-              "time": "1900"
-          },
-          "timeZoneId": "Eastern Standard Time",
-          "notificationSettings": {
-              "status": "Disabled",
-              "timeInMinutes": 30
-          },
-          "targetResourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('ClientComputerName'))]"
-      },
-      "dependsOn": [
-          "[resourceId('Microsoft.Compute/virtualMachines', parameters('ClientComputerName'))]"
-      ]
+     "copy": {
+       "name": "schedulecopy",
+       "count":"[length(parameters('ClientComputerNames'))]"
+     },
+     "type": "microsoft.devtestlab/schedules",
+     "name": "[toLower(concat('shutdown-computevm-', parameters('ClientComputerNames')[copyIndex()]))]",
+     "apiVersion": "2018-09-15",
+     "location": "[resourceGroup().location]",
+     "scale": null,
+     "properties": {
+         "status": "Enabled",
+         "taskType": "ComputeVmShutdownTask",
+         "dailyRecurrence": {
+             "time": "1900"
+         },
+         "timeZoneId": "Eastern Standard Time",
+         "notificationSettings": {
+             "status": "Disabled",
+             "timeInMinutes": 30
+         },
+         "targetResourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('ClientComputerNames')[copyIndex()])]"
+     },
+     "dependsOn": [
+         "[resourceId('Microsoft.Compute/virtualMachines', parameters('ClientComputerNames')[copyIndex()])]"
+     ]
     }
   ],
-  "outputs": {}
+  "outputs": {
+    "LastVariable": {
+      "type": "string",
+      "value": "[variables('lastVariable')]"
+    }
+  }
 }

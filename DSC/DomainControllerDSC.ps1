@@ -2,17 +2,15 @@ Configuration Main
 {
 
 	Param ( 
-		[String]$nodeName, 
-		[String]$driveLetter = "L", 
 		[PSCredential] $adminAccount,
-		[String]$domainName,
-		[int] $retryAttempts = "60",
-		[int] $waitTime = "60"
+		[String]$domainName
 	)
 
-	Import-DscResource -ModuleName PSDesiredStateConfiguration, StorageDsc, ActiveDirectoryDsc
-	[PSCredential ]$Creds = New-Object -TypeName PSCredential ($adminAccount.UserName, $adminAccount.Password)
-	$OUPath = ($domainName.split('.') | foreach { "DC=$_" }) -join ','
+	Import-DscResource -ModuleName PSDesiredStateConfiguration
+	Import-DscResource -ModuleName xActiveDirectory
+
+	[PSCredential]$Creds = New-Object -TypeName PSCredential ($adminAccount.UserName, $adminAccount.Password)
+	$OUPath = ($domainName.split('.') | ForEach-Object { "DC=$_" }) -join ','
 	
 	Node localhost
 	{
@@ -24,6 +22,7 @@ Configuration Main
 		WindowsFeature DNS {
 			Name="DNS"
 			Ensure="Present"
+			IncludeAllSubFeature = $true
 		}
 
 		WindowsFeature ADTools {
@@ -33,23 +32,16 @@ Configuration Main
 		}
 
 		<#
-		WaitForDisk Disk2 {
-			DiskId = 2
-			RetryIntervalSec = $waitTime
-			RetryCount = $retryAttempts
-		}
-
-		Disk ADDisk {
-			DiskId = 2
-			DriveLetter = $driveLetter
-			FSLabel = "ADData"
-			DependsOn = "[WaitForDisk]Disk2"
+		WindowsFeature DNSTools {
+			Name="RSAT-DNS-Server"
+			Ensure = "Present"
+			IncludeAllSubFeature = $true
 		}
 		#>
 
-		ADDomain CreateDomain {
+		xADDomain CreateDomain {
 			DomainName = $domainName
-            Credential = $Creds
+            DomainAdministratorCredential = $Creds
 			SafemodeAdministratorPassword = $Creds
             DependsOn = "[WindowsFeature]ADDomainServices"
 		}
@@ -59,16 +51,23 @@ Configuration Main
 			SourcePath = "https://download.microsoft.com/download/B/0/0/B00291D0-5A83-4DE7-86F5-980BC00DE05A/AzureADConnect.msi"
 			DestinationPath = "C:\Users\Public\Download"
 		}
+
+		xWaitForADDomain CreatedDomain {
+			DomainName = $domainName
+			RestartCount = 2
+			WaitTimeout = 600
+			DependsOn = "[xADDomain]CreateDomain"
+		}
 		
-		ADOrganizationalUnit LabUsers {
+		xADOrganizationalUnit LabUsers {
 			Name = 'LabUsers'
 			Path = $OUPath
 			ProtectedFromAccidentalDeletion = $true
 			Ensure = 'Present'
-			DependsOn = "[ADDomain]CreateDomain"
+			DependsOn = "[xWaitForADDomain]CreatedDomain"
 		}
 
-		ADUser JeffL {
+		xADUser JeffL {
 			Ensure = 'Present'
 			UserName = 'JeffL'
 			Password = $Creds
@@ -76,10 +75,10 @@ Configuration Main
 			PasswordNeverResets = $true
 			DomainName = $domainName
 			Path = 'CN=LabUsers,' + $OUPath
-			DependsOn = "[ADOrganizationalUnit]LabUsers"
+			DependsOn = "[xADOrganizationalUnit]LabUsers"
 		}
 
-		ADUser RonHD {
+		xADUser RonHD {
 			Ensure = 'Present'
 			UserName = 'RonHD'
 			Password = $Creds
@@ -87,10 +86,10 @@ Configuration Main
 			PasswordNeverExpires = $true
 			DomainName = $domainName
 			Path = 'CN=LabUsers,' + $OUPath
-			DependsOn = "[ADOrganizationalUnit]LabUsers"
+			DependsOn = "[xADOrganizationalUnit]LabUsers"
 		}
 
-		ADUser SamiraA {
+		xADUser SamiraA {
 			Ensure = 'Present'
 			UserName = 'SamiraA'
 			Password = $Creds
@@ -98,10 +97,10 @@ Configuration Main
 			PasswordNeverExpires = $true
 			DomainName = $domainName
 			Path = 'CN=LabUsers,' + $OUPath
-			DependsOn = "[ADOrganizationalUnit]LabUsers"
+			DependsOn = "[xADOrganizationalUnit]LabUsers"
 		}
 
-		ADUser AATPService {
+		xADUser AATPService {
 			Ensure = 'Present'
 			UserName = 'AATPService'
 			Password = $Creds
@@ -109,17 +108,17 @@ Configuration Main
 			PasswordNeverExpires = $true
 			DomainName = $domainName
 			Path = 'CN=LabUsers,' + $OUPath
-			DependsOn = "[ADOrganizationalUnit]LabUsers"
+			DependsOn = "[xADOrganizationalUnit]LabUsers"
 		}
 
-		ADGroup HelpDesk {
+		xADGroup HelpDesk {
 			GroupName = 'HelpDesk'
 			GroupScope = 'Global'
 			Category = 'Security'
 			Description = 'HelpDesk Security Group'
 			Members = 'RonHD'
 			Ensure = 'Present'
-			DependsOn = "[ADUser]RonHD"
+			DependsOn = "[xADUser]RonHD"
 		}
  	}
 }

@@ -1,11 +1,11 @@
 Configuration Main
 {
 
-Param ( [string] $nodeName )
+Param ()
 
 Import-DscResource -ModuleName PSDesiredStateConfiguration
 
-Node $nodeName
+Node localhost
   {
 	  WindowsFeature ADFS {
 		  Name="ADFS-Federation"
