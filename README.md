@@ -1,7 +1,5 @@
 # Lab for IDAM
 
-**Warning: This is in development and should NOT be used yet.  Instructions are still very INCOMPLETE**
-
 ## Defaults
 ### VMs Created (Updated 12/4/2020)
 1. One Active Directory Server
