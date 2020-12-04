@@ -113,10 +113,3 @@ The following is an example of a parameters JSON file which changes the value of
   }
 }
 ```
-
-## Project TODOs
-- [X] Add a Gateway so only the WAP has a Publicly accessible IP and all VMs can be directly RDP'ed to
-- [X] Include automatic download of the AAD Connect application to the AD server
-- [ ] *Fix the AD server DSC so AD folder and files will be located on non-cached disk - Removed due to non-production lab setup*
-- [X] Update Active Directory DSC to use the latest version
-- [X] Add a Windows 10 Admin Workstation
