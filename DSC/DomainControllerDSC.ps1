@@ -11,9 +11,18 @@ Configuration Main
 
 	[PSCredential]$Creds = New-Object -TypeName PSCredential ($adminAccount.UserName, $adminAccount.Password)
 	$OUPath = ($domainName.split('.') | ForEach-Object { "DC=$_" }) -join ','
+	$UserPath = "OU=LabUsers," + $OUPath
 	
 	Node localhost
 	{
+		Log WriteOU {
+			Message = "The OUPath is " + $OUPath
+		}
+
+		Log WriteUserPath {
+			Message = "The Userath is " + $UserPath
+		}
+
 		WindowsFeature ADDomainServices {
 			Name="AD-Domain-Services"
 			Ensure="Present"
@@ -46,16 +55,17 @@ Configuration Main
             DependsOn = "[WindowsFeature]ADDomainServices"
 		}
 
-		
+		<#
 		File AADConnect {
 			SourcePath = "https://download.microsoft.com/download/B/0/0/B00291D0-5A83-4DE7-86F5-980BC00DE05A/AzureADConnect.msi"
 			DestinationPath = "C:\Users\Public\Download"
 		}
-
+		#> 
+		
 		xWaitForADDomain CreatedDomain {
 			DomainName = $domainName
-			RestartCount = 2
-			WaitTimeout = 600
+			RebootRetryCount = 2
+			RetryIntervalSec = 600
 			DependsOn = "[xADDomain]CreateDomain"
 		}
 		
@@ -74,7 +84,7 @@ Configuration Main
 			DisplayName = "Jeff Leatherman"
 			PasswordNeverResets = $true
 			DomainName = $domainName
-			Path = 'CN=LabUsers,' + $OUPath
+			Path = $UserPath
 			DependsOn = "[xADOrganizationalUnit]LabUsers"
 		}
 
@@ -85,7 +95,7 @@ Configuration Main
 			DisplayName = "Ron Helpdesk"
 			PasswordNeverExpires = $true
 			DomainName = $domainName
-			Path = 'CN=LabUsers,' + $OUPath
+			Path = $UserPath
 			DependsOn = "[xADOrganizationalUnit]LabUsers"
 		}
 
@@ -96,7 +106,7 @@ Configuration Main
 			DisplayName = "Samira Abbasi"
 			PasswordNeverExpires = $true
 			DomainName = $domainName
-			Path = 'CN=LabUsers,' + $OUPath
+			Path = $UserPath
 			DependsOn = "[xADOrganizationalUnit]LabUsers"
 		}
 
@@ -107,7 +117,7 @@ Configuration Main
 			DisplayName = "Azure ATP Service"
 			PasswordNeverExpires = $true
 			DomainName = $domainName
-			Path = 'CN=LabUsers,' + $OUPath
+			Path = $UserPath
 			DependsOn = "[xADOrganizationalUnit]LabUsers"
 		}
 

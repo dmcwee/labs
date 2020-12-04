@@ -110,6 +110,14 @@
       "type": "string",
       "defaultValue": "VpnGw1"
     },
+    "gatewayRootCert": {
+      "type": "string",
+      "defaultValue":""
+    },
+    "gatewayRootCertName": {
+      "type":"string",
+      "defaultValue":"gatewayrootcert"
+    },
     "DSCLocation": {
       "type": "string",
       "metadata": {
@@ -336,8 +344,8 @@
             "typeHandlerVersion": "2.9",
             "autoUpgradeMinorVersion": true,
             "settings": {
-              "modulesUrl":"",
-              "configurationFunction":"",
+              //"modulesUrl":"",
+              //"configurationFunction":"",
               "configuration": {
                 "url": "[parameters('DSCLocation')]",
                 "script": "[parameters('AdDscFile')]",
@@ -481,8 +489,8 @@
             "typeHandlerVersion": "2.9",
             "autoUpgradeMinorVersion": true,
             "settings": {
-              "modulesUrl":"",
-              "configurationFunction":"",
+              //"modulesUrl":"",
+              //"configurationFunction":"",
               "configuration": {
                 "url": "[parameters('DSCLocation')]",
                 "script": "[parameters('AdfsDscFile')]",
@@ -623,8 +631,8 @@
             "typeHandlerVersion": "2.9",
             "autoUpgradeMinorVersion": true,
             "settings": {
-              "modulesUrl":"",
-              "configurationFunction":"",
+              //"modulesUrl":"",
+              //"configurationFunction":"",
               "configuration": {
                 "url": "[parameters('DSCLocation')]",
                 "script": "[parameters('WapDscFile')]",
@@ -728,6 +736,22 @@
           "sku": {
               "name": "[parameters('sku')]",
               "tier": "[parameters('sku')]"
+          },
+          "vpnClientConfiguration": {
+            "vpnClientAddressPool": {
+              "addressPrefixes":["10.10.10.0/24"]
+            },
+            "vpnClientProtocols":[
+              "IkeV2"
+            ],
+            "vpnClientRootCertificates": [
+              {
+                "name":"[parameters('gatewayRootCertName')]",
+                "properties": {
+                  "publicCertData":"[parameters('gatewayRootCert')]"
+                }
+              }
+            ]
           }
       }
     },
