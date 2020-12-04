@@ -63,6 +63,7 @@ Actions performed by the Web Application Proxy DSC:
    1. Follow steps [starting here](https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-point-to-site-resource-manager-portal#generatecert) to configure the Point-to-Site settings.
    *You can use the New-P2SCertificate.ps1 powershell script to generate self signed Point-to-Site Authentication certificates*
 </del>
+
 1. In the Azure Portal go to the VNet Gateway and download and install the Point-to-Site Client.
 1. Verify that the AD Domain has been installed and configured
 1. Verify the ADFS Server has the ADFS feature and tools installed and join it to the domain
