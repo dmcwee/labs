@@ -1,4 +1,7 @@
 # Lab for IDAM
+This now provides multiple lab deployment options one for Federated Identities and the second to support Microsoft Defender for Identity (MDI).  You can use the button below to quickly deploy the MDI lab.
+
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fdmcwee%2Fidamlab%2Fmaster%2FAzATP_Lab%2Fazuredeploy.json)
 
 ## Defaults
 ### VMs Created (Updated 12/4/2020)
