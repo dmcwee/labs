@@ -3,6 +3,8 @@ This now provides multiple lab deployment options one for Federated Identities a
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fdmcwee%2Fidamlab%2Fmaster%2FAzATP_Lab%2Fazuredeploy.json)
 
+As part of the deployment of the labs you can use New-P2SCertificate.ps1 to generate the root and child certificate for the lab's gateway Point-to-Site VPN deployment.
+
 ## Defaults
 ### VMs Created (Updated 12/4/2020)
 1. One Active Directory Server
