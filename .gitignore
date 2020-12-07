@@ -1,4 +1,5 @@
 DSC/xActiveDirectory
 DSC-test
-*.zip
+IDAMLab_DSC.zip
 .vs/
+PowershellScripts/*.txt
