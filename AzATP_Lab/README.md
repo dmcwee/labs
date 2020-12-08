@@ -18,23 +18,23 @@ This is a simplified deployment for the Defender for Identity [Security Alert La
 
 ## Post Deployment Setup
 1. Use the New-P2SCertificate.ps1 script, found [here](https://raw.githubusercontent.com/dmcwee/idamlab/master/PowershellScripts/New-P2SCertificate.ps1) to create a new Root & Child certificate pair for use with the Point-to-Site Gateway
-  1. Copy the text from the rootcert.txt file that the script generates in the folder where it is run or from the console's on-screen output
+    1. Copy the text from the rootcert.txt file that the script generates in the folder where it is run or from the console's on-screen output
 1. In the Azure Portal go to the Resource Group where the lab was created and find the Virtual Network Gateway Resource that was created and click on it
-  1. Go to the Point-to-Site Configuration
-  1. Provide a name for the Root Certificate
-  1. Paste the output from the above step into the Public certificate data field
-  1. Save the changes
-  1. After the changes have been saved click the Download VPN client button
+    1. Go to the Point-to-Site Configuration
+    1. Provide a name for the Root Certificate
+    1. Paste the output from the above step into the Public certificate data field
+    1. Save the changes
+    1. After the changes have been saved click the Download VPN client button
 1. Install the appropriate VPN client for your OS
 1. Connect the to the Point-to-Site VPN
 1. RDP to Victim-PC 
-  1. Set the VM's DNS to point to the ContosoDC1 IP address as the primary DNS. *When the DNS is reset the RDP session will likely be disconnected and RDP to the VM won't work until rebooted.*
-  1. Reboot Victim-PC from the Azure Portal
-  1. Reconnect to Victim-PC and domain join it to the contoso.com domain
+    1. Set the VM's DNS to point to the ContosoDC1 IP address as the primary DNS. *When the DNS is reset the RDP session will likely be disconnected and RDP to the VM won't work until rebooted.*
+    1. Reboot Victim-PC from the Azure Portal
+    1. Reconnect to Victim-PC and domain join it to the contoso.com domain
 1. RDP to Admin-PC
-  1. Set the VM's DNS to point to the ContosoDC1 IP address as the Primary DNS.*When the DNS is reset the RDP session will likely be disconnected and RDP to the VM won't work until rebooted.*
-  1. Reboot Admin-PC from the Azure Portal
-  1. Reconnect to Admin-PC and domain join it to the contoso.com domain
+    1. Set the VM's DNS to point to the ContosoDC1 IP address as the Primary DNS.*When the DNS is reset the RDP session will likely be disconnected and RDP to the VM won't work until rebooted.*
+    1. Reboot Admin-PC from the Azure Portal
+    1. Reconnect to Admin-PC and domain join it to the contoso.com domain
 1. Follow the process oulined in the [Alert Lab](https://docs.microsoft.com/en-us/defender-for-identity/playbook-setup-lab#-base-lab-environment) beginning with the **Configure SAM-R capabilities from ContosoDC**
 
 ## VMs Created
