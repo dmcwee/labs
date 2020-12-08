@@ -48,6 +48,7 @@ Admin-PC | Windows 10 | 10.0.0.51 | Basic_A2 | 7PM EST
 ## Accounts and Groups Created
 The deployment script and Active Directory DSC script set up the following accounts and groups for use with the Security Alert Lab
 Account | From | OU | Details
+------- | ---- | -- | -------
 labadmin | deployment script | Users | This is the admin setup account on all VMs created
 jeffl | AD DSC | LabUsers | Jeff Leatherman Account from Alert Lab
 ronhd | AD DSC | LabUsers | Ron HelpDesk account from Alert Lab
