@@ -38,12 +38,11 @@ This is a simplified deployment for the Defender for Identity [Security Alert La
 1. Follow the process oulined in the [Alert Lab](https://docs.microsoft.com/en-us/defender-for-identity/playbook-setup-lab#-base-lab-environment) beginning with the **Configure SAM-R capabilities from ContosoDC**
 
 ## VMs Created
-The IP Addresses for the VMs from this are different, as shown below, than the IPs in the Lab Setup.
 VM Name | Operating Sytem | IP Address | VM Size | Scheduled Shutdown
 ------- | --------------- | ---------- | ------- | ------------------
-ContosoDC1 | Windows Server 2012 R2 | 10.0.0.10 | Basic_A2 | 7PM EST
-Victim-PC | Windows 10 | 10.0.0.50 | Basic_A2 | 7PM EST
-Admin-PC | Windows 10 | 10.0.0.51 | Basic_A2 | 7PM EST
+ContosoDC1 | Windows Server 2012 R2 | 10.0.24.4 | Basic_A2 | 7PM EST
+Victim-PC | Windows 10 | 10.0.24.5 | Basic_A2 | 7PM EST
+Admin-PC | Windows 10 | 10.0.24.6 | Basic_A2 | 7PM EST
 
 ## Accounts and Groups Created
 The deployment script and Active Directory DSC script set up the following accounts and groups for use with the Security Alert Lab
