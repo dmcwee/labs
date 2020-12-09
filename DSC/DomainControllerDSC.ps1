@@ -130,5 +130,11 @@ Configuration Main
 			Ensure = 'Present'
 			DependsOn = "[xADUser]RonHD"
 		}
+
+		xADGroup DomainAdmins {
+			GroupName = "Domain Admins"
+			MembersToInclude = "SamiraA"
+			DependsOn = "[xADUser]SamiraA"
+		}
  	}
 }
