@@ -132,7 +132,7 @@
     "NetworkPrefix": "10.0.0.0/16",
     "SubNet1Name": "Subnet-1",
     "GatewaySubnet": "GatewaySubnet",
-    "SubNet1Prefix": "10.0.0.0/24",
+    "SubNet1Prefix": "10.0.24.0/24",
     "GatewaySubnetPrefix":"10.0.2.0/24",
     "VNetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('AdvDemoNet'))]",
     "SubnetReference": "[concat(variables('VNetId'), '/subnets/', variables('SubNet1Name'))]",
@@ -226,7 +226,7 @@
             "name": "ipconfig1",
             "properties": {
               "privateIPAllocationMethod": "Static",
-              "privateIPAddress": "10.0.0.10",
+              "privateIPAddress": "10.0.24.4",
               "subnet": {
                 "id": "[variables('SubnetReference')]"
               }
@@ -443,7 +443,7 @@
             "name": "ipconfig1",
             "properties": {
               "privateIPAllocationMethod": "Static",
-              "privateIPAddress": "[concat('10.0.0.', copyIndex(50))]",
+              "privateIPAddress": "[concat('10.0.24.', copyIndex(5))]",
               "subnet": {
                 "id": "[variables('SubnetReference')]"
               }
