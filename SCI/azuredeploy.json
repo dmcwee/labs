@@ -1,0 +1,233 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "StorageType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_ZRS",
+        "Standard_GRS",
+        "Standard_RAGRS",
+        "Premium_LRS"
+      ]
+    },
+    "ClientOsVersion":{
+      "type":"string",
+      "defaultValue":"Windows-10-N-x64",
+      "allowedValues": [
+        "Win7-SP1-ENT-N-x64",
+        "Win81-ENT-N-x64",
+        "Windows-10-N-x64"
+      ]
+    },
+    "VmSize": {
+      "type": "string",
+      "defaultValue": "Basic_A2",
+      "allowedValues": [
+        "Basic_A1",
+        "Basic_A2",
+        "Basic_A3",
+        "Basic_A4",
+        "Standard_A1",
+        "Standard_A2",
+        "Standard_A3",
+        "Standard_A4"
+      ]
+    },
+    "AdminUserName": {
+      "type": "string",
+      "minLength": 1,
+      "defaultValue": "cmadmin"
+    },
+    "AdminPassword": {
+      "type": "securestring"
+    },
+    "WindowsComputerName":{
+      "type":"string",
+      "defaultValue": "cmwks1"
+    }
+  },
+  "variables": {
+    "tmpDemoStorageName": "[concat('Storage', uniqueString(resourceGroup().id))]",
+    "StorageAccountName": "[toLower(substring(variables('tmpDemoStorageName'), 0, min(16, length(variables('tmpDemoStorageName')))))]",
+
+    "AdvDemoNet": "[concat(resourceGroup().name, '-net')]",
+
+    /* Windows OS Publisher Variables */
+    "WindowsClientImagePublisher":"MicrosoftVisualStudio",
+    "WindowsClientImageOffer":"Windows",
+
+    /* VNet Variables */
+    "NetworkPrefix": "10.0.0.0/16",
+    "SubNet1Prefix": "10.0.1.0/24",
+    "SubNet1Name": "Subnet-1",
+    "VNetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('AdvDemoNet'))]",
+    "SubnetReference": "[concat(variables('VNetId'), '/subnets/', variables('SubNet1Name'))]",
+    
+
+    /* VM VHD Storage location */
+    "VhdContainerName": "vhds",
+
+    // Just a place holder to end the variable list properly
+    "lastVariable": "NOT_USED"
+  },
+  "resources": [
+    /*
+    Create Storage Account
+    */
+    {
+      "name": "[variables('StorageAccountName')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2019-04-01",
+      "sku": {
+        "name": "[parameters('StorageType')]"
+      },
+      "dependsOn": [],
+      "tags": {
+        "displayName": "StorageAccount"
+      },
+      "kind": "Storage"
+    },
+
+    /*
+    Create Virtual Network
+    */
+    {
+      "name": "[variables('AdvDemoNet')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2018-10-01",
+      "dependsOn": [],
+      "tags": {
+        "displayName": "VirtualNetwork"
+      },
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('NetworkPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('SubNet1Name')]",
+            "properties": {
+              "addressPrefix": "[variables('SubNet1Prefix')]"
+            }
+          }
+        ]
+      }
+    },
+
+    /*
+    Create Client NIC
+    */
+    {
+      "name": "[concat(parameters('WindowsComputerName'), '-NIC')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2018-10-01",
+      "dependsOn": [
+        "[variables('VNetId')]"
+      ],
+      "tags": {
+        "displayName": "ClientNic"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "10.0.1.10",
+              "subnet": {
+                "id": "[variables('SubnetReference')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    /* 
+    Create Client VM 
+    */
+    {
+      "name": "[parameters('WindowsComputerName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2018-10-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('WindowsComputerName'), '-NIC') )]"
+      ],
+      "tags": {
+        "displayName": "Client-VM"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('VmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[parameters('WindowsComputerName')]",
+          "adminUsername": "[parameters('AdminUserName')]",
+          "adminPassword": "[parameters('AdminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('WindowsClientImagePublisher')]",
+            "offer": "[variables('WindowsClientImageOffer')]",
+            "sku": "[parameters('ClientOsVersion')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "[concat('osdisk-', parameters('WindowsComputerName'))]",
+            "vhd": {
+              "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), '2016-01-01').primaryEndpoints.blob, variables('VhdContainerName'), '/', parameters('ClientComputerNames')[copyIndex()], '-osdisk.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('WindowsComputerName'), '-NIC') )]"
+            }
+          ]
+        }
+      },
+      "resources": []
+    },
+    {
+     "type": "microsoft.devtestlab/schedules",
+     "name": "[toLower(concat('shutdown-computevm-', parameters('WindowsComputerName')))]",
+     "apiVersion": "2018-09-15",
+     "location": "[resourceGroup().location]",
+     "scale": null,
+     "properties": {
+         "status": "Enabled",
+         "taskType": "ComputeVmShutdownTask",
+         "dailyRecurrence": {
+             "time": "1900"
+         },
+         "timeZoneId": "Eastern Standard Time",
+         "notificationSettings": {
+             "status": "Disabled",
+             "timeInMinutes": 30
+         },
+         "targetResourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('WindowsComputerName'))]"
+     },
+     "dependsOn": [
+         "[resourceId('Microsoft.Compute/virtualMachines', parameters('WindowsComputerName'))]"
+     ]
+    }
+  ],
+  "outputs": {
+    "LastVariable": {
+      "type": "string",
+      "value": "[variables('lastVariable')]"
+    }
+  }
+}
