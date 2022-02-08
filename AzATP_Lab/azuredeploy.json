@@ -106,7 +106,7 @@
       "metadata": {
         "description": "Auto-generated container in staging storage account to receive post-build staging folder upload"
       },
-      "defaultValue": "https://raw.githubusercontent.com/dmcwee/idamlab/master/AzATP_Lab/AzATP_DSC.zip"
+      "defaultValue": "https://raw.githubusercontent.com/dmcwee/labs/master/AzATP_Lab/AzATP_DSC.zip"
     },
     "AdDscFile":{
       "type": "string",
