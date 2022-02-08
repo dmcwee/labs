@@ -1,7 +1,7 @@
 # LABS
 
 **NOTE:**
-This repository is being restructured so that different scenarios I use will be hosted in folder here rather than having different projects on GitHub.
+This repository is being restructured so that different scenarios I use will be hosted in folder here rather than having different projects on GitHub.  There will likely be broken parts while this happens so if you find errors please let me know, using the reporting in GitHub.
 
 ## Restructure Plan
 1. Move root project to Federation so it will create a DC, ADFS, WAP, and Client VM as well as the usual private network and Point-to-Site VPN capability.
