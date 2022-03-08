@@ -62,7 +62,7 @@
     },
     "ClientComputerNames":{
       "type":"array",
-      "defaultValue": ["Victim-PC", "Admin-PC"]
+      "defaultValue": ["ClientPc1", "ClientPc2", "ClientPc3"]
     },
     "DomainName":{
       "type":"string",
@@ -166,7 +166,8 @@
       },
       "dependsOn": [],
       "tags": {
-        "displayName": "StorageAccount"
+        "displayName": "StorageAccount",
+        "Lab":"MDE"
       },
       "kind": "Storage"
     },
@@ -181,7 +182,8 @@
       "apiVersion": "2018-10-01",
       "dependsOn": [],
       "tags": {
-        "displayName": "VirtualNetwork"
+        "displayName": "VirtualNetwork",
+        "Lab":"MDE"
       },
       "properties": {
         "addressSpace": {
@@ -218,7 +220,8 @@
         "[variables('VNetId')]"
       ],
       "tags": {
-        "displayName": "ADNic"
+        "displayName": "ADNic",
+        "Lab":"MDE"
       },
       "properties": {
         "ipConfigurations": [
@@ -249,7 +252,8 @@
         "[resourceId('Microsoft.Network/networkInterfaces', variables('ADNicName'))]"
       ],
       "tags": {
-        "displayName": "ADServer"
+        "displayName": "ADServer",
+        "Lab":"MDE"
       },
       "properties": {
         "hardwareProfile": {
@@ -296,7 +300,8 @@
             "[resourceId('Microsoft.Compute/virtualMachines', parameters('AdServerName'))]"
           ],
           "tags": {
-            "displayName": "ADDSC"
+            "displayName": "ADDSC",
+            "Lab":"MDE"
           },
           "properties": {
             "publisher": "Microsoft.Powershell",
@@ -304,8 +309,6 @@
             "typeHandlerVersion": "2.9",
             "autoUpgradeMinorVersion": true,
             "settings": {
-              //"modulesUrl":"",
-              //"configurationFunction":"",
               "configuration": {
                 "url": "[parameters('DSCLocation')]",
                 "script": "[parameters('AdDscFile')]",
@@ -359,7 +362,8 @@
       "apiVersion": "2018-10-01",
       "dependsOn": [],
       "tags": {
-        "displayName": "GatewayPublicIP"
+        "displayName": "GatewayPublicIP",
+        "Lab":"MDE"
       },
       "properties": {
         "publicIPAllocationMethod": "Dynamic"
@@ -378,7 +382,9 @@
         "[resourceId('Microsoft.Network/publicIPAddresses', variables('GatewayNamePip'))]",
         "[resourceId('Microsoft.Network/virtualNetworks', variables('AdvDemoNet'))]"
       ],
-      "tags": {},
+      "tags": {
+        "Lab":"MDE"
+      },
       "properties": {
           "gatewayType": "[parameters('gatewayType')]",
           "ipConfigurations": [
@@ -435,7 +441,8 @@
         "[variables('VNetId')]"
       ],
       "tags": {
-        "displayName": "ClientNic"
+        "displayName": "ClientNic",
+        "Lab":"MDE"
       },
       "properties": {
         "ipConfigurations": [
@@ -469,7 +476,8 @@
         "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('ClientComputerNames')[copyIndex()], '-NIC') )]"
       ],
       "tags": {
-        "displayName": "Client-VM"
+        "displayName": "Client-VM",
+        "Lab":"MDE"
       },
       "properties": {
         "hardwareProfile": {
