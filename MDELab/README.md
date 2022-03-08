@@ -6,4 +6,4 @@
     1. *Recommended:* Select the region where the lab should be deployed if using a new resource group
     1. *Recommended:* Update the Admin User Name to your desired name
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fdmcwee%2Fidamlab%2Fmaster%2FAzATP_Lab%2Fazuredeploy.json)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fdmcwee%2Flabs%2Fmaster%2FMDELab%2Fazuredeploy.json)
