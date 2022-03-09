@@ -1,0 +1,81 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vNetName": {
+            "type":"string"
+        },
+        "location": {
+            "type":"string"
+        },
+        "labTagValue": {
+            "type":"string"
+        },
+        "networkRange": {
+            "type":"string"
+        },
+        "subnetName": {
+            "type":"string"
+        },
+        "subnetRange": {
+            "type":"string"
+        },
+        "gatewayRange": {
+            "type":"string"
+        }
+    },
+    "variables": {
+        "gatewayName":"[concat(parameters('vNetName'), '-GW')]"
+    },
+    "resources": [
+        /*
+        Create Virtual Network
+        */
+        {
+            "name": "[parameters('vNetName')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "location": "[parameters('location')]",
+            "apiVersion": "2018-10-01",
+            "dependsOn": [],
+            "tags": {
+                "displayName": "VirtualNetwork",
+                "Lab":"[parameters('labTagValue')]"
+            },
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[parameters('networkRange')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[parameters('subnetName')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('subnetRange')]"
+                        }
+                    },
+                    {
+                        "name": "[variables('gatewayName')]",
+                        "properties":{
+                            "addressPrefix": "[parameters('gatewayRange')]"
+                        }
+                    }
+                ]
+            }
+        }
+    ],
+    "outputs": {
+        "vnetId": {
+            "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vNetName'))]",
+            "type":"string"
+        },
+        "gatewayId": {
+            "value": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('gatewayName'))]",
+            "type":"string"
+        },
+        "subnetId": {
+            "value": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('subnetName'))]",
+            "type":"string"
+        }
+    }
+}
