@@ -70,11 +70,11 @@
             "type":"string"
         },
         "gatewayId": {
-            "value": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vNetName'), variables('gatewayName'))]",
+            "value": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('vNetName')), '/subnets/', variables('gatewayName'))]",
             "type":"string"
         },
         "subnetId": {
-            "value": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vNetName'), parameters('subnetName'))]",
+            "value": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('vNetName')), '/subnets/', parameters('subnetName'))]",
             "type":"string"
         }
     }
