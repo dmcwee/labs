@@ -11,6 +11,9 @@
         "gatewaySubnetId":{
             "type":"string"
         },
+        "vNetName": {
+            "type":"string"
+        },
         "gatewayType": {
             "type": "string",
             "defaultValue": "Vpn",
@@ -37,8 +40,8 @@
         }
     },
     "variables":{
-        "gatewayName":"[concat(parameters('labTagValue'), '-gateway')]",
-        "publicIpName":"[concat(parameters('labTagValue'), '-gw-pip')]"
+        "gatewayName":"[concat(parameters('vNetName'), '-gateway')]",
+        "publicIpName":"[concat(parameters('vNetName'), '-gw-pip')]"
     },
     "resources":[
         {
