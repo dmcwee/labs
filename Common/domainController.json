@@ -1,0 +1,239 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type":"string"
+        },
+        "storageAccountName": {
+            "type":"string"
+        },
+        "vnetId": {
+            "type":"string"
+        },
+        "subnetId": {
+            "type":"string"
+        },
+        "privateIP": {
+            "type":"string"
+        },
+        "labTagValue": {
+            "type":"string"
+        },
+        "vmName": {
+            "type":"string",
+            "defaultValue": "Server"
+        },
+        "vmSize":{
+            "type": "string",
+            "defaultValue": "Basic_A2",
+            "allowedValues": [
+                "Basic_A1",
+                "Basic_A2",
+                "Basic_A3",
+                "Basic_A4",
+                "Standard_A1",
+                "Standard_A2",
+                "Standard_A3",
+                "Standard_A4"
+            ]
+        },
+        "serverOS": {
+            "type": "string",
+            "defaultValue": "2012-R2-Datacenter",
+            "allowedValues": [
+                "2008-R2-SP1",
+                "2012-Datacenter",
+                "2012-R2-Datacenter",
+                "2016-Datacenter",
+                "2019-Datacenter"
+            ]
+        },
+        "userName": {
+            "type": "string",
+            "minLength": 1,
+            "defaultValue": "labadmin"
+        },
+        "password": {
+            "type": "securestring"
+        },
+        "domain": {
+            "type":"string",
+            "defaultValue":"contoso.com"
+        },
+        "blobStorageUri":{
+            "type":"string"
+        },
+        "dscLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "Location to the Desired State Configuration package"
+            },
+            "defaultValue": "https://raw.githubusercontent.com/dmcwee/idamlab/master/AzATP_Lab/AzATP_DSC.zip"
+        },
+        "dscFile":{
+            "type": "string",
+            "metadata": {
+                "description": "The DSC settings file for the domain controller"
+            },
+            "defaultValue": "DomainControllerDSC.ps1"
+        }
+    },
+    "variables":{
+        /* Windows OS Publisher Variables */
+        "WindowsServerImagePublisher": "MicrosoftWindowsServer",
+        "WindowsServerImageOffer": "WindowsServer",
+        "VhdContainer":"vhds",
+        "ScheduleName":"[toLower(concat('shutdown-computevm-', parameters('vmName')))]"
+    },
+    "resources":[
+
+    /*
+    Create NIC for Domain Controller
+    */
+      {
+        "name": "[concat(parameters('vmName'), '-nic')]",
+        "type": "Microsoft.Network/networkInterfaces",
+        "location": "[parameters('location')]",
+        "apiVersion": "2018-10-01",
+        "dependsOn": [
+          "[parameters('vnetId')]"
+        ],
+        "tags": {
+          "displayName": "ADNic",
+          "Lab":"[parameters('labTagValue')]"
+        },
+        "properties": {
+          "ipConfigurations": [
+            {
+              "name": "ipconfig1",
+              "properties": {
+                "privateIPAllocationMethod": "Static",
+                "privateIPAddress": "[parameters('privateIP')]",
+                "subnet": {
+                  "id": "[parameters('subnetId')]"
+                }
+              }
+            }
+          ]
+        }
+      },
+  
+      /*
+      Create the Domain Controller
+      */
+      {
+        "name": "[parameters('vmName')]",
+        "type": "Microsoft.Compute/virtualMachines",
+        "location": "[parameters('location')]",
+        "apiVersion": "2018-10-01",
+        "dependsOn": [
+          "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
+          "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'), '-nic'))]"
+        ],
+        "tags": {
+          "displayName": "ADServer",
+          "Lab":"[parameters('labTagValue')]"
+        },
+        "properties": {
+          "hardwareProfile": {
+            "vmSize": "[parameters('vmSize')]"
+          },
+          "osProfile": {
+            "computerName": "[parameters('vmName')]",
+            "adminUsername": "[parameters('userName')]",
+            "adminPassword": "[parameters('password')]"
+          },
+          "storageProfile": {
+            "imageReference": {
+              "publisher": "[variables('WindowsServerImagePublisher')]",
+              "offer": "[variables('WindowsServerImageOffer')]",
+              "sku": "[parameters('ServerOS')]",
+              "version": "latest"
+            },
+            "osDisk": {
+              "name": "[concat(parameters('vmName'), '-osDisk')]",
+              "vhd": {
+                "uri": "[concat(parameters('blobStorageUri'), variables('VhdContainer'), '/', parameters('vmName'), '-osdisk.vhd')]"
+              },
+              "caching": "ReadWrite",
+              "createOption": "FromImage"
+            },
+            "dataDisks": [
+            ]
+          },
+          "networkProfile": {
+            "networkInterfaces": [
+              {
+                "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'), '-nic'))]"
+              }
+            ]
+          }
+        },
+        "resources": [
+          {
+            "name": "Microsoft.Powershell.DSC",
+            "type": "extensions",
+            "location": "[parameters('location')]",
+            "apiVersion": "2018-10-01",
+            "dependsOn": [
+              "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]"
+            ],
+            "tags": {
+              "displayName": "ADDSC",
+              "Lab":"[parameters('labTagValue')]"
+            },
+            "properties": {
+              "publisher": "Microsoft.Powershell",
+              "type": "DSC",
+              "typeHandlerVersion": "2.9",
+              "autoUpgradeMinorVersion": true,
+              "settings": {
+                "configuration": {
+                  "url": "[parameters('dscLocation')]",
+                  "script": "[parameters('dscFile')]",
+                  "Function": "Main"
+                },
+                "configurationArguments": {
+                  "domainName":"[parameters('domain')]"
+                }
+              },
+              "protectedSettings": {
+                "configurationArguments":{
+                  "adminAccount": {
+                    "UserName": "[parameters('userName')]",
+                    "Password": "[parameters('password')]"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "comments": "",
+        "type": "microsoft.devtestlab/schedules",
+        "name": "[variables('scheduleName')]",
+        "apiVersion": "2018-09-15",
+        "location": "[parameters('location')]",
+        "scale": null,
+        "properties": {
+            "status": "Enabled",
+            "taskType": "ComputeVmShutdownTask",
+            "dailyRecurrence": {
+                "time": "1900"
+            },
+            "timeZoneId": "Eastern Standard Time",
+            "notificationSettings": {
+                "status": "Disabled",
+                "timeInMinutes": 30
+            },
+            "targetResourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]"
+        },
+        "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]"
+        ]
+      }
+    ],
+    "outputs":{}
+}
