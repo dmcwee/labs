@@ -11,9 +11,6 @@
         "gatewaySubnetId":{
             "type":"string"
         },
-        "gatewayAddressRange": {
-            "type": "string"
-        },
         "gatewayType": {
             "type": "string",
             "defaultValue": "Vpn",
