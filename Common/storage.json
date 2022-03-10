@@ -66,6 +66,10 @@
         "storageEndpoint": {
             "type": "object",
             "value": "[reference(variables('StorageAccountName')).primaryEndpoints]"
+        },
+        "storageType": {
+          "type":"string",
+          "value":"[parameters('storageType')]"
         }
     }
 }

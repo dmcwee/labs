@@ -14,6 +14,9 @@
         "labTagValue": {
             "type":"string"
         },
+        "storageType": {
+            "type":"string"
+        },
         "vmName": {
             "defaultValue": "linuxVM",
             "type": "string"
@@ -88,7 +91,10 @@
                         "osType": "Linux",
                         "name": "[concat(parameters('vmName'), '_OsDisk')]",
                         "createOption": "FromImage",
-                        "caching": "ReadWrite"
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "storageAccountType": "[parameters('storageType')]"
+                        }
                         //"managedDisk": {
                         //    "id": "[parameters('disks_ftlinuxmde_OsDisk_1_6cd8f080740d47b2948fa7b763fe73e5_externalid')]"
                         //}
