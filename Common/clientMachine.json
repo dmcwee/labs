@@ -60,7 +60,7 @@
         "ScheduleName":"[toLower(concat('shutdown-computevm-', parameters('vmName')))]"
     },
     "resources": [
-        /*
+    /*
     Create Client NIC
     */
     {

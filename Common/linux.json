@@ -63,6 +63,9 @@
             "apiVersion": "2021-11-01",
             "name": "[parameters('vmName')]",
             "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'), '-nic'))]"
+            ],
             "tags": {
                 "displayName":"LinuxVM",
                 "Lab": "[parameters('labTagValue')]"
