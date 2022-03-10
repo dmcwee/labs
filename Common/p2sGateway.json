@@ -97,7 +97,7 @@
                 },
                 "vpnClientConfiguration": {
                     "vpnClientAddressPool": {
-                        "addressPrefixes":["[parameters('gatewayAddressRange')]"]
+                        "addressPrefixes":["10.10.10.0/24"]
                     },
                     "vpnClientProtocols":["IkeV2"],
                     "vpnClientRootCertificates": [ ]
