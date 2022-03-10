@@ -79,7 +79,7 @@
         "location": "[parameters('location')]",
         "apiVersion": "2018-10-01",
         "dependsOn": [
-          "[parameters('vnetId')]"
+          //"[parameters('vnetId')]"
         ],
         "tags": {
           "displayName": "ADNic",
