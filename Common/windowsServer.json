@@ -110,7 +110,7 @@
         "location": "[parameters('location')]",
         "apiVersion": "2018-10-01",
         "dependsOn": [
-          "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
+          //"[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
           "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'), '-nic'))]"
         ],
         "tags": {
