@@ -25,6 +25,9 @@
         "userName": {
             "type":"string",
             "defaultValue": "labadmin"
+        },
+        "password": {
+            "type": "securestring"
         }
     },
     "variables": {},
@@ -95,8 +98,9 @@
                 "osProfile": {
                     "computerName": "[parameters('vmName')]",
                     "adminUsername": "[parameters('userName')]",
+                    "adminPassword": "[parameters('password')]",
                     "linuxConfiguration": {
-                        "disablePasswordAuthentication": true,
+                        "disablePasswordAuthentication": false,
                         // "ssh": {
                         //     "publicKeys": [
                         //         {
