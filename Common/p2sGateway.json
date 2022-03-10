@@ -1,0 +1,109 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location":{
+            "type":"string"
+        },
+        "labTagValue": {
+            "type":"string"
+        },
+        "gatewaySubnetId":{
+            "type":"string"
+        },
+        "gatewayAddressRange": {
+            "type": "string"
+        },
+        "gatewayType": {
+            "type": "string",
+            "defaultValue": "Vpn",
+            "allowedValues": [
+                "Vpn",
+                "ExpressRoute"
+            ]
+        },
+        "vpnGatewayGeneration": {
+            "type": "string",
+            "defaultValue": "Generation1"
+        },
+        "vpnType": {
+            "type": "string",
+            "defaultValue": "RouteBased",
+            "allowedValues": [
+                "RouteBased",
+                "PolicyBased"
+            ]
+        },
+        "sku": {
+            "type": "string",
+            "defaultValue": "VpnGw1"
+        }
+    },
+    "variables":{
+        "gatewayName":"[concat(parameters('labTagValue'), '-gateway')]",
+        "publicIpName":"[concat(parameters('labTagValue'), '-gw-pip')]"
+    },
+    "resources":[
+        {
+            "name": "[variables('publicIpName')]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "location": "[parameters('location')]",
+            "apiVersion": "2018-10-01",
+            "dependsOn": [],
+            "tags": {
+                "displayName": "GatewayPublicIP",
+                "Lab":"[parameters('labTagValue')]"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic"
+                , "dnsSettings": {
+                "domainNameLabel": "[toLower(variables('gatewayName'))]"
+                }
+            }
+        },
+
+        {
+            "apiVersion": "2019-04-01",
+            "name": "[variables('gatewayName')]",
+            "type": "Microsoft.Network/virtualNetworkGateways",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpName'))]"
+            ],
+            "tags": {
+                "Lab":"[parameters('labTagValue')]"
+            },
+            "properties": {
+                "gatewayType": "[parameters('gatewayType')]",
+                "ipConfigurations": [
+                    {
+                        "name": "default",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[parameters('gatewaySubnetId')]"
+                            },
+                            "publicIpAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpName'))]"
+                            }
+                        }
+                    }
+                ],
+                "vpnType": "[parameters('vpnType')]",
+                "vpnGatewayGeneration": "[parameters('vpnGatewayGeneration')]",
+                "sku": {
+                    "name": "[parameters('sku')]",
+                    "tier": "[parameters('sku')]"
+                },
+                "vpnClientConfiguration": {
+                    "vpnClientAddressPool": {
+                        "addressPrefixes":["[parameters('gatewayAddressRange')]"]
+                    },
+                    "vpnClientProtocols":["IkeV2"],
+                    "vpnClientRootCertificates": [ ]
+                }
+            }
+        }
+    ],
+    "outputs":{}
+}

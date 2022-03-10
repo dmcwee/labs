@@ -25,7 +25,7 @@
         }
     },
     "variables": {
-        "gatewayName":"[concat(parameters('vNetName'), '-GW')]"
+        "gatewayName":"gatewaySubNet"
     },
     "resources": [
         /*
