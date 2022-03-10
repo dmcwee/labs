@@ -5,12 +5,6 @@
         "location": {
             "type":"string"
         },
-        "storageAccountName": {
-            "type":"string"
-        },
-        "vnetId": {
-            "type":"string"
-        },
         "subnetId": {
             "type":"string"
         },
@@ -96,9 +90,7 @@
         "type": "Microsoft.Network/networkInterfaces",
         "location": "[parameters('location')]",
         "apiVersion": "2018-10-01",
-        "dependsOn": [
-          "[parameters('vnetId')]"
-        ],
+        "dependsOn": [ ],
         "tags": {
           "displayName": "ADNic",
           "Lab":"[parameters('labTagValue')]"
@@ -128,7 +120,6 @@
         "location": "[parameters('location')]",
         "apiVersion": "2018-10-01",
         "dependsOn": [
-          "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
           "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'), '-nic'))]"
         ],
         "tags": {
