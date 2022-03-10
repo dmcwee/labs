@@ -1,0 +1,153 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location":{
+            "type":"string"
+        },
+        "subnetId": {
+            "type":"string"
+        },
+        "privateIP": {
+            "type":"string"
+        },
+        "labTagValue": {
+            "type":"string"
+        },
+        "vmName": {
+            "defaultValue": "linuxVM",
+            "type": "string"
+        },
+        "vmSize": {
+            "type":"string",
+            "defaultValue": "Standard_B4ms"
+        },
+        "userName": {
+            "type":"string",
+            "defaultValue": "labadmin"
+        }
+    },
+    "variables": {},
+    "resources": [
+        /*
+        Create Client NIC
+        */
+        {
+            "name": "[concat(parameters('vmName'), '-nic')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "location": "[parameters('location')]",
+            "apiVersion": "2018-10-01",
+            "dependsOn": [
+            ],
+            "tags": {
+                "displayName": "ClientNic",
+                "Lab":"[parameters('labTagValue')]"
+            },
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Static",
+                            "privateIPAddress": "[parameters('privateIP')]",
+                            "subnet": {
+                            "id": "[parameters('subnetId')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2021-11-01",
+            "name": "[parameters('vmName')]",
+            "location": "[parameters('location')]",
+            "tags": {
+                "displayName":"LinuxVM",
+                "Lab": "[parameters('labTagValue')]"
+            },
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "canonical",
+                        "offer": "0001-com-ubuntu-server-focal",
+                        "sku": "20_04-lts-gen2",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "osType": "Linux",
+                        "name": "[concat(parameters('vmName'), '_OsDisk')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite"
+                        //"managedDisk": {
+                        //    "id": "[parameters('disks_ftlinuxmde_OsDisk_1_6cd8f080740d47b2948fa7b763fe73e5_externalid')]"
+                        //}
+                    },
+                    "dataDisks": []
+                },
+                "osProfile": {
+                    "computerName": "[parameters('vmName')]",
+                    "adminUsername": "[parameters('userName')]",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": true,
+                        // "ssh": {
+                        //     "publicKeys": [
+                        //         {
+                        //             "path": "/home/labadmin/.ssh/authorized_keys",
+                        //             "keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQClQFtYLqqd7fzteLi68VH0eQRi\r\n9EYwGtI3X332kJa2ZXSzVauWhZ3FWM+HWxcgzJBXtXVXVolNZV4HuZEqjRf9nXBI\r\nuRzmA+SjyiM9kG2xNOC7mT2Jj7npdgXm1fMHoxBt8K7j99ZZMcNEcYc+DTUYLY0Z\r\nNmEDqBqf9StEO6YLpPKamR8p4orrj6QDm5+MC4nxJcL9iBofqL8JOM8V+ZFG4UMF\r\nmFuL6vlwuMK78EdahXe+SzEmU638U5jt3ZviVTlA0ONGLBDQPvqdUT9GfONMEOd5\r\nnPvZEMZSz66k86OBCZcCTxsH+WlMuFrmUu+DJbxDQ5Yvt5ZFwZ7oP0SCqOViaa6j\r\nBnvYDkk5eE1R2DxhP5o4nwCKxQxsrEbJFV/fqZHPA50NFxwERw10k0YB93NeI9eG\r\n0iHWIDDx0reZjBbHnm8S2NFAxvDnapx9c3Wn8sQMkmxrxNUmFiijW2q5L58lnhLc\r\ndR6osHoprWQX3iIcZep+5VjJxZC5Ec70hOtym+0= generated-by-azure\r\n"
+                        //         }
+                        //     ]
+                        // },
+                        "provisionVMAgent": true,
+                        "patchSettings": {
+                            "patchMode": "ImageDefault",
+                            "assessmentMode": "ImageDefault"
+                        }
+                    },
+                    "secrets": [],
+                    "allowExtensionOperations": true,
+                    "requireGuestProvisionSignal": true
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'), '-nic'))]"
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true
+                    }
+                }
+            }
+        },
+        {
+            "type": "microsoft.devtestlab/schedules",
+            "name": "[toLower(concat('shutdown-computevm-', parameters('vmName')))]",
+            "apiVersion": "2018-09-15",
+            "location": "[parameters('location')]",
+            "scale": null,
+            "properties": {
+                "status": "Enabled",
+                "taskType": "ComputeVmShutdownTask",
+                "dailyRecurrence": {
+                    "time": "1900"
+                },
+                "timeZoneId": "Eastern Standard Time",
+                "notificationSettings": {
+                    "status": "Disabled",
+                    "timeInMinutes": 30
+                },
+                "targetResourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]"
+            ]
+        }
+    ]
+}
