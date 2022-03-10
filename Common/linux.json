@@ -112,8 +112,8 @@
                         }
                     },
                     "secrets": [],
-                    "allowExtensionOperations": true,
-                    "requireGuestProvisionSignal": true
+                    "allowExtensionOperations": true
+                    //, "requireGuestProvisionSignal": true
                 },
                 "networkProfile": {
                     "networkInterfaces": [
