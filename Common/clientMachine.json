@@ -14,6 +14,9 @@
         "labTagValue": {
             "type":"string"
         },
+        "storageType": {
+          "type":"string"
+        },
         "vmName": {
             "type":"string",
             "defaultValue": "Server"
@@ -122,11 +125,14 @@
             },
             "osDisk": {
               "name": "[concat('osdisk-', parameters('vmName'))]",
-              "vhd": {
-                "uri": "[concat(parameters('blobStorageUri'), variables('VhdContainer'), '/', parameters('vmName'), '-osdisk.vhd')]"
-              },
+              //"vhd": {
+              //  "uri": "[concat(parameters('blobStorageUri'), variables('VhdContainer'), '/', parameters('vmName'), '-osdisk.vhd')]"
+              //},
               "caching": "ReadWrite",
-              "createOption": "FromImage"
+              "createOption": "FromImage",
+              "managedDisk":{
+                "storageAccountType":"[parameters('storageType')]"
+              }
             }
           },
           "networkProfile": {
