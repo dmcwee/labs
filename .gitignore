@@ -2,4 +2,4 @@ DSC/xActiveDirectory
 DSC-test
 IDAMLab_DSC.zip
 .vs/
-PowershellScripts/*.txt
+*.txt
