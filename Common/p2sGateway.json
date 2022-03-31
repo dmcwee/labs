@@ -37,11 +37,26 @@
         "sku": {
             "type": "string",
             "defaultValue": "VpnGw1"
+        },
+        "gatewayCertName": {
+            "type":"string",
+            "defaultValue": ""
+        },
+        "gatewayCertData":{
+            "type":"string",
+            "defaultValue": ""
         }
     },
     "variables":{
         "gatewayName":"[concat(parameters('vNetName'), '-gateway')]",
-        "publicIpName":"[concat(parameters('vNetName'), '-gw-pip')]"
+        "publicIpName":"[concat(parameters('vNetName'), '-gw-pip')]",
+        "clientAddressPool":"10.10.10.0/24",
+
+        "certObject":"[if(or(empty(parameters('gatewayCertName')), empty(parameters('gatewayCertData'))), json('[ ]'), createArray(createObject('name', parameters('gatewayCertName'), 'properties', createObject('publicCertData', parameters('gatewayCertData')))))]"
+        //"name":"[parameters('gatewayRootCertName')]",
+        //"properties": {
+        //  "publicCertData":"[parameters('gatewayRootCert')]"
+        //}
     },
     "resources":[
         {
@@ -97,13 +112,22 @@
                 },
                 "vpnClientConfiguration": {
                     "vpnClientAddressPool": {
-                        "addressPrefixes":["10.10.10.0/24"]
+                        "addressPrefixes":["[variables('clientAddressPool')]"]
                     },
                     "vpnClientProtocols":["IkeV2"],
-                    "vpnClientRootCertificates": [ ]
+                    "vpnClientRootCertificates": "[variables('certObject')]"
                 }
             }
         }
     ],
-    "outputs":{}
+    "outputs":{
+        "clientAddressPool":{
+            "type":"string",
+            "value":"[variables('clientAddressPool')]"
+        },
+        "certObject": {
+            "type": "array",
+            "value": "[variables('certObject')]"
+        }
+    }
 }

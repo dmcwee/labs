@@ -1,0 +1,95 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "String"
+        },
+        "location": {
+            "type": "string"
+        },
+        "labTagValue": {
+            "type": "string"
+        },
+        "vnetAddressRange": {
+            "type":"string"
+        },
+        "subnetAddressRange": {
+            "type":"string"
+        },
+        "vpnAddressRange": {
+            "type":"string"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2020-11-01",
+            "name": "[parameters('name')]",
+            "location": "[parameters('location')]",
+            "tags": {
+                "Lab": "[parameters('labTagValue')]",
+                "displayName": "virtualNetwork"
+            },
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "AllowVnetRdp",
+                        "properties": {
+                            "description":"Allow RDP connections between machines on the subnet",
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "3389",
+                            "sourceAddressPrefix": "[parameters('subnetAddressRange')]",
+                            "destinationAddressPrefix": "[parameters('subnetAddressRange')]",
+                            "access": "Allow",
+                            "priority": 2900,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    },
+                    {
+                        "name": "AllowRDPFromP2S",
+                        "properties": {
+                            "description": "Allow RDP connections originating from Point-2-Site network",
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "3389",
+                            "sourceAddressPrefix": "[parameters('vpnAddressRange')]",
+                            "destinationAddressPrefix": "[parameters('subnetAddressRange')]",
+                            "access": "Allow",
+                            "priority": 2901,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    },
+                    {
+                        "name": "BlockRDPOnVNet",
+                        "properties": {
+                            "description":"Block RDP connections that originate from the VNet to VirtualNetwork",
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "3389",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "[parameters('vnetAddressRange')]",
+                            "access": "Deny",
+                            "priority": 2999,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    }
+                ]
+            }
+        } 
+    ]
+}
