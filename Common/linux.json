@@ -95,9 +95,6 @@
                         "managedDisk": {
                             "storageAccountType": "[parameters('storageType')]"
                         }
-                        //"managedDisk": {
-                        //    "id": "[parameters('disks_ftlinuxmde_OsDisk_1_6cd8f080740d47b2948fa7b763fe73e5_externalid')]"
-                        //}
                     },
                     "dataDisks": []
                 },
@@ -107,14 +104,6 @@
                     "adminPassword": "[parameters('password')]",
                     "linuxConfiguration": {
                         "disablePasswordAuthentication": false,
-                        // "ssh": {
-                        //     "publicKeys": [
-                        //         {
-                        //             "path": "/home/labadmin/.ssh/authorized_keys",
-                        //             "keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQClQFtYLqqd7fzteLi68VH0eQRi\r\n9EYwGtI3X332kJa2ZXSzVauWhZ3FWM+HWxcgzJBXtXVXVolNZV4HuZEqjRf9nXBI\r\nuRzmA+SjyiM9kG2xNOC7mT2Jj7npdgXm1fMHoxBt8K7j99ZZMcNEcYc+DTUYLY0Z\r\nNmEDqBqf9StEO6YLpPKamR8p4orrj6QDm5+MC4nxJcL9iBofqL8JOM8V+ZFG4UMF\r\nmFuL6vlwuMK78EdahXe+SzEmU638U5jt3ZviVTlA0ONGLBDQPvqdUT9GfONMEOd5\r\nnPvZEMZSz66k86OBCZcCTxsH+WlMuFrmUu+DJbxDQ5Yvt5ZFwZ7oP0SCqOViaa6j\r\nBnvYDkk5eE1R2DxhP5o4nwCKxQxsrEbJFV/fqZHPA50NFxwERw10k0YB93NeI9eG\r\n0iHWIDDx0reZjBbHnm8S2NFAxvDnapx9c3Wn8sQMkmxrxNUmFiijW2q5L58lnhLc\r\ndR6osHoprWQX3iIcZep+5VjJxZC5Ec70hOtym+0= generated-by-azure\r\n"
-                        //         }
-                        //     ]
-                        // },
                         "provisionVMAgent": true,
                         "patchSettings": {
                             "patchMode": "ImageDefault",
@@ -123,7 +112,6 @@
                     },
                     "secrets": [],
                     "allowExtensionOperations": true
-                    //, "requireGuestProvisionSignal": true
                 },
                 "networkProfile": {
                     "networkInterfaces": [

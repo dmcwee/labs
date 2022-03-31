@@ -51,15 +51,14 @@
         "password": {
             "type": "securestring"
         },
-        "blobStorageUri":{
-            "type":"string"
+        "storageType": {
+          "type":"string"
         }
     },
     "variables":{
         /* Windows OS Publisher Variables */
         "WindowsServerImagePublisher": "MicrosoftWindowsServer",
         "WindowsServerImageOffer": "WindowsServer",
-        "VhdContainer":"vhds",
         "ScheduleName":"[toLower(concat('shutdown-computevm-', parameters('vmName')))]"
     },
     "resources":[
@@ -127,11 +126,11 @@
             },
             "osDisk": {
               "name": "[concat(parameters('vmName'), '-osDisk')]",
-              "vhd": {
-                "uri": "[concat(parameters('blobStorageUri'), variables('VhdContainer'), '/', parameters('vmName'), '-osdisk.vhd')]"
-              },
               "caching": "ReadWrite",
-              "createOption": "FromImage"
+              "createOption": "FromImage",
+              "managedDisk":{
+                "storageAccountType":"[parameters('storageType')]"
+              }
             },
             "dataDisks": [
             ]
