@@ -30,5 +30,11 @@
                 "privateLinkServiceNetworkPolicies": "Enabled"
             }
         }
-    ]
+    ],
+    "outputs":{
+        "subnetId": {
+           "value": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('vNetName')), '/subnets/', parameters('subnetName'))]",
+           "type":"string"
+        }
+    }
 }

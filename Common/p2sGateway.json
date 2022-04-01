@@ -135,6 +135,10 @@
         }
     ],
     "outputs":{
+        "gatewayId": {
+           "value": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('vNetName')), '/subnets/', variables('gatewayName'))]",
+           "type":"string"
+        },
         "clientAddressPool":{
             "type":"string",
             "value":"[variables('clientAddressPool')]"
