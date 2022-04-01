@@ -1,0 +1,34 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "subnetName": {
+            "defaultValue":"subnet-1",
+            "type":"string"
+        },
+        "vnetName": {
+            "defaultValue": "labtest-vnet",
+            "type": "String"
+        },
+        "subnetRange": {
+            "defaultValue": "10.0.2.0/24",
+            "type": "string"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2020-11-01",
+            "name": "[concat(parameters('vnetName'), '/', parameters('subnetName'))]",
+            "dependsOn": [
+            ],
+            "properties": {
+                "addressPrefix": "[parameters('subnetRange')]",
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        }
+    ]
+}

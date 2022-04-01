@@ -21,13 +21,6 @@
           "Premium_LRS"
         ]
       },
-      "location": {
-        "type": "string",
-        "defaultValue": "[resourceGroup().location]",
-        "metadata": {
-          "description": "Specify a location for the resources."
-        }
-      },
       "subNetName": {
           "type": "string",
           "defaultValue": "subNet1",
@@ -66,6 +59,7 @@
       }
     },
     "variables":{
+      "location": "[resourceGroup().location]",
         "NetworkRange": "10.0.0.0/16",
         "SubnetRange": "[concat('10.0.', parameters('subNetRangeOctet'), '.0/24')]",
         "GatewayRange": "10.0.1.0/24"
@@ -85,7 +79,7 @@
                         "value": "[concat(resourceGroup().name, '-vnet')]"
                     },
                     "location": {
-                        "value": "[parameters('location')]"
+                        "value": "[variables('location')]"
                     },
                     "labTagValue": {
                         "value": "[parameters('labTagValue')]"
@@ -119,7 +113,7 @@
                 },
                 "parameters": {
                     "location":{
-                        "value":"[parameters('location')]"
+                        "value":"[variables('location')]"
                     },
                     "labTagValue":{
                         "value":"[parameters('labTagValue')]"
@@ -156,7 +150,7 @@
                         "value":"[concat(resourceGroup().name, '-nsg')]"
                     },
                     "location":{
-                        "value":"[parameters('location')]"
+                        "value":"[variables('location')]"
                     },
                     "labTagValue":{
                         "value":"[parameters('labTagValue')]"
@@ -187,7 +181,7 @@
                 },
                 "parameters": {
                     "location":{
-                        "value":"[parameters('location')]"
+                        "value":"[variables('location')]"
                     },
                     "subnetId":{
                         "value":"[reference('linkedSubnetTemplate').outputs.subnetId.value]"
@@ -230,7 +224,7 @@
                 },
                 "parameters": {
                     "location":{
-                        "value":"[parameters('location')]"
+                        "value":"[variables('location')]"
                     },
                     "subnetId":{
                         "value":"[reference('linkedSubnetTemplate').outputs.subnetId.value]"
@@ -277,7 +271,7 @@
                 },
                 "parameters": {
                     "location":{
-                        "value":"[parameters('location')]"
+                        "value":"[variables('location')]"
                     },
                     "subnetId":{
                         "value":"[reference('linkedSubnetTemplate').outputs.subnetId.value]"
@@ -317,7 +311,7 @@
                 },
                 "parameters": {
                     "location": {
-                        "value":"[parameters('location')]"
+                        "value":"[variables('location')]"
                     },
                     "subnetId": {
                         "value":"[reference('linkedSubnetTemplate').outputs.subnetId.value]"

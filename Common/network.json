@@ -13,19 +13,19 @@
         },
         "networkRange": {
             "type":"string"
-        },
-        "subnetName": {
-            "type":"string"
-        },
-        "subnetRange": {
-            "type":"string"
-        },
-        "gatewayRange": {
-            "type":"string"
         }
+        //"subnetName": {
+        //    "type":"string"
+        //},
+        //"subnetRange": {
+        //    "type":"string"
+        //},
+        //"gatewayRange": {
+        //    "type":"string"
+        //}
     },
     "variables": {
-        "gatewayName":"gatewaySubNet"
+        //"gatewayName":"gatewaySubNet"
     },
     "resources": [
         /*
@@ -48,18 +48,18 @@
                     ]
                 },
                 "subnets": [
-                    {
-                        "name": "[parameters('subnetName')]",
-                        "properties": {
-                            "addressPrefix": "[parameters('subnetRange')]"
-                        }
-                    },
-                    {
-                        "name": "[variables('gatewayName')]",
-                        "properties":{
-                            "addressPrefix": "[parameters('gatewayRange')]"
-                        }
-                    }
+                    //{
+                    //    "name": "[parameters('subnetName')]",
+                    //    "properties": {
+                    //        "addressPrefix": "[parameters('subnetRange')]"
+                    //    }
+                    //},
+                    //{
+                    //    "name": "[variables('gatewayName')]",
+                    //    "properties":{
+                    //        "addressPrefix": "[parameters('gatewayRange')]"
+                    //    }
+                    //}
                 ]
             }
         }
@@ -69,13 +69,13 @@
             "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vNetName'))]",
             "type":"string"
         },
-        "gatewayId": {
-            "value": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('vNetName')), '/subnets/', variables('gatewayName'))]",
-            "type":"string"
-        },
-        "subnetId": {
-            "value": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('vNetName')), '/subnets/', parameters('subnetName'))]",
-            "type":"string"
-        }
+        //"gatewayId": {
+        //    "value": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('vNetName')), '/subnets/', variables('gatewayName'))]",
+        //    "type":"string"
+        //},
+        //"subnetId": {
+        //    "value": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('vNetName')), '/subnets/', parameters('subnetName'))]",
+        //    "type":"string"
+        //}
     }
 }

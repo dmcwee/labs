@@ -8,10 +8,13 @@
         "labTagValue": {
             "type":"string"
         },
-        "gatewaySubnetId":{
+        //"gatewaySubnetId":{
+        //    "type":"string"
+        //},
+        "vNetName": {
             "type":"string"
         },
-        "vNetName": {
+        "gatewayRange": {
             "type":"string"
         },
         "gatewayType": {
@@ -51,12 +54,9 @@
         "gatewayName":"[concat(parameters('vNetName'), '-gateway')]",
         "publicIpName":"[concat(parameters('vNetName'), '-gw-pip')]",
         "clientAddressPool":"10.10.10.0/24",
+        "gatewaySubnetName":"gatewaySubNet",
 
         "certObject":"[if(or(empty(parameters('gatewayCertName')), empty(parameters('gatewayCertData'))), json('[ ]'), createArray(createObject('name', parameters('gatewayCertName'), 'properties', createObject('publicCertData', parameters('gatewayCertData')))))]"
-        //"name":"[parameters('gatewayRootCertName')]",
-        //"properties": {
-        //  "publicCertData":"[parameters('gatewayRootCert')]"
-        //}
     },
     "resources":[
         {
@@ -74,6 +74,20 @@
                 , "dnsSettings": {
                 "domainNameLabel": "[toLower(variables('gatewayName'))]"
                 }
+            }
+        },
+
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2020-11-01",
+            "name": "[concat(parameters('vnetName'), '/', variables('gatewaySubnetName'))]",
+            "dependsOn": [
+            ],
+            "properties": {
+                "addressPrefix": "[parameters('gatewayRange')]",
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
             }
         },
 
@@ -96,7 +110,7 @@
                         "properties": {
                             "privateIPAllocationMethod": "Dynamic",
                             "subnet": {
-                                "id": "[parameters('gatewaySubnetId')]"
+                                "id": "[resourceId('Microsoft.Network/virtualNetwork/subnets', concat(parameters('vnetName'), '/', variables('gatewaySubnetName')))]"
                             },
                             "publicIpAddress": {
                                 "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpName'))]"
