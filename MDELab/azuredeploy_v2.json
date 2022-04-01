@@ -1,0 +1,377 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "labTagValue": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 11,
+        "metadata": {
+          "description": "Specify a project name that is used to generate resource names."
+        }
+      },
+      "storageType": {
+        "type": "string",
+        "defaultValue": "Standard_LRS",
+        "allowedValues": [
+          "Standard_LRS",
+          "Standard_ZRS",
+          "Standard_GRS",
+          "Standard_RAGRS",
+          "Premium_LRS"
+        ]
+      },
+      "location": {
+        "type": "string",
+        "defaultValue": "[resourceGroup().location]",
+        "metadata": {
+          "description": "Specify a location for the resources."
+        }
+      },
+      "subNetName": {
+          "type": "string",
+          "defaultValue": "subNet1",
+          "metadata": {
+              "description":"Specify the name of the subnet the deployment should use"
+          }
+      },
+      "subNetRangeOctet": {
+          "type": "int",
+          "defaultValue": 2,
+          "minValue": 2,
+          "maxValue": 254,
+          "metadata": {
+              "description": "Specify the class C desired subnet ip range (10.0.2-254.0/24).  Must be greater than 1."
+          }
+      },
+      "gatewayCertName":{
+          "type":"string",
+          "defaultValue":""
+      },
+      "gatewayCertData": {
+          "type":"string",
+          "defaultValue":""
+      },
+      "clientList": {
+          "type": "array",
+          "defaultValue": ["ClientPc1", "ClientPc2", "ClientPc3"]
+      },
+      "userName": {
+        "type": "string",
+        "minLength": 1,
+        "defaultValue": "cmadmin"
+        },
+      "password": {
+        "type": "securestring"
+      }
+    },
+    "variables":{
+        "NetworkRange": "10.0.0.0/16",
+        "SubnetRange": "[concat('10.0.', parameters('subNetRangeOctet'), '.0/24')]",
+        "GatewayRange": "10.0.1.0/24"
+    },
+    "resources": [
+        {
+            "name": "linkedSubnetTemplate",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "https://raw.githubusercontent.com/dmcwee/labs/master/Common/network.json"
+                },
+                "parameters": {
+                    "vNetName": {
+                        "value": "[concat(resourceGroup().name, '-vnet')]"
+                    },
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "labTagValue": {
+                        "value": "[parameters('labTagValue')]"
+                    },
+                    "networkRange": {
+                        "value":"[variables('NetworkRange')]"
+                    },
+                    "subnetName": {
+                        "value":"[parameters('subNetName')]"
+                    },
+                    "subnetRange": {
+                        "value":"[variables('SubnetRange')]"
+                    },
+                    "gatewayRange": {
+                        "value":"[variables('GatewayRange')]"
+                    }
+                }
+            }
+        },
+        {
+            "name":"linkedGatewayTemplate",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "dependsOn":[
+                "Microsoft.Resources/deployments/linkedSubnetTemplate"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri":"https://raw.githubusercontent.com/dmcwee/labs/master/Common/p2sGateway.json"
+                },
+                "parameters": {
+                    "location":{
+                        "value":"[parameters('location')]"
+                    },
+                    "labTagValue":{
+                        "value":"[parameters('labTagValue')]"
+                    },
+                    "gatewaySubnetId":{
+                        "value":"[reference('linkedSubnetTemplate').outputs.gatewayId.value]"
+                    },
+                    "vNetName": { 
+                        "value":"[concat(resourceGroup().name, '-vnet')]"
+                    },
+                    "gatewayCertName": {
+                        "value":"[parameters('gatewayCertName')]"
+                    },
+                    "gatewayCertData": {
+                        "value":"[parameters('gatewayCertData')]"
+                    }
+                }
+            }
+        },
+        {
+            "name":"linkedSecurityGroupTemplate",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "dependsOn":[
+                "Microsoft.Resources/deployments/linkedSubnetTemplate"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri":"https://raw.githubusercontent.com/dmcwee/labs/master/Common/networkSecurityGroup.json"
+                },
+                "parameters": {
+                    "name":{
+                        "value":"[concat(resourceGroup().name, '-nsg')]"
+                    },
+                    "location":{
+                        "value":"[parameters('location')]"
+                    },
+                    "labTagValue":{
+                        "value":"[parameters('labTagValue')]"
+                    },
+                    "vnetAddressRange":{
+                        "value":"[variables('NetworkRange')]"
+                    },
+                    "subnetAddressRange":{
+                        "value":"[variables('SubnetRange')]"
+                    },
+                    "vpnAddressRange": {
+                        "value":"[variables('GatewayRange')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "linkedDCTemplate",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "dependsOn":[
+                "Microsoft.Resources/deployments/linkedSubnetTemplate"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri":"https://raw.githubusercontent.com/dmcwee/labs/master/Common/domainController.json"
+                },
+                "parameters": {
+                    "location":{
+                        "value":"[parameters('location')]"
+                    },
+                    "subnetId":{
+                        "value":"[reference('linkedSubnetTemplate').outputs.subnetId.value]"
+                    },
+                    "privateIP":{
+                        "value":"[concat('10.0.', parameters('subNetRangeOctet'), '.15')]"
+                    },
+                    "labTagValue":{
+                        "value":"[parameters('labTagValue')]"
+                    },
+                    "vmName":{
+                        "value":"firstDC"
+                    },
+                    "serverOS":{
+                        "value":"2019-Datacenter"
+                    },
+                    "userName":{
+                        "value":"[parameters('userName')]"
+                    },
+                    "password":{
+                        "value":"[parameters('password')]"
+                    },
+                    "storageType":{
+                        "value":"[parameters('storageType')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "linkedServerTemplate",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "dependsOn":[
+                "Microsoft.Resources/deployments/linkedSubnetTemplate"
+                //, "Microsoft.Resources/deployments/linkedStorageTemplate"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri":"https://raw.githubusercontent.com/dmcwee/labs/master/Common/windowsServer.json"
+                },
+                "parameters": {
+                    "location":{
+                        "value":"[parameters('location')]"
+                    },
+                    "subnetId":{
+                        "value":"[reference('linkedSubnetTemplate').outputs.subnetId.value]"
+                    },
+                    "privateIP":{
+                        "value":"[concat('10.0.', parameters('subNetRangeOctet'), '.5')]"
+                    },
+                    "labTagValue":{
+                        "value":"[parameters('labTagValue')]"
+                    },
+                    "vmName":{
+                        "value":"firstServer"
+                    },
+                    "serverOS":{
+                        "value":"2019-Datacenter"
+                    },
+                    "userName":{
+                        "value":"[parameters('userName')]"
+                    },
+                    "password":{
+                        "value":"[parameters('password')]"
+                    },
+                    "storageType":{
+                        "value":"[parameters('storageType')]"
+                    }
+                }
+            }
+        },
+        {
+            "copy": {
+                "name":"clientCopy",
+                "count":"[length(parameters('clientList'))]"
+            },
+            "name": "[concat('linkedClientTemplate', copyIndex())]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "dependsOn":[
+                "Microsoft.Resources/deployments/linkedSubnetTemplate"
+                //, "Microsoft.Resources/deployments/linkedStorageTemplate"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri":"https://raw.githubusercontent.com/dmcwee/labs/master/Common/clientMachine.json"
+                },
+                "parameters": {
+                    "location":{
+                        "value":"[parameters('location')]"
+                    },
+                    "subnetId":{
+                        "value":"[reference('linkedSubnetTemplate').outputs.subnetId.value]"
+                    },
+                    "privateIP":{
+                        "value":"[concat('10.0.', parameters('subNetRangeOctet'), '.', copyIndex(20))]"
+                    },
+                    "labTagValue":{
+                        "value":"[parameters('labTagValue')]"
+                    },
+                    "vmName":{
+                        "value":"[parameters('clientList')[copyIndex()]]"
+                    },
+                    "userName":{
+                        "value":"[parameters('userName')]"
+                    },
+                    "password":{
+                        "value":"[parameters('password')]"
+                    },
+                    "storageType":{
+                        "value":"[parameters('storageType')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "LinuxTemplate",
+            "apiVersion": "2021-04-01",
+            "dependsOn":[
+                "Microsoft.Resources/deployments/linkedSubnetTemplate"
+                //, "Microsoft.Resources/deployments/linkedStorageTemplate"
+            ],
+            "properties":{
+                "mode": "Incremental",
+                "templateLink":{
+                    "uri": "https://raw.githubusercontent.com/dmcwee/labs/master/Common/linux.json"
+                },
+                "parameters": {
+                    "location": {
+                        "value":"[parameters('location')]"
+                    },
+                    "subnetId": {
+                        "value":"[reference('linkedSubnetTemplate').outputs.subnetId.value]"
+                    },
+                    "privateIP":{
+                        "value":"[concat('10.0.', parameters('subNetRangeOctet'), '.35')]"
+                    },
+                    "labTagValue": {
+                        "value": "[parameters('labTagValue')]"
+                    },
+                    "userName": {
+                        "value":"[parameters('userName')]"
+                    },
+                    "password": {
+                        "value":"[parameters('password')]"
+                    },
+                    "storageType":{
+                        "value":"[parameters('storageType')]"
+                    }
+                }
+            }
+        }    
+    ],
+    "outputs":{
+        // "storageEndpoint": {
+        //     "type": "object",
+        //     "value": "[reference('linkedStorageTemplate').outputs.storageEndpoint.value]"
+        // },
+        // "blobStorageEndpoint": {
+        //     "type": "string",
+        //     "value": "[reference('linkedStorageTemplate').outputs.storageEndpoint.value.blob]"
+        // },
+        // "storageType": {
+        //     "type": "string",
+        //     "value":"[reference('linkedStorageTemplate').outputs.storageType.value]"
+        // },
+        "networkId": {
+            "type": "string",
+            "value": "[reference('linkedSubnetTemplate').outputs.vnetId.value]"
+        },
+        "gatewayId": {
+            "type": "string",
+            "value": "[reference('linkedSubnetTemplate').outputs.gatewayId.value]"
+        },
+        "subnetId": {
+            "type":"string",
+            "value": "[reference('linkedSubnetTemplate').outputs.subnetId.value]"
+        },
+        "gatewayCert": {
+            "type": "array",
+            "value": "[reference('linkedGatewayTemplate').outputs.certObject.value]"
+        }
+    }
+}

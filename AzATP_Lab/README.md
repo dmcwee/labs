@@ -14,7 +14,7 @@ This is a simplified deployment for the Defender for Identity [Security Alert La
 **Notes:** 
 1. **DO NOT** change the Server OS Version, this will impact how the lab runs
 1. **DO NOT** change the DSC Location or AD DSC File parameters
-1. The VPN Root Cert and Root Cert Name are not currently used during deployment.
+1. The VPN Root Cert and Root Cert Name are not required during deployment.
 
 ## Post Deployment Setup
 1. Use the New-P2SCertificate.ps1 script, found [here](https://raw.githubusercontent.com/dmcwee/idamlab/master/PowershellScripts/New-P2SCertificate.ps1) to create a new Root & Child certificate pair for use with the Point-to-Site Gateway

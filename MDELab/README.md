@@ -1,3 +1,6 @@
+# Defender for Endpoint Scurity Lab
+This is a lab environment for testing of MDE scenarios including onboarding, offboarding, device configuration, and monitoring.
+
 ## Deployment Instructions
 1. Open the Azure Portal in a seperate tab in your browser
 1. Use the Deploy to Azure button below to deploy the lab to your Azure Environment
