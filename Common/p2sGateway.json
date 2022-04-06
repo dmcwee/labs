@@ -81,8 +81,8 @@
             "type": "Microsoft.Network/virtualNetworks/subnets",
             "apiVersion": "2020-11-01",
             "name": "[concat(parameters('vnetName'), '/', variables('gatewaySubnetName'))]",
-            "dependsOn": [
-            ],
+            "location":"[parameters('location')]",
+            "dependsOn": [],
             "properties": {
                 "addressPrefix": "[parameters('gatewayRange')]",
                 "delegations": [],
