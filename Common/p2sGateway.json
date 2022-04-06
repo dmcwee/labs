@@ -78,22 +78,42 @@
         },
 
         {
-            "type": "Microsoft.Network/virtualNetworks/subnets",
-            "apiVersion": "2020-11-01",
-            "name": "[concat(parameters('vnetName'), '/', variables('gatewaySubnetName'))]",
-            "location":"[parameters('location')]",
-            "dependsOn": [],
-            "tags": {
-                "displayName": "GatewaySubNet",
-                "Lab":"[parameters('labTagValue')]"
-            },
+            "name": "linkedSubnet",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "dependsOn": ["Microsoft.Resources/deployments/linkedSubnetTemplate"],
             "properties": {
-                "addressPrefix": "[parameters('gatewayRange')]",
-                "delegations": [],
-                "privateEndpointNetworkPolicies": "Enabled",
-                "privateLinkServiceNetworkPolicies": "Enabled"
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "https://raw.githubusercontent.com/dmcwee/labs/dev/Common/subnet.json"
+                },
+                "parameters": {
+                    "subnetName":{
+                        "value":"[variables('gatewaySubnetName')]"
+                    },
+                    "vnetName":{
+                        "value":"[concat(resourceGroup().name, '-vnet')]"
+                    },
+                    "subnetRange": {
+                        "value": "[parameters('gatewayRange')]"
+                    }
+                }
             }
         },
+
+        // {
+        //     "type": "Microsoft.Network/virtualNetworks/subnets",
+        //     "apiVersion": "2020-11-01",
+        //     "name": "[concat(parameters('vnetName'), '/', variables('gatewaySubnetName'))]",
+        //     "location":"[parameters('location')]",
+        //     "dependsOn": [],
+        //     "properties": {
+        //         "addressPrefix": "[parameters('gatewayRange')]",
+        //         "delegations": [],
+        //         "privateEndpointNetworkPolicies": "Enabled",
+        //         "privateLinkServiceNetworkPolicies": "Enabled"
+        //     }
+        // },
 
         {
             "apiVersion": "2019-04-01",
@@ -114,6 +134,7 @@
                         "properties": {
                             "privateIPAllocationMethod": "Dynamic",
                             "subnet": {
+                                //"id": "[reference('linkedSubnet').outputs.subnetId.value]"
                                 "id": "[resourceId('Microsoft.Network/virtualNetwork/subnets', parameters('vnetName'), variables('gatewaySubnetName'))]"
                             },
                             "publicIpAddress": {
