@@ -81,7 +81,7 @@
             "name": "linkedSubnet",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2021-04-01",
-            "dependsOn": ["Microsoft.Resources/deployments/linkedSubnetTemplate"],
+            "dependsOn": [],
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
