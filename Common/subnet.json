@@ -3,15 +3,12 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "subnetName": {
-            "defaultValue":"subnet-1",
             "type":"string"
         },
         "vnetName": {
-            "defaultValue": "labtest-vnet",
             "type": "String"
         },
         "subnetRange": {
-            "defaultValue": "10.0.2.0/24",
             "type": "string"
         }
     },
