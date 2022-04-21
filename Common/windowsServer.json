@@ -3,7 +3,8 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "location": {
-            "type":"string"
+            "type":"string",
+            "defaultValue": "[resourceGroup().location]"
         },
         "subnetId": {
             "type":"string"
@@ -53,6 +54,18 @@
         },
         "storageType": {
           "type":"string"
+        },
+        "dscLocation": {
+          "type": "string"
+        },
+        "dscFile": {
+          "type": "string"
+        },
+        "configurationArguments": {
+          "type": "object"
+        },
+        "secureConfigurationArguments": {
+          "type": "object"
         }
     },
     "variables":{
@@ -144,6 +157,33 @@
           }
         },
         "resources": [ ]
+      },
+      {
+        "condition":"[not(and(empty(parameters('dscFile')), empty(parameters('dscLocation'))))]",
+        "type": "Microsoft.Compute/virtualMachines/extensions",
+        "apiVersion": "2021-11-01",
+        "name": "[concat(parameters('vmName'), '/Microsoft.Powershell.DSC')]",
+        "location":"[parameters('location')]",
+        "dependsOn": [
+          "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+        ],
+        "properties": {
+          "publisher": "Microsoft.Powershell",
+          "type": "DSC",
+          "autoUpgradeMinorVersion": true,
+          "typeHandlerVersion":"2.9",
+          "settings": {
+            "configuration": {
+              "url": "[parameters('dscLocation')]",
+              "script": "[parameters('dscFile')]",
+              "Function": "Main"
+            },
+            "configurationArguments": "[parameters('configurationArguments')]"
+          },
+          "protectedSettings": {
+            "configurationArguments":"[parameters('secureConfigurationArguments')]"
+          }
+        }
       },
       {
         "comments": "",

@@ -6,12 +6,16 @@
             "type": "String"
         },
         "location": {
-            "type": "string"
+            "type": "string",
+            "defaultValue":"[resourceGroup().location]"
         },
         "labTagValue": {
             "type": "string"
         },
         "vnetAddressRange": {
+            "type":"string"
+        },
+        "subnetName": {
             "type":"string"
         },
         "subnetAddressRange": {
@@ -34,62 +38,11 @@
             },
             "properties": {
                 "securityRules": [
-                    {
-                        "name": "AllowVnetRdp",
-                        "properties": {
-                            "description":"Allow RDP connections between machines on the subnet",
-                            "protocol": "TCP",
-                            "sourcePortRange": "*",
-                            "destinationPortRange": "3389",
-                            "sourceAddressPrefix": "[parameters('subnetAddressRange')]",
-                            "destinationAddressPrefix": "[parameters('subnetAddressRange')]",
-                            "access": "Allow",
-                            "priority": 2900,
-                            "direction": "Inbound",
-                            "sourcePortRanges": [],
-                            "destinationPortRanges": [],
-                            "sourceAddressPrefixes": [],
-                            "destinationAddressPrefixes": []
-                        }
-                    },
-                    {
-                        "name": "AllowRDPFromP2S",
-                        "properties": {
-                            "description": "Allow RDP connections originating from Point-2-Site network",
-                            "protocol": "TCP",
-                            "sourcePortRange": "*",
-                            "destinationPortRange": "3389",
-                            "sourceAddressPrefix": "[parameters('vpnAddressRange')]",
-                            "destinationAddressPrefix": "[parameters('subnetAddressRange')]",
-                            "access": "Allow",
-                            "priority": 2901,
-                            "direction": "Inbound",
-                            "sourcePortRanges": [],
-                            "destinationPortRanges": [],
-                            "sourceAddressPrefixes": [],
-                            "destinationAddressPrefixes": []
-                        }
-                    },
-                    {
-                        "name": "BlockRDPOnVNet",
-                        "properties": {
-                            "description":"Block RDP connections that originate from the VNet to VirtualNetwork",
-                            "protocol": "TCP",
-                            "sourcePortRange": "*",
-                            "destinationPortRange": "3389",
-                            "sourceAddressPrefix": "*",
-                            "destinationAddressPrefix": "[parameters('vnetAddressRange')]",
-                            "access": "Deny",
-                            "priority": 2999,
-                            "direction": "Inbound",
-                            "sourcePortRanges": [],
-                            "destinationPortRanges": [],
-                            "sourceAddressPrefixes": [],
-                            "destinationAddressPrefixes": []
-                        }
-                    }
                 ]
             }
         } 
-    ]
+    ],
+    "outputs":{
+         
+    }
 }

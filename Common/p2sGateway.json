@@ -3,14 +3,12 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "location":{
-            "type":"string"
+            "type":"string",
+            "defaultValue":"[resourceGroup().location]"
         },
         "labTagValue": {
             "type":"string"
         },
-        //"gatewaySubnetId":{
-        //    "type":"string"
-        //},
         "vNetName": {
             "type":"string"
         },
