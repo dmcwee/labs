@@ -71,7 +71,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "https://raw.githubusercontent.com/dmcwee/labs/dev/Common/network.json"
+          "uri": "https://raw.githubusercontent.com/dmcwee/labs/master/Common/network.json"
         },
         "parameters": {
           "vNetName": {
@@ -98,7 +98,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "https://raw.githubusercontent.com/dmcwee/labs/dev/Common/subnet.json"
+          "uri": "https://raw.githubusercontent.com/dmcwee/labs/master/Common/subnet.json"
         },
         "parameters": {
           "subnetName":{
@@ -123,7 +123,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "https://raw.githubusercontent.com/dmcwee/labs/dev/Common/p2sGateway.json"
+          "uri": "https://raw.githubusercontent.com/dmcwee/labs/master/Common/p2sGateway.json"
         },
         "parameters": {
           "location": {
