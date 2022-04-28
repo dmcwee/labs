@@ -139,7 +139,7 @@
       "name": "subnetTemplate",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
-      "dependsOn": [],
+      "dependsOn": ["Microsoft.Resources/deployments/networkTemplate"],
       "properties": {
         "mode": "Incremental",
         "templateLink": {
