@@ -64,7 +64,7 @@
             "metadata": {
                 "description": "Location to the Desired State Configuration package"
             },
-            "defaultValue": "https://raw.githubusercontent.com/dmcwee/idamlab/master/AzATP_Lab/AzATP_DSC.zip"
+            "defaultValue": "https://github.com/dmcwee/labs/raw/master/AzATP_Lab/AzATP_DSC.zip"
         },
         "dscFile":{
             "type": "string",
