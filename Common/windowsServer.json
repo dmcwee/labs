@@ -158,6 +158,7 @@
         },
         "resources": [ ]
       },
+      /*
       {
         "condition":"[not(and(empty(parameters('dscFile')), empty(parameters('dscLocation'))))]",
         "type": "Microsoft.Compute/virtualMachines/extensions",
@@ -185,6 +186,7 @@
           }
         }
       },
+      */
       {
         "comments": "",
         "type": "microsoft.devtestlab/schedules",
