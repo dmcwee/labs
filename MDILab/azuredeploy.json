@@ -86,7 +86,7 @@
       "metadata": {
         "description": "Auto-generated container in staging storage account to receive post-build staging folder upload"
       },
-      "defaultValue": "https://raw.githubusercontent.com/dmcwee/labs/master/AzATP_Lab/AzATP_DSC.zip"
+      "defaultValue": "https://raw.githubusercontent.com/dmcwee/labs/master/MDILab/AzATP_DSC.zip"
     },
     "AdDscFile": {
       "type": "string",
@@ -192,43 +192,7 @@
         }
       }
     },
-/*
-    {
-      "name": "securityGroupTemplate",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2021-04-01",
-      "dependsOn": ["Microsoft.Resources/deployments/subnetTemplate"],
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "https://raw.githubusercontent.com/dmcwee/labs/master/Common/networkSecurityGroup.json"
-        },
-        "parameters": {
-          "name": {
-            "value": "[concat(resourceGroup().name, '-nsg')]"
-          },
-          "location": {
-            "value": "[variables('location')]"
-          },
-          "labTagValue": {
-            "value": "[variables('labTagValue')]"
-          },
-          "vnetAddressRange": {
-            "value": "[variables('NetworkPrefix')]"
-          },
-          "subnetName": {
-            "value":"[variables('SubNet1Name')]"
-          },
-          "subnetAddressRange": {
-            "value": "[variables('SubNet1Prefix')]"
-          },
-          "vpnAddressRange": {
-            "value": "[variables('GatewaySubnetPrefix')]"
-          }
-        }
-      }
-    },
-*/
+
     // Create Domain Controller
     {
       "name": "linkedDCTemplate",
