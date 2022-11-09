@@ -1,0 +1,8 @@
+- name: Install Web Server Software
+  hosts: webservers
+  tasks:
+          - name: Lookup MySQL Stuff
+            become: yes
+            become_method: sudo 
+            mysql_info:
+                    login_user: root

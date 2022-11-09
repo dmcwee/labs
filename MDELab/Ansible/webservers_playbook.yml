@@ -1,0 +1,29 @@
+- name: Install Web Server Software
+  hosts: webservers
+  tasks:
+          - name: Install nginx
+            become: yes
+            become_method: sudo
+            ansible.builtin.apt:
+                    name: nginx
+                    state: latest
+          - name: Install MySQL
+            become: yes
+            become_method: sudo
+            ansible.builtin.apt:
+                    name: "{{ item }}"
+                    state: latest
+            with_items:
+                    - mysql-server
+                    - python3-pymysql
+          - name: Install PHP
+            become: yes
+            become_method: sudo
+            ansible.builtin.apt:
+                    name: "{{ item }}"
+                    state: latest
+            with_items:
+                    - php-fpm
+                    - php-mysql
+          - name: Update MySQL Root Password
+            mysql_user: name=root host=localhost password={{ new_root_password }}

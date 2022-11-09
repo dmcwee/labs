@@ -1,0 +1,80 @@
+- name: MDE Install
+  hosts: all
+  tasks:
+    - name: Get Zip and UnZip
+      become: yes
+      become_method: sudo
+      apt:
+        name: "{{ item }}"
+        state: latest
+      with_items:
+        - zip
+        - unzip
+
+    - name: Create MDATP directories
+      become: yes
+      become_method: sudo
+      file:
+        path: /etc/opt/microsoft/mdatp
+        recurse: true
+        state: directory
+        mode: 0755
+        owner: root
+        group: root
+
+    - name: Register mdatp_onbaord.json
+      become: yes
+      become_method: sudo
+      stat:
+        path: /etc/opt/microsoft/mdatp/mdatp_onboard.json
+      register: mdatp_onboard
+
+    - name: Register mde_healthy
+      shell: "mdatp health"
+      register: mde_healthy
+
+    - name: Extract WindowsDefenderAtpOnboardingPackage.zip to /etc/opt/microsoft/mdatp
+      become: yes
+      become_method: sudo
+      unarchive:
+        src: WindowsDefenderATPOnboardingPackage_Linux.zip
+        dest: /etc/opt/microsoft/mdatp
+        mode: 0600
+        owner: root
+        group: root
+      when: not mdatp_onboard.stat.exists
+
+    - name: Add Microsoft APT Key
+      become: yes
+      become_method: sudo
+      apt_key:
+        url: https://packages.microsoft.com/keys/microsoft.asc
+        state: present
+    
+    - name: Add Microsoft APT repository for MDATP
+      become: yes
+      become_method: sudo
+      apt_repository:
+        repo: deb [arch=amd64,armhf,arm64] https://packages.microsoft.com/ubuntu/20.04/prod focal main
+        update_cache: yes
+        state: present
+        filename: microsoft-prod
+
+    - name: Install MDATP
+      become: yes
+      become_method: sudo
+      apt:
+        name: mdatp
+        state: latest
+        update_cache: yes
+      when: mde_healthy.failed
+
+    - name: Push mdatp_managed.json
+      become: yes
+      become_method: sudo
+      copy:
+        dest: /etc/opt/microsoft/mdatp/managed/mdatp_managed.json
+        src: mdatp_managed.json
+        owner: root
+        group: root
+        mode: 0755

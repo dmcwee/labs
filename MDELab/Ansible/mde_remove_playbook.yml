@@ -1,0 +1,41 @@
+- name: MDE Uninstall
+  hosts: all
+  tasks:
+    - name: Remove mdatp_onboard.json
+      become: yes
+      become_method: sudo
+      file:
+        path: /etc/opt/microsoft/mdatp/mdatp_onboard.json
+        state: absent
+
+    - name: Remove mdatp_managed.json
+      become: yes
+      become_method: sudo
+      file:
+        path: /etc/opt/microsoft/mdatp/managed/mdatp_managed.json
+        state: absent
+
+    - name: Register mdatp_offboard.json
+      become: yes
+      become_method: sudo
+      stat:
+        path: /etc/opt/microsoft/mdatp/mdatp_offboard.json
+      register: mdatp_offboard
+
+    - name: Extract Offboarding
+      become: yes
+      become_method: sudo
+      unarchive:
+        src: "{{ offboarding_file }}"
+        dest: /etc/opt/microsoft/mdatp
+        mode: 0600
+        owner: root
+        group: root
+      when: not mdatp_offboard.stat.exists
+
+    - name: UnInstall MDATP
+      become: yes
+      become_method: sudo
+      apt:
+        name: mdatp
+        state: absent

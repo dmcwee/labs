@@ -1,0 +1,20 @@
+- name: Server Upgrades
+  hosts: all
+  tasks:
+    - name: Update apt repo and cache
+      become: yes
+      become_method: sudo
+      apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+      
+    - name: Upgrade all apt packages
+      become: yes
+      become_method: sudo
+      apt: upgrade=dist force_apt_get=yes
+
+    - name: Register mdatp_health
+      shell: "mdatp health"
+      register: mdatp_health
+
+    - name: Update MDATP Definitions
+      shell: "mdatp definitions update"
+      when: not mdatp_health.failed
