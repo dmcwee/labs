@@ -54,18 +54,6 @@
         },
         "storageType": {
           "type":"string"
-        },
-        "dscLocation": {
-          "type": "string"
-        },
-        "dscFile": {
-          "type": "string"
-        },
-        "configurationArguments": {
-          "type": "object"
-        },
-        "secureConfigurationArguments": {
-          "type": "object"
         }
     },
     "variables":{
