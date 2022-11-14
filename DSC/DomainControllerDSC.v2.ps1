@@ -1,18 +1,19 @@
 Configuration Main
 {
+	Param ( 
+		[PSCredential] $adminAccount,
+		[String]$domainName
+	)
 
-	$adminAccount = Get-AutomationPSCredential -Name "DomainAdmin"
-	$domainName = Get-AutomationVariable -Name "DomainName"
+	Import-DscResource -ModuleName 'PSDesiredStateConfiguration'
+	Import-DScResource -ModuleName 'ComputerManagementDsc'
+	Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
-	Import-DscResource -ModuleName PSDesiredStateConfiguration
-	Import-DscResource -ModuleName ComputerManagementDsc
-	Import-DscResource -ModuleName ActiveDirectoryDsc
-
-	<#
+	
 	[PSCredential]$Creds = New-Object -TypeName PSCredential ($adminAccount.UserName, $adminAccount.Password)
 	$OUPath = ($domainName.split('.') | ForEach-Object { "DC=$_" }) -join ','
 	$UserPath = "OU=LabUsers," + $OUPath
-	#>
+	
 		
 	Node localhost
 	{
@@ -52,6 +53,7 @@ Configuration Main
 			DomainName = $domainName
 			RestartCount = 2
 			WaitTimeout = 600
-			DependsOn = "[xADDomain]CreateDomain"
+			DependsOn = "[ADDomain]CreateDomain"
 		}
+	}
 }
