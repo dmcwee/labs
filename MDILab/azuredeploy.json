@@ -285,7 +285,7 @@
           "storageType": {
             "value": "[parameters('storageType')]"
           },
-          "ClientOS": {
+          "SKU": {
             "value": "[parameters('ClientOsVersion')]"
           },
           "vmSize": {
