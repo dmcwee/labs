@@ -36,14 +36,17 @@
                 "Standard_A4"
             ]
         },
-        "ClientOS":{
+        "Publisher": {
+          "type":"string",
+          "defaultValue":"MicrosoftVisualStudio"
+         },
+         "Offer": {
+          "type":"string",
+          "defaultValue":"Windows"
+         },
+        "SKU":{
             "type":"string",
-            "defaultValue":"Windows-10-N-x64",
-            "allowedValues": [
-                "Win7-SP1-ENT-N-x64",
-                "Win81-ENT-N-x64",
-                "Windows-10-N-x64"
-            ]
+            "defaultValue":"Windows-10-N-x64"
         },
         "userName": {
             "type": "string",
@@ -55,8 +58,6 @@
         }
     },
     "variables":{
-        "WindowsClientImagePublisher":"MicrosoftVisualStudio",
-        "WindowsClientImageOffer":"Windows",
         "ScheduleName":"[toLower(concat('shutdown-computevm-', parameters('vmName')))]"
     },
     "resources": [
@@ -115,9 +116,9 @@
           },
           "storageProfile": {
             "imageReference": {
-              "publisher": "[variables('WindowsClientImagePublisher')]",
-              "offer": "[variables('WindowsClientImageOffer')]",
-              "sku": "[parameters('ClientOS')]",
+              "publisher": "[parameters('Publisher')]",
+              "offer": "[parameters('Offer')]",
+              "sku": "[parameters('SKU')]",
               "version": "latest"
             },
             "osDisk": {

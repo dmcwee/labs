@@ -32,6 +32,22 @@
         },
         "password": {
             "type": "securestring"
+        },
+        "publisher": {
+            "type": "string",
+            "defaultValue":"canonical"
+        },
+        "offer": {
+            "type": "string",
+            "defaultValue":"0001-com-ubuntu-server-focal"
+        },
+        "sku": {
+            "type":"string",
+            "defaultValue":"20_04-lts-gen2"
+        },
+        "version": {
+            "type":"string",
+            "defaultValue":"latest"
         }
     },
     "variables": {},
@@ -83,10 +99,10 @@
                 },
                 "storageProfile": {
                     "imageReference": {
-                        "publisher": "canonical",
-                        "offer": "0001-com-ubuntu-server-focal",
-                        "sku": "20_04-lts-gen2",
-                        "version": "latest"
+                        "publisher": "[parameters('publisher')]",
+                        "offer": "[parameters('offer')]",
+                        "sku": "[parameters('sku')]",
+                        "version": "[parameters('version')]"
                     },
                     "osDisk": {
                         "osType": "Linux",

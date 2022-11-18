@@ -86,14 +86,14 @@
       "metadata": {
         "description": "Auto-generated container in staging storage account to receive post-build staging folder upload"
       },
-      "defaultValue": "https://raw.githubusercontent.com/dmcwee/labs/master/MDILab/AzATP_DSC.zip"
+      "defaultValue": "https://raw.githubusercontent.com/dmcwee/labs/master/MDILab/DSC/MdiLabDcDSC.zip"
     },
     "AdDscFile": {
       "type": "string",
       "metadata": {
         "description": "The DSC settings file for the domain controller"
       },
-      "defaultValue": "DomainControllerDSC.ps1"
+      "defaultValue": "MdiLabDcDSC.ps1"
     }
   },
   "variables": {
