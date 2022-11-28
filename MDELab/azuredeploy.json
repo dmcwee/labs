@@ -13,17 +13,6 @@
         "Premium_LRS"
       ]
     },
-    "newOrExistingNetwork": {
-      "type": "string",
-      "defaultValue": "new",
-      "allowedValues": [
-        "new",
-        "existing"
-      ],
-      "metadata":{
-        "description": "Specifies if this deployment is going to a resource group that needs a network or adding to the VNet."
-      }
-    },
     "subNetRangeOctet": {
       "type": "int",
       "defaultValue": 2,
@@ -59,7 +48,21 @@
     "NetworkRange": "10.0.0.0/16",
     "subNetName": "mdeNet",
     "SubnetRange": "[concat('10.0.', parameters('subNetRangeOctet'), '.0/24')]",
-    "GatewayRange": "10.0.1.0/24",
+    "GatewayRange": "10.0.10.0/24",
+    "WindowsServers": [
+      {"Name":"Win2012R2", "OS":"2012-R2-Datacenter"},
+      {"Name":"Win2016","OS":"2016-Datacenter"},
+      {"Name":"Win2019", "OS":"2019-Datacenter"}
+    ],
+    "WindowsClients": [
+      {"Name":"WinClient10", "Publisher":"microsoftwindowsdesktop", "Offer":"windows-10", "SKU":"win10-22h2-ent"},
+      {"Name":"WinClient11", "Publisher":"microsoftwindowsdesktop", "Offer":"windows-11", "SKU":"win11-21h2-ent"}
+    ],
+    "LinuxServers":[
+      {"Name":"LinuxAnsible"},
+      {"Name":"LinuxServer1"},
+      {"Name":"LinuxServer2"}
+    ],
     "LabTagValue": "MDE"
   },
   "resources": [
@@ -67,7 +70,6 @@
       "name": "networkTemplate",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
-      "condition":"[equals(parameters('newOrExistingNetwork'), 'new')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -118,8 +120,7 @@
       "name": "gatewayTemplate",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
-      "condition":"[equals(parameters('newOrExistingNetwork'), 'new')]",
-      "dependsOn": ["Microsoft.Resources/deployments/networkTemplate"],
+      "dependsOn": ["Microsoft.Resources/deployments/subnetTemplate"],
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -147,46 +148,6 @@
         }
       }
     },
-/*
-    {
-      "name": "linkedSecurityGroupTemplate",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2021-04-01",
-      "dependsOn": [
-        "Microsoft.Resources/deployments/networkTemplate",
-        "Microsoft.Resources/deployments/subnetTemplate"
-      ],
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "https://raw.githubusercontent.com/dmcwee/labs/master/Common/networkSecurityGroup.json"
-        },
-        "parameters": {
-          "name": {
-            "value": "[concat(resourceGroup().name, '-nsg')]"
-          },
-          "location": {
-            "value": "[variables('location')]"
-          },
-          "labTagValue": {
-            "value": "[variables('labTagValue')]"
-          },
-          "vnetAddressRange": {
-            "value": "[variables('NetworkRange')]"
-          },
-          "subnetName": {
-            "value":"[variables('subNetName')]"
-          },
-          "subnetAddressRange": {
-            "value": "[variables('SubnetRange')]"
-          },
-          "vpnAddressRange": {
-            "value": "[variables('GatewayRange')]"
-          }
-        }
-      }
-    },
-*/
     {
       "name": "linkedDCTemplate",
       "type": "Microsoft.Resources/deployments",
@@ -208,7 +169,7 @@
             "value": "[reference('subnetTemplate').outputs.subnetId.value]"
           },
           "privateIP": {
-            "value": "[concat('10.0.', parameters('subNetRangeOctet'), '.15')]"
+            "value": "[concat('10.0.', parameters('subNetRangeOctet'), '.5')]"
           },
           "labTagValue": {
             "value": "[variables('labTagValue')]"
@@ -232,7 +193,11 @@
       }
     },
     {
-      "name": "linkedServerTemplate",
+      "copy": {
+        "name": "winServerCopy",
+        "count": "[length(variables('windowsServers'))]"
+      },
+      "name": "[concat('linkedServerTemplate', copyIndex())]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
       "dependsOn": [
@@ -252,16 +217,16 @@
             "value": "[reference('subnetTemplate').outputs.subnetId.value]"
           },
           "privateIP": {
-            "value": "[concat('10.0.', parameters('subNetRangeOctet'), '.5')]"
+            "value": "[concat('10.0.', parameters('subNetRangeOctet'), '.', copyIndex(10))]"
           },
           "labTagValue": {
             "value": "[variables('labTagValue')]"
           },
           "vmName": {
-            "value": "mdeServer"
+            "value": "[variables('windowsServers')[copyIndex()].Name]"
           },
           "serverOS": {
-            "value": "2019-Datacenter"
+            "value": "[variables('windowsServers')[copyIndex()].OS]"
           },
           "userName": {
             "value": "[parameters('userName')]"
@@ -278,7 +243,7 @@
     {
       "copy": {
         "name": "clientCopy",
-        "count": "[length(parameters('clientList'))]"
+        "count": "[length(variables('WindowsClients'))]"
       },
       "name": "[concat('linkedClientTemplate', copyIndex())]",
       "type": "Microsoft.Resources/deployments",
@@ -306,7 +271,16 @@
             "value": "[variables('labTagValue')]"
           },
           "vmName": {
-            "value": "[parameters('clientList')[copyIndex()]]"
+            "value": "[variables('WindowsClients')[copyIndex()].Name]"
+          },
+          "Publisher": {
+            "value": "[variables('WindowsClients')[copyIndex()].Publisher]"
+          },
+          "Offer": {
+            "value": "[variables('WindowsClients')[copyIndex()].Offer]"
+          },
+          "SKU": {
+            "value": "[variables('WindowsClients')[copyIndex()].SKU]"
           },
           "userName": {
             "value": "[parameters('userName')]"
@@ -321,8 +295,12 @@
       }
     },
     {
+      "copy": {
+        "name": "copyLinuxServers",
+        "count": "[length(variables('LinuxServers'))]"
+      },
+      "name": "[concat('linkedLinuxTemplate', copyIndex())]",
       "type": "Microsoft.Resources/deployments",
-      "name": "LinuxTemplate",
       "apiVersion": "2021-04-01",
       "dependsOn": [
         "Microsoft.Resources/deployments/networkTemplate",
@@ -341,10 +319,13 @@
             "value": "[reference('subnetTemplate').outputs.subnetId.value]"
           },
           "privateIP": {
-            "value": "[concat('10.0.', parameters('subNetRangeOctet'), '.35')]"
+            "value": "[concat('10.0.', parameters('subNetRangeOctet'), '.', copyIndex(30))]"
           },
           "labTagValue": {
             "value": "[variables('labTagValue')]"
+          },
+          "vmName":{
+            "value": "[variables('LinuxServers')[copyIndex()].Name]"
           },
           "userName": {
             "value": "[parameters('userName')]"

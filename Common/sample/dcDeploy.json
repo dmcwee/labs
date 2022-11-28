@@ -113,10 +113,10 @@
             "value": "[variables('storageType')]"
           },
           "dscLocation": {
-            "value": "https://github.com/dmcwee/labs/blob/master/DSC/DomainControllerDSC.v2.zip?raw=true"
+            "value": "https://github.com/dmcwee/labs/blob/master/Common/DSC/DomainControllerDSC.zip?raw=true"
           },
           "dscFile": {
-            "value": "DomainControllerDSC.v2.ps1"
+            "value": "DomainControllerDSC.ps1"
           }
         }
       }

@@ -164,7 +164,7 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
       "condition":"[parameters('NewNetwork')]",
-      "dependsOn": ["Microsoft.Resources/deployments/networkTemplate"],
+      "dependsOn": ["Microsoft.Resources/deployments/subnetTemplate"],
       "properties": {
         "mode": "Incremental",
         "templateLink": {
