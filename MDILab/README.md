@@ -1,6 +1,9 @@
 # Defender for Identity Security Alert Lab
 This is a simplified deployment for the Defender for Identity [Security Alert Lab](https://docs.microsoft.com/en-us/defender-for-identity/playbook-lab-overview)
 
+## MDI Event 1644 DSC
+29 Nov 2022 - Added the [Registry settings recommended by MDI](https://learn.microsoft.com/en-us/defender-for-identity/configure-windows-event-collection#event-id-1644) to the AD Desired State Configuration. The specific settings are also available in a [standalone DSC file](./DSC/MDIEventDsc.ps1) which can be deployed to other environments.
+
 ## Deployment Instructions
 1. Open the Azure Portal in a seperate tab in your browser
 1. Use the Deploy to Azure button below to deploy the lab to your Azure Environment
