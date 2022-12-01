@@ -28,15 +28,15 @@
         },
         "Publisher": {
           "type":"string",
-          "defaultValue":"MicrosoftVisualStudio"
+          "defaultValue":"microsoftwindowsdesktop"
          },
          "Offer": {
           "type":"string",
-          "defaultValue":"Windows"
+          "defaultValue":"windows-10"
          },
         "SKU":{
             "type":"string",
-            "defaultValue":"Windows-10-N-x64"
+            "defaultValue":"win10-22h2-ent"
         },
         "userName": {
             "type": "string",
