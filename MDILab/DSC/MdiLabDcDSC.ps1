@@ -57,7 +57,7 @@ Configuration Main
             Key = "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\NTDS\Parameters"
             ValueName = "Search Time Threshold (msecs)"
             ValueData = "1"
-         
+		}
 
 		IEEnhancedSecurityConfiguration DisableForAdmin {
 			Role = 'Administrators'
