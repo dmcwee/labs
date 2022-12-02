@@ -30,11 +30,12 @@
     },
     "ClientOsVersion": {
       "type": "string",
-      "defaultValue": "Windows-10-N-x64",
+      "defaultValue": "win10-22h2-ent",
       "allowedValues": [
         "Win7-SP1-ENT-N-x64",
         "Win81-ENT-N-x64",
-        "Windows-10-N-x64"
+        "Windows-10-N-x64",
+        "win10-22h2-ent"
       ]
     },
     "VmSize": {
