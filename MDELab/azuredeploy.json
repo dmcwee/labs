@@ -30,10 +30,6 @@
       "type": "string",
       "defaultValue": ""
     },
-    "clientList": {
-      "type": "array",
-      "defaultValue": ["ClientPc1", "ClientPc2", "ClientPc3"]
-    },
     "userName": {
       "type": "string",
       "minLength": 1,
@@ -61,7 +57,8 @@
     "LinuxServers":[
       {"Name":"LinuxAnsible"},
       {"Name":"LinuxServer1"},
-      {"Name":"LinuxServer2"}
+      {"Name":"LinuxServer2"},
+      {"Name":"LinuxDefenderTunnel"}
     ],
     "LabTagValue": "MDE"
   },
