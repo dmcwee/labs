@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "dscLocation": {
-            "value":"https://github.com/dmcwee/labs/blob/master/Common/DSC/DomainControllerDSC.zip?raw=true"
+            "value":"https://github.com/dmcwee/labs/raw/dev/Common/DSC/DomainControllerDSC.zip"
         }
     }
   }
