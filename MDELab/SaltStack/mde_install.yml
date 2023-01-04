@@ -4,6 +4,7 @@
 install_packages_needed:
   pkg.installed:
     - pkgs:
+      - unzip
       - libplist-utils
       - gpg
       - gnupg
@@ -24,4 +25,16 @@ update_repo:
 install_mdatp:
   pkg.installed:
     - name: mdatp
+
+# An example MDATP Managed JSON file can be found in the Ansible folder of this lab
+copy_mde_configuration:
+  file.managed:
+    - name: /etc/opt/microsoft/mdatp/managed/mdatp_managed.json
+    - source: salt://mde/mdatp_managed.json
+
+# this assumes you have extracted the mdatp_onboard.json file to your salt shared file directory
+copy_mde_onboarding_file:
+  file.managed:
+    - name: /etc/opt/microsoft/mdatp/mdatp_onboard.json
+    - source: salt://mde/mdatp_onboard.json
 
