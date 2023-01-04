@@ -35,6 +35,12 @@ Configuration Main
 			IncludeAllSubFeature = $true
 		}
 
+		WindowsFeature DNSTools {
+			Name="RSAT-DNS-Server"
+			Ensure="Present"
+			IncludeAllSubFeature = $true
+		}
+
 		WindowsFeature ADTools {
 			Name="RSAT-AD-Tools"
 			Ensure = "Present"
