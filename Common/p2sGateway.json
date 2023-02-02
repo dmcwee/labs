@@ -61,17 +61,23 @@
             "name": "[variables('publicIpName')]",
             "type": "Microsoft.Network/publicIPAddresses",
             "location": "[parameters('location')]",
-            "apiVersion": "2018-10-01",
-            "dependsOn": [],
+            "apiVersion": "2022-05-01",
             "tags": {
                 "displayName": "GatewayPublicIP",
                 "Lab":"[parameters('labTagValue')]"
             },
+            "sku": {
+                "name":"Basic",
+                "tier":"Regional"
+            },
             "properties": {
-                "publicIPAllocationMethod": "Dynamic"
-                , "dnsSettings": {
-                "domainNameLabel": "[toLower(variables('gatewayName'))]"
-                }
+                "publicIPAllocationMethod": "Dynamic",
+                "publicIpAddressVersion":"IPv4",
+                "idleTimeoutInMinutes":4,
+                "dnsSettings": {
+                    "domainNameLabel": "[toLower(variables('gatewayName'))]"
+                },
+                "ipTags":[]
             }
         },
 
@@ -127,7 +133,7 @@
                     "vpnClientAddressPool": {
                         "addressPrefixes":["[variables('clientAddressPool')]"]
                     },
-                    "vpnClientProtocols":["IkeV2"],
+                    "vpnClientProtocols":["SSTP"],
                     "vpnClientRootCertificates": "[variables('certObject')]"
                 }
             }
