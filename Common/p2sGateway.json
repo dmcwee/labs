@@ -128,14 +128,15 @@
                 "sku": {
                     "name": "[parameters('sku')]",
                     "tier": "[parameters('sku')]"
-                },
+                }
+                /*,
                 "vpnClientConfiguration": {
                     "vpnClientAddressPool": {
                         "addressPrefixes":["[variables('clientAddressPool')]"]
                     },
                     "vpnClientProtocols":["SSTP"],
                     "vpnClientRootCertificates": "[variables('certObject')]"
-                }
+                }*/
             }
         }
     ],
