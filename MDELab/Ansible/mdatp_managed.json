@@ -27,6 +27,12 @@
 		"automaticSampleSubmissionConsent":"safe",
 		"automaticDefinitionUpdateEnabled":true
 	},
+	"features": {
+		"networkProtection":"enabled"
+	},
+	"networkProtection": {
+		"enforcementLevel": "block"
+	},
 	"edr":{
 		"groupsIds":"linuxGroup",
 		"tags":[
