@@ -37,6 +37,10 @@
     },
     "password": {
       "type": "securestring"
+    },
+    "CommonTemplateUri": {
+      "type":"string",
+      "defaultValue":"https://raw.githubusercontent.com/dmcwee/labs/master/Common"
     }
   },
   "variables": {
@@ -70,7 +74,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "https://raw.githubusercontent.com/dmcwee/labs/master/Common/network.json"
+          "uri": "[concat(parameters('CommonTemplateUri'), '/network.json')]"
         },
         "parameters": {
           "vNetName": {
@@ -97,7 +101,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "https://raw.githubusercontent.com/dmcwee/labs/master/Common/subnet.json"
+          "uri": "[concat(parameters('CommonTemplateUri'), '/subnet.json')]"
         },
         "parameters": {
           "subnetName":{
@@ -121,7 +125,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "https://raw.githubusercontent.com/dmcwee/labs/master/Common/p2sGateway.json"
+          "uri": "[concat(parameters('CommonTemplateUri'), '/p2sGateway.json')]"
         },
         "parameters": {
           "location": {
@@ -156,7 +160,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "https://raw.githubusercontent.com/dmcwee/labs/master/Common/domainController.json"
+          "uri": "[concat(parameters('CommonTemplateUri'), '/domainController.json')]"
         },
         "parameters": {
           "location": {
@@ -204,7 +208,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "https://raw.githubusercontent.com/dmcwee/labs/master/Common/windowsServer.json"
+          "uri": "[concat(parameters('CommonTemplateUri'), '/windowsServer.json')]"
         },
         "parameters": {
           "location": {
@@ -252,7 +256,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "https://raw.githubusercontent.com/dmcwee/labs/master/Common/clientMachine.json"
+          "uri": "[concat(parameters('CommonTemplateUri'), '/clientMachine.json')]"
         },
         "parameters": {
           "location": {
@@ -306,7 +310,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "https://raw.githubusercontent.com/dmcwee/labs/master/Common/linux.json"
+          "uri": "[concat(parameters('CommonTemplateUri'), '/linux.json')]"
         },
         "parameters": {
           "location": {
