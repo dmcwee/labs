@@ -37,7 +37,7 @@
         },
         "sku": {
             "type": "string",
-            "defaultValue": "VpnGw1"
+            "defaultValue": "Basic"
         },
         "gatewayCertName": {
             "type":"string",
@@ -108,7 +108,7 @@
                 "Lab":"[parameters('labTagValue')]"
             },
             "properties": {
-                "gatewayType": "[parameters('gatewayType')]",
+                "enablePrivateIpAddress": false,
                 "ipConfigurations": [
                     {
                         "name": "default",
@@ -123,20 +123,25 @@
                         }
                     }
                 ],
-                "vpnType": "[parameters('vpnType')]",
                 "vpnGatewayGeneration": "[parameters('vpnGatewayGeneration')]",
                 "sku": {
                     "name": "[parameters('sku')]",
                     "tier": "[parameters('sku')]"
-                }
-                /*,
+                },
+                "gatewayType": "[parameters('gatewayType')]",
+                "vpnType": "[parameters('vpnType')]",
+                "enableBgp": false,
+                "activeActive": false,
                 "vpnClientConfiguration": {
                     "vpnClientAddressPool": {
                         "addressPrefixes":["[variables('clientAddressPool')]"]
                     },
                     "vpnClientProtocols":["SSTP"],
+                    "vpnAuthenticationTypes": [
+                        "Certificate"
+                    ],
                     "vpnClientRootCertificates": "[variables('certObject')]"
-                }*/
+                }
             }
         }
     ],
