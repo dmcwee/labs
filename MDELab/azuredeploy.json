@@ -59,10 +59,12 @@
       {"Name":"WinClient11", "Publisher":"microsoftwindowsdesktop", "Offer":"windows-11", "SKU":"win11-21h2-ent"}
     ],
     "LinuxServers":[
-      {"Name":"LinuxAnsible"},
-      {"Name":"LinuxServer1"},
-      {"Name":"LinuxServer2"},
-      {"Name":"LinuxDefenderTunnel"}
+      {"Name":"LinuxManager", "Publisher":"canonical", "Offer":"0001-com-ubuntu-server-focal", "SKU":"20_04-lts-gen2"},
+      {"Name":"LinuxTunnel", "Publisher":"canonical", "Offer":"0001-com-ubuntu-server-focal", "SKU":"20_04-lts-gen2"},
+      {"Name":"LinuxUbuntu1", "Publisher":"canonical", "Offer":"0001-com-ubuntu-server-focal", "SKU":"20_04-lts-gen2"},
+      {"Name":"LinuxUbuntu2", "Publisher":"canonical", "Offer":"0001-com-ubuntu-server-focal", "SKU":"20_04-lts-gen2"},
+      {"Name":"LinuxCentOs1", "Publisher":"OpenLogic", "Offer":"CentOS", "SKU":"8.0"},
+      {"Name":"LinuxCentOs2", "Publisher":"OpenLogic", "Offer":"CentOS", "SKU":"8.0"}
     ],
     "LabTagValue": "MDE"
   },
@@ -336,6 +338,15 @@
           },
           "storageType": {
             "value": "[parameters('storageType')]"
+          },
+          "publisher": {
+            "value":"[variables('LinuxServers')[copyIndex()].Publisher]"
+          },
+          "offer": {
+            "value": "[variables('LinuxServers')[copyIndex()].Offer]"
+          },
+          "sku": {
+            "value": "[variables('LinuxServers')[copyIndex()].SKU]"
           }
         }
       }
