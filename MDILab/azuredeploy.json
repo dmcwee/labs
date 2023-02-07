@@ -13,45 +13,6 @@
         "Premium_LRS"
       ]
     },
-    "NewNetwork": {
-      "type": "bool",
-      "defaultValue": true
-    },
-    "ServerOsVersion": {
-      "type": "string",
-      "defaultValue": "2012-R2-Datacenter",
-      "allowedValues": [
-        "2008-R2-SP1",
-        "2012-Datacenter",
-        "2012-R2-Datacenter",
-        "2016-Datacenter",
-        "2019-Datacenter"
-      ]
-    },
-    "ClientOsVersion": {
-      "type": "string",
-      "defaultValue": "win10-22h2-ent",
-      "allowedValues": [
-        "Win7-SP1-ENT-N-x64",
-        "Win81-ENT-N-x64",
-        "Windows-10-N-x64",
-        "win10-22h2-ent"
-      ]
-    },
-    "VmSize": {
-      "type": "string",
-      "defaultValue": "Basic_A2",
-      "allowedValues": [
-        "Basic_A1",
-        "Basic_A2",
-        "Basic_A3",
-        "Basic_A4",
-        "Standard_A1",
-        "Standard_A2",
-        "Standard_A3",
-        "Standard_A4"
-      ]
-    },
     "AdminUserName": {
       "type": "string",
       "minLength": 1,
@@ -59,15 +20,6 @@
     },
     "AdminPassword": {
       "type": "securestring"
-    },
-    "AdServerName": {
-      "type": "string",
-      "minLength": 1,
-      "defaultValue": "ContosoDC"
-    },
-    "ClientComputerNames": {
-      "type": "array",
-      "defaultValue": ["Victim-PC", "Admin-PC"]
     },
     "DomainName": {
       "type": "string",
@@ -108,6 +60,12 @@
     "SubNet1Prefix": "10.0.24.0/24",
     "GatewaySubnetPrefix": "10.0.2.0/24",
 
+    "AdServer": {"Name":"ContosoDC", "OS":"2012-R2-Datacenter", "Ip":"10.0.24.4" },
+    "ClientMachines": [
+      { "Name":"VictimPC", "Publisher":"microsoftwindowsdesktop", "Offer":"windows-10", "SKU":"win10-22h2-ent", "Ip":"10.0.24.5" },
+      { "Name":"AdminPC", "Publisher":"microsoftwindowsdesktop", "Offer":"windows-10", "SKU":"win10-22h2-ent", "Ip":"10.0.24.6" }
+    ],
+
     "location": "[resourceGroup().location]",
     "labTagValue": "MDI"
   },
@@ -117,7 +75,6 @@
       "name": "networkTemplate",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
-      "condition":"[parameters('NewNetwork')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -168,7 +125,6 @@
       "name": "gatewayTemplate",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
-      "condition":"[parameters('NewNetwork')]",
       "dependsOn": ["Microsoft.Resources/deployments/subnetTemplate"],
       "properties": {
         "mode": "Incremental",
@@ -217,16 +173,16 @@
             "value": "[reference('subnetTemplate').outputs.subnetId.value]"
           },
           "privateIP": {
-            "value": "10.0.24.4"
+            "value": "[variables('AdServer').Ip]"
           },
           "labTagValue": {
             "value": "[variables('labTagValue')]"
           },
           "vmName": {
-            "value": "[parameters('AdServerName')]"
+            "value": "[variables('AdServer').Name]"
           },
           "serverOS": {
-            "value": "[parameters('ServerOsVersion')]"
+            "value": "[variables('AdServer').OS]"
           },
           "userName": {
             "value": "[parameters('AdminUserName')]"
@@ -254,7 +210,7 @@
     {
       "copy": {
         "name": "clientCopy",
-        "count": "[length(parameters('ClientComputerNames'))]"
+        "count": "[length(variables('ClientMachines'))]"
       },
       "name": "[concat('linkedClientTemplate', copyIndex())]",
       "type": "Microsoft.Resources/deployments",
@@ -273,13 +229,13 @@
             "value": "[reference('subnetTemplate').outputs.subnetId.value]"
           },
           "privateIP": {
-            "value": "[concat('10.0.24.', copyIndex(5))]"
+            "value": "[variables('ClientMachines')[copyIndex()].Ip]"
           },
           "labTagValue": {
             "value": "[variables('labTagValue')]"
           },
           "vmName": {
-            "value": "[parameters('ClientComputerNames')[copyIndex()]]"
+            "value": "[variables('ClientMachines')[copyIndex()].Name]"
           },
           "userName": {
             "value": "[parameters('AdminUserName')]"
@@ -291,10 +247,13 @@
             "value": "[parameters('storageType')]"
           },
           "SKU": {
-            "value": "[parameters('ClientOsVersion')]"
+            "value": "[variables('ClientMachines')[copyIndex()].SKU]"
           },
-          "vmSize": {
-            "value": "[parameters('VmSize')]"
+          "Publisher": {
+            "value":"[variables('ClientMachines')[copyIndex()].Publisher]"
+          },
+          "Offer": {
+            "value":"[variables('ClientMachines')[copyIndex()].Offer]"
           }
         }
       }
