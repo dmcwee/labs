@@ -21,28 +21,11 @@
         },
         "vmSize":{
             "type": "string",
-            "defaultValue": "Basic_A2",
-            "allowedValues": [
-                "Basic_A1",
-                "Basic_A2",
-                "Basic_A3",
-                "Basic_A4",
-                "Standard_A1",
-                "Standard_A2",
-                "Standard_A3",
-                "Standard_A4"
-            ]
+            "defaultValue": "Standard_B4ms"
         },
         "serverOS": {
             "type": "string",
-            "defaultValue": "2012-R2-Datacenter",
-            "allowedValues": [
-                "2008-R2-SP1",
-                "2012-Datacenter",
-                "2012-R2-Datacenter",
-                "2016-Datacenter",
-                "2019-Datacenter"
-            ]
+            "defaultValue": "2012-R2-Datacenter"
         },
         "userName": {
             "type": "string",
