@@ -94,6 +94,11 @@ Configuration Main
 			WaitTimeout = 600
 			DependsOn = "[ADDomain]CreateDomain"
 		}
+
+		PendingReboot AfterAdSetup{
+			Name = "After A Setup"
+			DependsOn = "[WaitForADDomain]CreatedDomain"
+		}
 		
 		ADOrganizationalUnit LabUsers {
 			Name = 'LabUsers'
