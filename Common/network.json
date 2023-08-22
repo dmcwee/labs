@@ -16,7 +16,7 @@
             "type":"string"
         },
         "dnsServers": {
-            "type":array,
+            "type":"array",
             "defaultValue":["168.63.129.16"]
         }
     },
