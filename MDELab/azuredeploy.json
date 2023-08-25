@@ -90,6 +90,9 @@
           },
           "networkRange": {
             "value": "[variables('NetworkRange')]"
+          },
+          "dnsServers": {
+            "value": ["[concat('10.0.', parameters('subNetRangeOctet'), '.5')]", "168.63.129.16"]
           } 
         }
       }

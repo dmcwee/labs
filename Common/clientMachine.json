@@ -153,5 +153,11 @@
            "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]"
        ]
       }
-    ]
+    ],
+    "outputs": {
+      "name": {
+        "value": "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]",
+        "type": "string"
+      }
+    }
 }

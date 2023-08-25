@@ -4,4 +4,4 @@ This is a Azure Resource Manager deployment template for the Defender for Identi
 
 ## Quick Deploy
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fdmcwee%2Flabs%2Fmaster%2FMDILab%2Fazuredeploy.json){:target="_blank"}
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fdmcwee%2Flabs%2Fmaster%2FMDILab%2Fazuredeploy.json)

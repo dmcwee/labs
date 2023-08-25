@@ -14,6 +14,10 @@
         },
         "networkRange": {
             "type":"string"
+        },
+        "dnsServers": {
+            "type":"array",
+            "defaultValue":["168.63.129.16"]
         }
     },
     "variables": {
@@ -38,7 +42,10 @@
                         "[parameters('networkRange')]"
                     ]
                 },
-                "subnets": [ ]
+                "subnets": [ ],
+                "dhcpOptions": {
+                  "dnsServers": "[parameters('dnsServers')]"
+                },
             }
         }
     ],
