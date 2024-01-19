@@ -4,4 +4,5 @@ IDAMLab_DSC.zip
 .vs/
 *.txt
 *.testing.*
+*.local.*
 .vscode/
