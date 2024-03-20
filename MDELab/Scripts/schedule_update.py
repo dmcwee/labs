@@ -3,16 +3,16 @@
 import os
 import argparse
 from datetime import datetime
-
+    
 def backup_cron_jobs(debug):
     try:
         today = datetime.today().date()
         formatted_date = today.strftime('%Y%m%d')
-        backup_location = f"/tmp/cron_schedule_scan_backup_{formatted_date}"
+        backup_location = f"/tmp/cron_schedule_update_backup_{formatted_date}"
 
         cron_backup = f"(crontab -l > {backup_location})"
         if debug == True:
-            print(f"[d]cron_backup: {cron_backup}")
+            print(f"[d] cron_backup: {cron_backup}")
         else:
             os.system(cron_backup)
     except Exception as e:
@@ -23,13 +23,13 @@ def create_cron_job(minute="*",
                     hour="2", 
                     day_of_month="*", 
                     month="*", 
-                    day_of_week="*", 
-                    command="/bin/mdatp scan quick > /tmp/mdatp_scheduled_scan.log", 
+                    day_of_week="6", 
+                    command="", 
                     debug=False):
     
     today = datetime.today().date()
     formatted_date = today.strftime('%Y%m%d')
-    export_file = f"/tmp/cron_scan_schedule_{formatted_date}"
+    export_file = f"/tmp/cron_update_schedule_{formatted_date}"
 
     # Construct the cron task expression
     cron_expression = f"{minute} {hour} {day_of_month} {month} {day_of_week} {command}"
@@ -52,6 +52,7 @@ def create_cron_job(minute="*",
             os.system(cron_export)
             os.system(cron_append_task)
             os.system(cron_cmd)
+
             print(f"Cron job added successfully: {cron_expression}")
         except Exception as e:
             print(f"[!] Error adding cron job: {e}")
@@ -65,23 +66,21 @@ if __name__ == "__main__":
         type=int,
         default=2,
         choices=range(0,24),
-        help="number representint the hour of the day: 0-23 (0 being midnight). Default: 2 (2am)")
+        help="Provide a number that represents the hour of the day: 0-23 (0 being midnight). Default: 2(2am)")
     parser.add_argument("-D", "--day",
         action="store",
         dest="day",
-        choices=["*", "0", "1", "2", "3", "4", "5", "6"],
-        default="*",
-        help="number representing the day of the week: 0 => Sunday, 6 => Saturday. Default: * (everyday)")
-    parser.add_argument("-S", "--scan",
+        choices=["0","1","2","3","4","5","6"],
+        default=6,
+        help="Provide a number that represents the day of the week: 0 => Sunday, 6 => Saturday. Default: 6(SAT). '*' Has been removed as daily checks are not recommended.")
+    parser.add_argument("-O", "--os",
+        choices=["RHEL", "SLES", "DEB"],
         action="store",
-        dest="scan_type",
-        choices=["quick", "full"],
-        default="quick",
-        help="Type of scan to run ('quick' or 'full').")
+        dest="os")
     parser.add_argument("-L", "--log",
         action="store",
         dest="log_file",
-        default="/tmp/mdatp_scheduled_scan.log",
+        default="/tmp/mdatp_update_job.log",
         help="Log file location for output.")
     parser.add_argument("-d", "--debug",
         action="store_true",
@@ -91,7 +90,11 @@ if __name__ == "__main__":
     
     try:
         args = parser.parse_args()
-        cmd_string = f"/bin/mdatp scan {args.scan_type} > {args.log_file}"
+        update_dict = {"RHEL":"yum update mdatp -y",
+                       "SLES":"zypper update mdatp",
+                       "DEB":"apt install --only-upgrade mdatp"}
+        
+        cmd_string = f"sudo {update_dict[args.os]} >> {args.log_file}"
         if args.debug == True:
             print(f"[d] Hour: {args.hour} Day: {args.day} Cmd: {cmd_string}")
 
