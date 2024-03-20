@@ -59,7 +59,7 @@ def create_cron_job(minute="*",
             raise Exception("Error attempting to create cron job.")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Script creates an mde scheduled quick scan.")
+    parser = argparse.ArgumentParser(description="Script creates an mde package update schedule.")
     parser.add_argument("-H", "--hour",
         action="store",
         dest="hour",
@@ -76,7 +76,9 @@ if __name__ == "__main__":
     parser.add_argument("-O", "--os",
         choices=["RHEL", "SLES", "DEB"],
         action="store",
-        dest="os")
+        default="DEB",
+        dest="os",
+        help="Linux Distribution")
     parser.add_argument("-L", "--log",
         action="store",
         dest="log_file",
