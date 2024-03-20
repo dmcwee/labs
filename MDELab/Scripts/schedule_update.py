@@ -59,26 +59,26 @@ def create_cron_job(minute="*",
             raise Exception("Error attempting to create cron job.")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Script creates an mde package update schedule.")
+    parser = argparse.ArgumentParser(description="This script creates a cron job that will perform MDE package updates on the desired schedule.")
     parser.add_argument("-H", "--hour",
         action="store",
         dest="hour",
         type=int,
         default=2,
         choices=range(0,24),
-        help="Provide a number that represents the hour of the day: 0-23 (0 being midnight). Default: 2(2am)")
+        help="A number that represents the hour of the day: 0-23 (0 being midnight). Default: 2(2am)")
     parser.add_argument("-D", "--day",
         action="store",
         dest="day",
         choices=["0","1","2","3","4","5","6"],
         default=6,
-        help="Provide a number that represents the day of the week: 0 => Sunday, 6 => Saturday. Default: 6(SAT). '*' Has been removed as daily checks are not recommended.")
+        help="A number that represents the day of the week: 0 => Sunday, 6 => Saturday. Everyday ('*') is not allowed as checking for updates daily is not recommended. Default: 6(SAT). ")
     parser.add_argument("-O", "--os",
         choices=["RHEL", "SLES", "DEB"],
         action="store",
         default="DEB",
         dest="os",
-        help="Linux Distribution")
+        help="Linux Distribution. Default: DEB")
     parser.add_argument("-L", "--log",
         action="store",
         dest="log_file",
