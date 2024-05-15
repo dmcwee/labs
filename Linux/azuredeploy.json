@@ -52,7 +52,8 @@
     "LinuxServers":[
       {"Name":"LinuxManager", "Publisher":"canonical", "Offer":"0001-com-ubuntu-server-jammy", "SKU":"22_04-lts-gen2"},
       {"Name":"LinuxUbuntu1", "Publisher":"canonical", "Offer":"0001-com-ubuntu-server-jammy", "SKU":"22_04-lts-gen2"},
-      {"Name":"LinuxCentOs1", "Publisher":"OpenLogic", "Offer":"CentOS", "SKU":"8.0"},
+      {"Name":"LinuxUbuntu2", "Publisher":"canonical", "Offer":"0001-com-ubuntu-server-jammy", "SKU":"22_04-lts-gen2"},
+      //{"Name":"LinuxCentOs1", "Publisher":"OpenLogic", "Offer":"CentOS", "SKU":"8.0"},
       {"Name":"LinuxSuseOs1", "Publisher":"suse", "Offer":"sles-12-sp5-basic", "SKU":"gen2"}
     ],
     "LabTagValue": "Linux"
