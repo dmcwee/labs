@@ -4,13 +4,13 @@
     - name: Get Zip and UnZip (Debian)
       become: yes
       apt:
-        name: ['zip','unzip']
+        name: ['zip','unzip','acl']
       when: ansible_facts['os_family'] == "Debian"
 
     - name: Get Zip and Unzip (SUSE)
       become: yes
       community.general.zypper:
-        name: ['zip','unzip']
+        name: ['zip','unzip','acl']
       when: ansible_facts['os_family'] == "Suse"
 
     - name: Create XMDEClientAnalyzer directories
