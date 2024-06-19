@@ -1,80 +1,131 @@
 - name: MDE Install
   hosts: all
   tasks:
-    - name: Get Zip and UnZip
+    - name: Get Zip and UnZip (Debian)
       become: yes
-      become_method: sudo
       apt:
-        name: "{{ item }}"
-        state: latest
-      with_items:
-        - zip
-        - unzip
+        name: ['zip','unzip']
+      when: ansible_facts['os_family'] == "Debian"
 
-    - name: Create MDATP directories
+    - name: Get Zip and Unzip (SUSE)
       become: yes
-      become_method: sudo
+      community.general.zypper:
+        name: ['zip','unzip']
+      when: ansible_facts['os_family'] == "Suse"
+
+    - name: Create XMDEClientAnalyzer directories
+      become: yes
       file:
-        path: /etc/opt/microsoft/mdatp
+        path: /etc/opt/microsoft/clientanalyzer
         recurse: true
         state: directory
         mode: 0755
         owner: root
         group: root
 
-    - name: Register mdatp_onbaord.json
+    - name: Extract SupportToolLinuxBinary.zip to /etc/opt/microsoft/clientanalyzer
       become: yes
-      become_method: sudo
+      unarchive:
+        src: SupportToolLinuxBinary.zip
+        dest: /etc/opt/microsoft/clientanalyzer
+        mode: 0600
+        owner: root
+        group: root
+
+    - name: Set Execution on Support Tool Binary
+      become: yes
+      file:
+        path: /etc/opt/microsoft/clientanalyzer/MDESupportTool
+        mode: 0710
+
+    - name: Check mdatp_onbaord.json
+      become: yes
       stat:
         path: /etc/opt/microsoft/mdatp/mdatp_onboard.json
       register: mdatp_onboard
 
-    - name: Register mde_healthy
-      shell: "mdatp health"
-      register: mde_healthy
-
-    - name: Extract WindowsDefenderAtpOnboardingPackage.zip to /etc/opt/microsoft/mdatp
+    - name: Check managed mdatp file
       become: yes
-      become_method: sudo
-      unarchive:
-        src: WindowsDefenderATPOnboardingPackage_Linux.zip
-        dest: /etc/opt/microsoft/mdatp
-        mode: 0600
-        owner: root
-        group: root
-      when: not mdatp_onboard.stat.exists
+      stat:
+        path: /etc/opt/microsoft/mdatp/managed/mdatp_managed.json
+      register: mdatp_managed
 
-    - name: Add Microsoft APT Key
+    - name: Add Microsoft APT Key Debian
       become: yes
-      become_method: sudo
       apt_key:
         url: https://packages.microsoft.com/keys/microsoft.asc
         state: present
+      when: ansible_facts['os_family'] == "Debian"
     
+    - name: Add Microsoft RPM Key SUSE
+      become: yes
+      rpm_key:
+        key: https://packages.microsoft.com/keys/microsoft.asc
+        state: present
+      when: ansible_facts['os_family'] == "Suse"
+
+    #codename: 'ansible_distribution_release'
+    #version: 'ansible_distribution_version'
+    #distro: 'ansible_distribution'
     - name: Add Microsoft APT repository for MDATP
       become: yes
-      become_method: sudo
       apt_repository:
-        repo: deb [arch=amd64,armhf,arm64] https://packages.microsoft.com/ubuntu/20.04/prod focal main
+        repo: deb [arch=amd64,armhf,arm64] https://packages.microsoft.com/{{ ansible_facts['distribution'] | lower }}/{{ ansible_facts['distribution_version'] }}/prod {{ ansible_facts['distribution_release'] }} main
         update_cache: yes
         state: present
         filename: microsoft-prod
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: Remove Microsoft Zypper repository for MDATP
+      become: yes
+      zypper_repository:
+        #repo: https://packages.microsoft.com/config/{{ ansible_facts['distribution'] | lower }}/12/prod.repo
+        name: packages-microsoft-com-prod
+        runrefresh : true
+        state: absent
+      when: ansible_facts['os_family'] == "Suse"
+
+    - name: Add Microsoft Zypper repository for MDATP
+      become: yes
+      zypper_repository:
+        repo: https://packages.microsoft.com/config/{{ ansible_facts['distribution'] | lower }}/12/prod.repo
+        runrefresh : true
+        state: present
+      when: ansible_facts['os_family'] == "Suse"
 
     - name: Install MDATP
       become: yes
       become_method: sudo
       apt:
         name: mdatp
-        state: latest
+        state: present
         update_cache: yes
-      when: mde_healthy.failed
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: Install MDATP (SUSE)
+      become: yes
+      community.general.zypper:
+        name: mdatp
+        state: present
+        update_cache: yes
+      when: ansible_facts['os_family'] == "Suse"
+
+    - name: Extract WindowsDefenderAtpOnboardingPackage.zip to /etc/opt/microsoft/mdatp
+      become: yes
+      unarchive:
+        src: WindowsDefenderATPOnboardingPackage.zip
+        dest: /etc/opt/microsoft/mdatp
+        mode: 0600
+        owner: root
+        group: root
+      when: not mdatp_onboard.stat.exists
 
     - name: Push mdatp_managed.json
       become: yes
-      become_method: sudo
       copy:
         dest: /etc/opt/microsoft/mdatp/managed/mdatp_managed.json
         src: mdatp_managed.json
         owner: root
         group: root
         mode: 0755
+      when: not mdatp_managed.stat.exists
