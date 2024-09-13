@@ -48,6 +48,10 @@
         "version": {
             "type":"string",
             "defaultValue":"latest"
+        },
+        "plan": {
+            "type": "object",
+            "defaultValue": {}
         }
     },
     "variables": {},
@@ -142,7 +146,8 @@
                         "enabled": true
                     }
                 }
-            }
+            },
+            "plan": "[parameters('plan')]"
         },
         {
             "type": "microsoft.devtestlab/schedules",
