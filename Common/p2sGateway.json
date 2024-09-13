@@ -50,7 +50,7 @@
     },
     "variables":{
         //"gatewayName":"[concat(parameters('vNetName'), '-gateway')]",
-        "gatewayName":"[concat(uniqueString(resourceGroup().id), '-gateway')]",
+        "gatewayName":"[concat('gateway-', uniqueString(resourceGroup().id))]",
         "publicIpName":"[concat(parameters('vNetName'), '-gw-pip')]",
         "clientAddressPool":"10.10.10.0/24",
         "gatewaySubnetName":"gatewaySubNet",
