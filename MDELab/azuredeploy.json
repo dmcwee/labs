@@ -49,23 +49,26 @@
     "subNetName": "mdeNet",
     "SubnetRange": "[concat('10.0.', parameters('subNetRangeOctet'), '.0/24')]",
     "GatewayRange": "10.0.10.0/24",
+    "vmSize": "Standard_B2ms",
     "WindowsServers": [
-      {"Name":"Win2012R2", "OS":"2012-R2-Datacenter"},
-      {"Name":"Win2016","OS":"2016-Datacenter"},
-      {"Name":"Win2019", "OS":"2019-Datacenter"}
+      //{"Name":"Win2012R2", "OS":"2012-R2-Datacenter"},
+      {"Name":"Win2016","OS":"2016-Datacenter", "Note":"Keep for Unified Agent Testing"},
+      //{"Name":"Win2019", "OS":"2019-Datacenter"},
+      {"Name":"Win2022", "OS":"2022-Datacenter"}
     ],
     "WindowsClients": [
-      {"Name":"WinClient10", "Publisher":"microsoftwindowsdesktop", "Offer":"windows-10", "SKU":"win10-22h2-ent"},
-      {"Name":"WinClient11", "Publisher":"microsoftwindowsdesktop", "Offer":"windows-11", "SKU":"win11-21h2-ent"}
+      //{"Name":"WinClient10", "Publisher":"microsoftwindowsdesktop", "Offer":"windows-10", "SKU":"win10-22h2-ent"},
+      {"Name":"WinClient11", "Publisher":"microsoftwindowsdesktop", "Offer":"windows-11", "SKU":"win11-23h2-ent"}
     ],
     "LinuxServers":[
-      {"Name":"LinuxManager", "Publisher":"canonical", "Offer":"0001-com-ubuntu-server-focal", "SKU":"20_04-lts-gen2"},
-      {"Name":"LinuxTunnel", "Publisher":"canonical", "Offer":"0001-com-ubuntu-server-focal", "SKU":"20_04-lts-gen2"},
-      {"Name":"LinuxUbuntu1", "Publisher":"canonical", "Offer":"0001-com-ubuntu-server-focal", "SKU":"20_04-lts-gen2"},
-      //{"Name":"LinuxUbuntu2", "Publisher":"canonical", "Offer":"0001-com-ubuntu-server-focal", "SKU":"20_04-lts-gen2"},
-      {"Name":"LinuxCentOs1", "Publisher":"OpenLogic", "Offer":"CentOS", "SKU":"8.0"},
+      //{"Name":"LinuxTunnel", "Publisher":"canonical", "Offer":"0001-com-ubuntu-server-jammy", "SKU":"22_04-lts-gen2"},
+      {"Name":"LinuxUbuntu1", "Publisher":"canonical", "Offer":"0001-com-ubuntu-server-jammy", "SKU":"22_04-lts-gen2"},
+      //{"Name":"LinuxRocky1", "Publisher": "resf", "Offer":"rockylinux-x86_64", "SKU":"9-base", "plan":{ "name": "9-base", "publisher":"resf", "produt":"rockylinux-x86_64"}},
+      //{"Name":"LinuxUbuntu2", "Publisher":"canonical", "Offer":"0001-com-ubuntu-server-jammy", "SKU":"22_04-lts-gen2"},
+      //{"Name":"LinuxCentOs1", "Publisher":"OpenLogic", "Offer":"CentOS", "SKU":"8.0"},
       //{"Name":"LinuxCentOs2", "Publisher":"OpenLogic", "Offer":"CentOS", "SKU":"8.0"},
-      {"Name":"LinuxSuseOs1", "Publisher":"suse", "Offer":"sles-12-sp5-basic", "SKU":"gen2"}
+      //{"Name":"LinuxSuseOs1", "Publisher":"suse", "Offer":"sles-12-sp5-basic", "SKU":"gen2"}
+      {"Name":"LinuxManager", "Publisher":"canonical", "Offer":"0001-com-ubuntu-server-jammy", "SKU":"22_04-lts-gen2", "Note":"Will be Ansible Manager"}
     ],
     "LabTagValue": "MDE"
   },
@@ -232,6 +235,9 @@
           "vmName": {
             "value": "[variables('windowsServers')[copyIndex()].Name]"
           },
+          "vmSize": {
+            "value": "[variables('vmSize')]"
+          },
           "serverOS": {
             "value": "[variables('windowsServers')[copyIndex()].OS]"
           },
@@ -279,6 +285,9 @@
           },
           "vmName": {
             "value": "[variables('WindowsClients')[copyIndex()].Name]"
+          },
+          "vmSize": {
+            "value": "[variables('vmSize')]"
           },
           "Publisher": {
             "value": "[variables('WindowsClients')[copyIndex()].Publisher]"
@@ -333,6 +342,9 @@
           },
           "vmName":{
             "value": "[variables('LinuxServers')[copyIndex()].Name]"
+          },
+          "vmSize": {
+            "value": "[variables('vmSize')]"
           },
           "userName": {
             "value": "[parameters('userName')]"
