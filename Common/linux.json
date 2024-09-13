@@ -150,12 +150,13 @@
                         "enabled": true
                     }
                 }
-            },
-            "plan": {
-                "name":"[parameters('plan').name]",
-                "product":"[parameters('plan').product]",
-                "publisher":"[parameters('plan').publisher]"
             }
+            //,
+            //"plan": {
+            //    "name":"[parameters('plan').name]",
+            //    "product":"[parameters('plan').product]",
+            //    "publisher":"[parameters('plan').publisher]"
+            //}
         },
         {
             "type": "microsoft.devtestlab/schedules",
