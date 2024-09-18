@@ -57,7 +57,7 @@
       {"Name":"Win2022", "OS":"2022-Datacenter"}
     ],
     "WindowsClients": [
-      //{"Name":"WinClient10", "Publisher":"microsoftwindowsdesktop", "Offer":"windows-10", "SKU":"win10-22h2-ent"},
+      {"Name":"WinClient10", "Publisher":"microsoftwindowsdesktop", "Offer":"windows-10", "SKU":"win10-22h2-ent"},
       {"Name":"WinClient11", "Publisher":"microsoftwindowsdesktop", "Offer":"windows-11", "SKU":"win11-23h2-ent"}
     ],
     "LinuxServers":[
