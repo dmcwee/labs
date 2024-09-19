@@ -5,6 +5,8 @@ Configuration Main
 		[String]$domainName
 	)
 
+	Install-Module -Name 'ActiveDirectoryDsc'
+	
 	Import-DscResource -ModuleName 'PSDesiredStateConfiguration'
 	Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
