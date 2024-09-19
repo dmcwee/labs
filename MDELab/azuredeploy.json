@@ -2,26 +2,6 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "storageType": {
-      "type": "string",
-      "defaultValue": "Standard_LRS",
-      "allowedValues": [
-        "Standard_LRS",
-        "Standard_ZRS",
-        "Standard_GRS",
-        "Standard_RAGRS",
-        "Premium_LRS"
-      ]
-    },
-    "subNetRangeOctet": {
-      "type": "int",
-      "defaultValue": 2,
-      "minValue": 2,
-      "maxValue": 254,
-      "metadata": {
-        "description": "Specify the class C desired subnet ip range (10.0.2-254.0/24).  Must be greater than 1."
-      }
-    },
     "gatewayCertName": {
       "type": "string",
       "defaultValue": ""
@@ -29,6 +9,10 @@
     "gatewayCertData": {
       "type": "string",
       "defaultValue": ""
+    },
+    "domainName": {
+      "type":"string",
+      "defaultValue": "contoso.com"
     },
     "userName": {
       "type": "string",
@@ -44,16 +28,17 @@
     }
   },
   "variables": {
+    "storageType": "Standard_LRS",
     "location": "[resourceGroup().location]",
     "NetworkRange": "10.0.0.0/16",
     "subNetName": "mdeNet",
-    "SubnetRange": "[concat('10.0.', parameters('subNetRangeOctet'), '.0/24')]",
+    "SubnetRange": "10.0.2.0/24",
     "GatewayRange": "10.0.10.0/24",
     "vmSize": "Standard_B2ms",
     "WindowsServers": [
       //{"Name":"Win2012R2", "OS":"2012-R2-Datacenter"},
-      {"Name":"Win2016","OS":"2016-Datacenter", "Note":"Keep for Unified Agent Testing"},
       //{"Name":"Win2019", "OS":"2019-Datacenter"},
+      {"Name":"Win2016","OS":"2016-Datacenter", "Note":"Keep for Unified Agent Testing"},
       {"Name":"Win2022", "OS":"2022-Datacenter"}
     ],
     "WindowsClients": [
@@ -62,12 +47,12 @@
     ],
     "LinuxServers":[
       //{"Name":"LinuxTunnel", "Publisher":"canonical", "Offer":"0001-com-ubuntu-server-jammy", "SKU":"22_04-lts-gen2"},
-      {"Name":"LinuxUbuntu1", "Publisher":"canonical", "Offer":"0001-com-ubuntu-server-jammy", "SKU":"22_04-lts-gen2"},
       //{"Name":"LinuxRocky1", "Publisher": "resf", "Offer":"rockylinux-x86_64", "SKU":"9-base", "plan":{ "name": "9-base", "publisher":"resf", "produt":"rockylinux-x86_64"}},
       //{"Name":"LinuxUbuntu2", "Publisher":"canonical", "Offer":"0001-com-ubuntu-server-jammy", "SKU":"22_04-lts-gen2"},
       //{"Name":"LinuxCentOs1", "Publisher":"OpenLogic", "Offer":"CentOS", "SKU":"8.0"},
       //{"Name":"LinuxCentOs2", "Publisher":"OpenLogic", "Offer":"CentOS", "SKU":"8.0"},
-      //{"Name":"LinuxSuseOs1", "Publisher":"suse", "Offer":"sles-12-sp5-basic", "SKU":"gen2"}
+      //{"Name":"LinuxSuseOs1", "Publisher":"suse", "Offer":"sles-12-sp5-basic", "SKU":"gen2"},
+      {"Name":"LinuxUbuntu1", "Publisher":"canonical", "Offer":"0001-com-ubuntu-server-jammy", "SKU":"22_04-lts-gen2"},
       {"Name":"LinuxManager", "Publisher":"canonical", "Offer":"0001-com-ubuntu-server-jammy", "SKU":"22_04-lts-gen2", "Note":"Will be Ansible Manager"}
     ],
     "LabTagValue": "MDE"
@@ -96,7 +81,7 @@
             "value": "[variables('NetworkRange')]"
           },
           "dnsServers": {
-            "value": ["[concat('10.0.', parameters('subNetRangeOctet'), '.5')]", "168.63.129.16"]
+            "value": ["[concat('10.0.2.5')]", "168.63.129.16"]
           } 
         }
       }
@@ -179,7 +164,7 @@
             "value": "[reference('subnetTemplate').outputs.subnetId.value]"
           },
           "privateIP": {
-            "value": "[concat('10.0.', parameters('subNetRangeOctet'), '.5')]"
+            "value": "10.0.2.5"
           },
           "labTagValue": {
             "value": "[variables('labTagValue')]"
@@ -190,6 +175,9 @@
           "serverOS": {
             "value": "2019-Datacenter"
           },
+          "domain": {
+            "value":"[parameters('domainName')]"
+          },
           "userName": {
             "value": "[parameters('userName')]"
           },
@@ -197,7 +185,7 @@
             "value": "[parameters('password')]"
           },
           "storageType": {
-            "value": "[parameters('storageType')]"
+            "value": "[variables('storageType')]"
           }
         }
       }
@@ -227,7 +215,7 @@
             "value": "[reference('subnetTemplate').outputs.subnetId.value]"
           },
           "privateIP": {
-            "value": "[concat('10.0.', parameters('subNetRangeOctet'), '.', copyIndex(10))]"
+            "value": "[concat('10.0.2.', copyIndex(10))]"
           },
           "labTagValue": {
             "value": "[variables('labTagValue')]"
@@ -248,7 +236,7 @@
             "value": "[parameters('password')]"
           },
           "storageType": {
-            "value": "[parameters('storageType')]"
+            "value": "[variables('storageType')]"
           }
         }
       }
@@ -278,7 +266,7 @@
             "value": "[reference('subnetTemplate').outputs.subnetId.value]"
           },
           "privateIP": {
-            "value": "[concat('10.0.', parameters('subNetRangeOctet'), '.', copyIndex(20))]"
+            "value": "[concat('10.0.2.', copyIndex(20))]"
           },
           "labTagValue": {
             "value": "[variables('labTagValue')]"
@@ -305,7 +293,7 @@
             "value": "[parameters('password')]"
           },
           "storageType": {
-            "value": "[parameters('storageType')]"
+            "value": "[variables('storageType')]"
           }
         }
       }
@@ -335,7 +323,7 @@
             "value": "[reference('subnetTemplate').outputs.subnetId.value]"
           },
           "privateIP": {
-            "value": "[concat('10.0.', parameters('subNetRangeOctet'), '.', copyIndex(30))]"
+            "value": "[concat('10.0.2.', copyIndex(30))]"
           },
           "labTagValue": {
             "value": "[variables('labTagValue')]"
@@ -353,7 +341,7 @@
             "value": "[parameters('password')]"
           },
           "storageType": {
-            "value": "[parameters('storageType')]"
+            "value": "[variables('storageType')]"
           },
           "publisher": {
             "value":"[variables('LinuxServers')[copyIndex()].Publisher]"
