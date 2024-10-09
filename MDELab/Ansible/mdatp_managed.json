@@ -2,9 +2,6 @@
 	"antivirusEngine":{
 		"enforcementLevel":"real_time",
 		"scanAfterDefinitionUpdate":true,
-		"maximumOnDemandScanThreads":2,
-		"exclusionMergePolicy":"merge",
-		"threatTypeSettingsMergePolicy":"merge",
 		"threatTypeSettings":[
 			{
 				"key":"potentially_unwanted_application",
@@ -18,28 +15,6 @@
 		"disallowedThreatActions":[
 			"allow",
 			"restore"
-		]
-	},
-	"cloudService": {
-		"enabled":true,
-		"cloudBlockLevel":"high",
-		"diagnosticLevel":"optional",
-		"automaticSampleSubmissionConsent":"safe",
-		"automaticDefinitionUpdateEnabled":true
-	},
-	"features": {
-		"networkProtection":"enabled"
-	},
-	"networkProtection": {
-		"enforcementLevel": "block"
-	},
-	"edr":{
-		"groupsIds":"linuxGroup",
-		"tags":[
-			{
-				"key":"GROUP",
-				"value":"linuxTag"
-			}
 		]
 	}
 }

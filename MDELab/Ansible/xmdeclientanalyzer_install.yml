@@ -1,0 +1,39 @@
+- name: Install XMDEClientAnalyzer
+  hosts: all
+  tasks:
+    - name: Get Zip and UnZip (Debian)
+      become: yes
+      apt:
+        name: ['zip','unzip','acl']
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: Get Zip and Unzip (SUSE)
+      become: yes
+      community.general.zypper:
+        name: ['zip','unzip','acl']
+      when: ansible_facts['os_family'] == "Suse"
+
+    - name: Create XMDEClientAnalyzer directories
+      become: yes
+      file:
+        path: /etc/opt/microsoft/clientanalyzer
+        recurse: true
+        state: directory
+        mode: 0755
+        owner: root
+        group: root
+
+    - name: Extract SupportToolLinuxBinary.zip to /etc/opt/microsoft/clientanalyzer
+      become: yes
+      unarchive:
+        src: SupportToolLinuxBinary.zip
+        dest: /etc/opt/microsoft/clientanalyzer
+        mode: 0600
+        owner: root
+        group: root
+
+    - name: Set Execution on Support Tool Binary
+      become: yes
+      file:
+        path: /etc/opt/microsoft/clientanalyzer/MDESupportTool
+        mode: 0710
