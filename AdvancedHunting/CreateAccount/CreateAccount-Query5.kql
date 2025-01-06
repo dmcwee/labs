@@ -1,0 +1,11 @@
+// MITRE Tactic: Persistence
+// Author: David McWee
+// Description: Capture Create User Events and Extend the Local Group Device Event to show what group was impacted.
+//              Join the create user events with the Local Group Action so you can see what account was added to the group
+let createdUserEvents = DeviceEvents
+| where ActionType contains "AccountCreated"
+| project Created=TimeGenerated, CreationTimeStamp=Timestamp, DeviceId, DeviceName, AccountCreatedDomain=AccountDomain, AccountCreatedName=AccountName, CreatedBy=InitiatingProcessAccountName, AccountSid;
+DeviceEvents
+| where ActionType contains "AccountAddedToLocalGroup"
+| extend localGroup=(parse_json(AdditionalFields).GroupName)
+| join kind=inner createdUserEvents on AccountSid, DeviceId, DeviceName

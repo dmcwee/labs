@@ -1,0 +1,5 @@
+// MITRE Tactic: Persistence
+// Author: David McWee
+// Description: Enhancement on first query to look at only Created & Local Group Actions on a Device
+DeviceEvents
+| where ActionType contains "AccountCreated" or ActionType contains "AccountAddedToLocalGroup"

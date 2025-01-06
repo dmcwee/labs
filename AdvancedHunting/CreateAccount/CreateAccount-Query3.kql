@@ -1,0 +1,6 @@
+// MITRE Tactic: Persistence
+// Author: David McWee
+// Description: Enhancement on second query to capture Account Creation events an limited set of details
+DeviceEvents
+| where ActionType contains "AccountCreated"
+| project Created=TimeGenerated, CreationTimeStamp=Timestamp, DeviceId, DeviceName, AccountCreatedDomain=AccountDomain, AccountCreatedName=AccountName, CreatedBy=InitiatingProcessAccountName, AccountSid

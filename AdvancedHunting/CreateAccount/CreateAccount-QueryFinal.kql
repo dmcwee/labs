@@ -1,0 +1,18 @@
+///////////////////////////////////////////////////
+// MITRE Tactic: Persistence
+// Author: David McWee
+// Description: Capture Create User Events, extend the Local Group Device Event to extract the group the user was added to,
+//              and calculate the time difference between when the account was created and when it was added to the sensitive
+//              group. Necessary fields for creating a Custom Alert are also included in the output should you want to create
+//              a custom alert.
+//////////////////////////////////////////////////
+let createdUserEvents = DeviceEvents
+| where ActionType contains "AccountCreated"
+| project Created=TimeGenerated, CreationTimeStamp=Timestamp, DeviceId, DeviceName, AccountCreatedDomain=AccountDomain, AccountCreatedName=AccountName, CreatedBy=InitiatingProcessAccountName, AccountSid;
+DeviceEvents
+| where ActionType contains "AccountAddedToLocalGroup"
+| extend localGroup=(parse_json(AdditionalFields).GroupName)
+| where localGroup != "Users"
+| join kind=inner createdUserEvents on AccountSid, DeviceId, DeviceName
+| extend timeSpan = datetime_diff('second', TimeGenerated, Created)
+| project Created, Added=TimeGenerated, timeSpan, DeviceId, DeviceName, AccountCreatedDomain, AccountCreatedName, CreatedBy, localGroup, Timestamp, ReportId, InitiatingProcessAccountName, InitiatingProcessAccountObjectId
