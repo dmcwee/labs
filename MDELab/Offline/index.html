@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MDE Offline Update Mirror Container</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="./styles.css" rel="stylesheet">
+  </head>
+  <body>
+    <div class="container">
+        <ul class="nav">
+            <li class="nav-item">
+                <a class="nav-link link-secondary" href="/">MDE Offline Update Mirror Container</a>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Linux</a>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a class="dropdown-item link-secondary" href="./wdav-update/linux/production/arch_x86_64/manifest.json">Linux Manifest (x86 &amp; x64)</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item link-secondary" href="./wdav-update/linux/production/arch_x86_64/updates.zip">Linux Update Zip (x86 &amp; x64</a>
+                    </li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li>
+                        <a class="dropdown-item link-secondary" href="./wdav-update/linux/production/arch_arm64/manifest.json">Linux Manifest (ARM x64)</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item link-secondary" href="./wdav-update/linux/production/arch_arm64/updates.zip">Linux Update Zip (ARM x64</a>
+                    </li>
+                </ul>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Mac</a>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a class="dropdown-item link-secondary" href="./wdav-update/mac/production/arch_x86_64/manifest.json">Mac Manifest (x86 &amp; x64)</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item link-secondary" href="./wdav-update/mac/production/arch_x86_64/updates.zip">Mac Update Zip (x86 &amp; x64)</a>
+                    </li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li>
+                        <a class="dropdown-item link-secondary" href="./wdav-update/mac/production/arch_arm64/manifest.json">Mac Manifest (ARM x64)</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item link-secondary" href="./wdav-update/mac/production/arch_arm64/updates.zip">Mac Update Zip (ARM x64)</a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+    <div class="container mt-3">
+        <p>You can use the above menus to access the Mac and Linux Manifest and Update Zip files directly. Below is a sample of what your <code>mdatp_managed.json</code> file
+            should look like to properly use this containerized offline update component.</p>
+        <h2>mdatp_managed.json Sample</h2>
+        <ul class="nav nav-tabs">
+            <li class="nav-item"><a class="nav-link active" aria-current="page" role="button" data-dm-os="linux" onclick="swapTabs(this)" href="#">Linux</a></li>
+            <!--<li class="nav-item"><a class="nav-link" aria-current="page" role="button" data-dm-os="mac" onclick="swapTabs(this)" href="#mac">Mac</a></li>-->
+        </ul>
+        <code class="linux">
+            {<br/>
+                &nbsp;&nbsp;"cloudService": {<br/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;"automaticDefinitionUpdateEnabled": true,<br/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;"definitionUpdatesInterval": 1202<br/>
+                    &nbsp;&nbsp;},<br/>
+                    &nbsp;&nbsp;"antivirusEngine": {<br/>
+                        &nbsp;&nbsp;&nbsp;&nbsp;"offlineDefinitionUpdateUrl": "<span id='offlineDefinitionUpdateUrl'>http://172.22.199.67:8000</span>/wdav-update/<span id='offlineDefinitionUpdateOs'>linux</span>/production/",<br/>
+                        &nbsp;&nbsp;&nbsp;&nbsp;"offlineDefinitionUpdateFallbackToCloud":false,<br/>
+                        &nbsp;&nbsp;&nbsp;&nbsp;"offlineDefinitionUpdate": "enabled"<br/>
+                        &nbsp;&nbsp;},<br/>
+                        &nbsp;&nbsp;"features": {<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;"offlineDefinitionUpdateVerifySig": "enabled"<br/>
+                            &nbsp;&nbsp;}<br/>
+              }
+        </code>
+        
+        <h2 class="mt-3">Related Links</h2>
+        <p><a href="https://learn.microsoft.com/en-us/defender-endpoint/linux-support-offline-security-intelligence-update">Linux support offline seurity intelligence update</a></p>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            //Get the url for this site and update the offlineDefinitionUpdateUrl value.
+            $("#offlineDefinitionUpdateUrl").text(`${ window.location.origin }`);
+        });
+
+        function swapTabs (tabObj) {
+            var os = $(tabObj).data('dm-os');
+            $("#offlineDefinitionUpdateOs").text(`${ os }`);
+
+            $(".nav-tabs").children().children().removeClass('active');
+            $(tabObj).addClass('active');
+        }
+    </script>
+  </body>
+</html>

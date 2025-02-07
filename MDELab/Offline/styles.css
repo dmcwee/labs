@@ -1,0 +1,7 @@
+.nav {
+    border-bottom: 1px solid var(--bs-primary-border-subtle);
+}
+
+.dropdown-item, .nav-link {
+    font-weight: 500;
+}

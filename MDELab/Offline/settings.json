@@ -1,0 +1,8 @@
+{
+    "downloadFolder": "/usr/share/microsoft/wdav-update",
+    "downloadLinuxUpdates": true,
+    "logFilePath": "/usr/share/microsoft/mdatp_offline_updates.log",
+    "downloadMacUpdates": true,
+    "downloadPreviewUpdates": false,
+    "backupPreviousUpdates": true 
+  }
