@@ -24,9 +24,9 @@ $regValues.GetEnumerator() | ForEach-Object {
     
 
     $result = Get-RegistryValue -RegKeyPath $path -RegKeyName $name
-    $result_text = "is not set."
+    $result_text = "is not set"
     if($result -ne $null) {
-        Write-Host "is set to $result."
+        $result_text = "is set to $result"
     }
-    Write-Host "Testing $name at path $path $result_text"
+    Write-Host "Testing $name at path $path $result_text."
 }
