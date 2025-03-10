@@ -6,3 +6,4 @@ IDAMLab_DSC.zip
 *.testing.*
 *.local.*
 .vscode/
+azuredeploy.parameters.*.*.json
