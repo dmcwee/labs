@@ -1,0 +1,29 @@
+DeviceInfo
+        | summarize arg_max(TimeGenerated, *) by DeviceName
+        | project DeviceName, OnboardingStatus, OSDistribution, OSVersionInfo, DeviceId, ClientVersion, SensorHealthState
+        | join kind=inner (
+            DeviceTvmInfoGathering
+            | extend AdditionalFieldsParsed = parse_json(AdditionalFields)
+            | extend Scans = tostring(AdditionalFieldsParsed.AvScanResults)
+            | extend AvScanResults = parse_json(Scans)
+            | project DeviceId,
+                    AvPlatformVersion = tostring(AdditionalFieldsParsed.AvPlatformVersion),
+                    AvEngineVersion = tostring(AdditionalFieldsParsed.AvEngineVersion),
+                    AvSignatureVersion = tostring(AdditionalFieldsParsed.AvSignatureVersion),
+                    AvSignatureUpdateTime = tostring(AdditionalFieldsParsed.AvSignatureUpdateTime),
+                    AvEngineUpdateTime = tostring(AdditionalFields.AvEngineUpdateTime),
+                    AvPlatformUpdateTime = tostring(AdditionalFields.AvPlatformUpdateTime),
+                    AvIsSignatureUptodate = tostring(AdditionalFieldsParsed.AvIsSignatureUptoDate),
+                    AvIsEngineUptodate = tostring(AdditionalFieldsParsed.AvIsEngineUptodate),
+                    AvIsPlatformUptodate = tostring(AdditionalFieldsParsed.AvIsPlatformUptodate),
+                    QuickScanStatus = AvScanResults.Quick.ScanStatus,
+                    QuickScanTime = AvScanResults.Quick.Timestamp,
+                    CustomStatus = AvScanResults.Custom.ScanStatus,
+                    CustomScanTime = AvScanResults.Custom.Timestamp,
+                    FullScanStatus = AvScanResults.Full.ScanStatus,
+                    FullScanTime = AvScanResults.Full.Timestamp,
+                    AdditionalFields,
+                    Timestamp, 
+                    LastSeenTime
+        ) on DeviceId
+        | project Timestamp, LastSeenTime, DeviceName, OnboardingStatus, SensorHealthState, OSDistribution, OSVersionInfo, DeviceId, AvPlatformVersion, AvEngineVersion, AvSignatureVersion, AvSignatureUpdateTime, AvEngineUpdateTime, AvPlatformUpdateTime, AvIsSignatureUptodate, AvIsEngineUptodate, AvIsPlatformUptodate, AdditionalFields, ClientVersion

@@ -1,0 +1,3 @@
+DeviceTvmInfoGathering
+| summarize arg_min(Timestamp, *) by DeviceName
+| where LastSeenTime < ago(1d)

@@ -1,0 +1,3 @@
+DeviceTvmSoftwareVulnerabilities
+| join DeviceTvmInfoGathering on DeviceId
+| project DeviceName, CveId, Timestamp, LastSeenTime

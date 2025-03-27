@@ -1,0 +1,17 @@
+DeviceInfo
+        | summarize arg_max(Timestamp, *) by DeviceName
+        | project DeviceName, OnboardingStatus, OSDistribution, OSVersionInfo, DeviceId, ReleaseVersion = ClientVersion, SensorHealthState, LoggedOnUsers, DIAddFields = AdditionalFields
+        | join kind=inner (
+DeviceTvmInfoGathering
+| extend addFields = parse_json(AdditionalFields)
+//| extend _avScanResults = tostring(addFields.AvScanResults)
+| extend ScanResults = parse_json(tostring(addFields.AvScanResults))
+| extend QuickScanStatus = ScanResults.Quick.ScanStatus
+| extend QuickScanTime = ScanResults.Quick.Timestamp
+| extend CustomStatus = ScanResults.Custom.ScanStatus
+| extend CustomScanTime = ScanResults.Custom.Timestamp
+| extend FullScanStatus = ScanResults.Full.ScanStatus
+| extend FullScanTime = ScanResults.Full.Timestamp
+| extend ASR_ExecutableEmailContent = addFields.AsrConfigurationStates.ExecutableEmailContent
+| extend PlatformVersion = addFields.AvPlatformVersion
+) on DeviceId
