@@ -1,0 +1,18 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "userName": {
+        "value":"dadmin"
+      },
+      "dscLocation": {
+        "value":"https://raw.githubusercontent.com/dmcwee/labs/refs/heads/dev/Common/DSC/DcDesiredState.ps1"
+      },
+      "dscPrerequisiteFile": {
+        "value":"DcDesiredState.ps1"
+      },
+      "dscFile": {
+        "value":"DcDesiredState.ps1"
+      }
+    }
+}

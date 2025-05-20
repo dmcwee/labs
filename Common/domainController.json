@@ -49,6 +49,13 @@
             },
             "defaultValue": "https://github.com/dmcwee/labs/blob/master/Common/DSC/DomainControllerDSC.zip?raw=true"
         },
+        "dscPrerequisiteFile": {
+            "type": "string",
+            "metadata": {
+                "description": "The DSC prerequisite file"
+            },
+            "defaultValue": "DomainControllerDSC.ps1"
+        },
         "dscFile":{
             "type": "string",
             "metadata": {
@@ -146,7 +153,7 @@
         },
         "resources": [
           {
-            "name": "Microsoft.Powershell.DSC",
+            "name": "ActiveDirectoryDSC-Prerequisites",
             "type": "extensions",
             "location": "[parameters('location')]",
             "apiVersion": "2018-10-01",
@@ -154,7 +161,34 @@
               "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]"
             ],
             "tags": {
-              "displayName": "ADDSC",
+              "displayName": "ActiveDirectoryDSC-Prerequisites",
+              "Lab":"[parameters('labTagValue')]"
+            },
+            "properties": {
+              "publisher": "Microsoft.Powershell",
+              "type": "DSC",
+              "typeHandlerVersion": "2.9",
+              "autoUpgradeMinorVersion": true,
+              "settings": {
+                "configuration": {
+                  "url": "[parameters('dscLocation')]",
+                  "script": "[parameters('dscPrerequisiteFile')]",
+                  "Function": "Prerequisites"
+                }
+              }
+            }
+          },
+          {
+            "name": "ActiveDirectoryDSC-CreateDomain",
+            "type": "extensions",
+            "location": "[parameters('location')]",
+            "apiVersion": "2018-10-01",
+            "dependsOn": [
+              "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]",
+              "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'), 'extensions/ActiveDirectoryDSC-Prerequisites')]"
+            ],
+            "tags": {
+              "displayName": "ActiveDirectoryDSC-CreateDomain",
               "Lab":"[parameters('labTagValue')]"
             },
             "properties": {
