@@ -185,7 +185,7 @@
             "apiVersion": "2018-10-01",
             "dependsOn": [
               "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]",
-              "[resourceId('Microsoft.Compute/virtualMachines', concat(parameters('vmName'), '/extensions/ActiveDirectoryDSC-Prerequisites'))]"
+              "[resourceId(concat('Microsoft.Compute/virtualMachines/', parameters('vmName'), '/extensions'), 'ActiveDirectoryDSC-Prerequisites'))]"
             ],
             "tags": {
               "displayName": "ActiveDirectoryDSC-CreateDomain",
