@@ -49,13 +49,20 @@
             },
             "defaultValue": "https://github.com/dmcwee/labs/blob/master/Common/DSC/DomainControllerDSC.zip?raw=true"
         },
-        "dscPrerequisiteFile": {
+        "prerequisiteFile": {
             "type": "string",
             "metadata": {
                 "description": "The DSC prerequisite file"
             },
             "defaultValue": "DomainControllerDSC.ps1"
         },
+        "prerequisiteCommand": {
+          "type": "string",
+          "metadata": {
+            "description":"The command to run"
+          },
+          "defaultValue": "powershell -executionpolicy bypass DcDependenciesDsc.ps1"
+        }
         "dscFile":{
             "type": "string",
             "metadata": {
@@ -165,16 +172,17 @@
               "Lab":"[parameters('labTagValue')]"
             },
             "properties": {
-              "publisher": "Microsoft.Powershell",
-              "type": "DSC",
-              "typeHandlerVersion": "2.9",
+              "publisher": "Microsoft.Compute",
+              "type": "CustomScriptExtension",
+              "typeHandlerVersion": "1.10",
               "autoUpgradeMinorVersion": true,
               "settings": {
-                "configuration": {
-                  "url": "[parameters('dscLocation')]",
-                  "script": "[parameters('dscPrerequisiteFile')]",
-                  "Function": "Prerequisites"
-                }
+                "commandToExecute": "[parameters('prerequisiteCommand')]"
+              },
+              "protectedSettings": {
+                  "fileUris": [
+                    "[parameters('prerequisiteFile')]"
+                  ]
               }
             }
           },
