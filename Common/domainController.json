@@ -62,7 +62,7 @@
             "description":"The command to run"
           },
           "defaultValue": "powershell -executionpolicy bypass DcDependenciesDsc.ps1"
-        }
+        },
         "dscFile":{
             "type": "string",
             "metadata": {
