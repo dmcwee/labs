@@ -3,6 +3,7 @@ params(
 	[string]$NetBiosName,
 	[string]$PlainTextPassword
 )
+
 # Install AD DS and RSAT tools
 Install-WindowsFeature -Name AD-Domain-Services, RSAT-AD-Tools -IncludeManagementTools
 
