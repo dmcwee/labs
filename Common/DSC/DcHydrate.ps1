@@ -1,5 +1,5 @@
 params(
-    [string]$password
+    [securestring]$password
 )
 # Import Active Directory module
 Import-Module ActiveDirectory
@@ -15,9 +15,9 @@ if (-not (Get-ADOrganizationalUnit -Filter "Name -eq '$ouName'" -ErrorAction Sil
 }
 
 # Create users in the LabUsers OU
-New-ADUser -Name "John Smith" -SamAccountName "jsmith" -AccountPassword (ConvertTo-SecureString $password -AsPlainText -Force) -Enabled $true -Path $ouPath
-New-ADUser -Name "Ron HelpDesk" -SamAccountName "ronhd" -AccountPassword (ConvertTo-SecureString $password -AsPlainText -Force) -Enabled $true -Path $ouPath
-New-ADUser -Name "John Admin" -SamAccountName "johna" -AccountPassword (ConvertTo-SecureString $password -AsPlainText -Force) -Enabled $true -Path $ouPath
+New-ADUser -Name "John Smith" -SamAccountName "jsmith" -AccountPassword $password -Enabled $true -Path $ouPath
+New-ADUser -Name "Ron HelpDesk" -SamAccountName "ronhd" -AccountPassword $password -Enabled $true -Path $ouPath
+New-ADUser -Name "John Admin" -SamAccountName "johna" -AccountPassword $password -Enabled $true -Path $ouPath
 
 # Create helpdesk group in the LabUsers OU
 New-ADGroup -Name "helpdesk" -GroupScope Global -Path $ouPath
