@@ -16,7 +16,7 @@ On a testing machine open the Command Prompt as an Admin
 1. Add user to local admin group `net localgroup Administrators {username} /add`
 1. Confirm user is in local admin group `net localgroup Administrators`
 
-> *Script:* [download] (../../AdvancedHuting/CreateAccount/CreateAccount.cmd)
+> *Script:* [download](../../AdvancedHuting/CreateAccount/CreateAccount.cmd)
 
 ### Advanced Hunting
 
