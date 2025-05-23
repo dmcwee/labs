@@ -9,27 +9,6 @@
         },
         "password": {
             "type": "securestring"
-        },
-        "dscLocation": {
-          "type": "string",
-          "metadata": {
-                "description": "Location to the Desired State Configuration package"
-            },
-            "defaultValue": "https://github.com/dmcwee/labs/blob/master/Common/DSC/DomainControllerDSC.zip?raw=true"
-        },
-        "dscPrerequisiteFile": {
-            "type": "string",
-            "metadata": {
-                "description": "The DSC prerequisite file"
-            },
-            "defaultValue": "DomainControllerDSC.ps1"
-        },
-        "dscFile":{
-            "type": "string",
-            "metadata": {
-                "description": "The DSC settings file for the domain controller"
-            },
-            "defaultValue": "DomainControllerDSC.ps1"
         }
     },
     "variables": {
@@ -134,13 +113,10 @@
             "value": "[variables('storageType')]"
           },
           "dscLocation": {
-            "value": "[parameters('dscLocation')]"
+            "value": "https://github.com/dmcwee/labs/blob/master/Common/DSC/DomainControllerDSC.zip?raw=true"
           },
           "dscFile": {
-            "value": "[parameters('dscFile')]"
-          },
-          "dscPrerequisiteFile": {
-            "value": "[parameters('dscPrerequisiteFile')]"
+            "value": "DomainControllerDSC.ps1"
           }
         }
       }
