@@ -12,6 +12,6 @@
 ## Attack Scenarios
 
 1. [MDE Demonstration Scenarios (MS Learn)](https://learn.microsoft.com/en-us/defender-endpoint/defender-endpoint-demonstrations)
-1. [Delete Log Events](attacks/EventLog.md)
-1. [AV Tampering](attacks/AvTampering.md)
-1. [Account Creation - Persistence](attacks/AccountPersistence.md)
+1. [Delete Log Events](Attacks/EventLog.md)
+1. [AV Tampering](Attacks/AvTampering.md)
+1. [Account Creation - Persistence](Attacks/AccountPersistence.md)
