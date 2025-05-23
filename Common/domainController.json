@@ -49,20 +49,6 @@
             },
             "defaultValue": "https://github.com/dmcwee/labs/blob/master/Common/DSC/DomainControllerDSC.zip?raw=true"
         },
-        "prerequisiteFile": {
-            "type": "string",
-            "metadata": {
-                "description": "The DSC prerequisite file"
-            },
-            "defaultValue": "DomainControllerDSC.ps1"
-        },
-        "prerequisiteCommand": {
-          "type": "string",
-          "metadata": {
-            "description":"The command to run"
-          },
-          "defaultValue": "powershell -executionpolicy bypass DcDependenciesDsc.ps1"
-        },
         "dscFile":{
             "type": "string",
             "metadata": {
@@ -160,7 +146,7 @@
         },
         "resources": [
           {
-            "name": "ActiveDirectoryDSC-Prerequisites",
+            "name": "Microsoft.Powershell.DSC",
             "type": "extensions",
             "location": "[parameters('location')]",
             "apiVersion": "2018-10-01",
@@ -168,35 +154,7 @@
               "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]"
             ],
             "tags": {
-              "displayName": "ActiveDirectoryDSC-Prerequisites",
-              "Lab":"[parameters('labTagValue')]"
-            },
-            "properties": {
-              "publisher": "Microsoft.Compute",
-              "type": "CustomScriptExtension",
-              "typeHandlerVersion": "1.10",
-              "autoUpgradeMinorVersion": true,
-              "settings": {
-                "commandToExecute": "[parameters('prerequisiteCommand')]"
-              },
-              "protectedSettings": {
-                  "fileUris": [
-                    "[parameters('prerequisiteFile')]"
-                  ]
-              }
-            }
-          },
-          {
-            "name": "ActiveDirectoryDSC-CreateDomain",
-            "type": "extensions",
-            "location": "[parameters('location')]",
-            "apiVersion": "2018-10-01",
-            "dependsOn": [
-              "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]",
-              "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('vmName'), 'ActiveDirectoryDSC-Prerequisites')]"
-            ],
-            "tags": {
-              "displayName": "ActiveDirectoryDSC-CreateDomain",
+              "displayName": "ADDSC",
               "Lab":"[parameters('labTagValue')]"
             },
             "properties": {
