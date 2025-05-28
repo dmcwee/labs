@@ -1,7 +1,7 @@
 param(
 	[string]$DomainName,
 	[string]$NetBiosName,
-	[securestring]$Password
+	[string]$Password
 )
 
 # Install AD DS and RSAT tools
@@ -10,11 +10,13 @@ Install-WindowsFeature -Name AD-Domain-Services, RSAT-AD-Tools -IncludeManagemen
 # Import ADDSDeployment module
 Import-Module ADDSDeployment
 
+$SecurePassword = ConvertTo-SecureString -String $Password -AsPlainText -Force
+
 # Install new forest and domain controller
 Install-ADDSForest `
     -DomainName $DomainName `
 	-DomainNetbiosName $NetBiosName `
-    -SafeModeAdministratorPassword $Password `
+    -SafeModeAdministratorPassword $SecurePassword `
     -InstallDNS `
     -Force
 

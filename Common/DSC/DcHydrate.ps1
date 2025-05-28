@@ -1,5 +1,5 @@
 param(
-    [securestring]$password
+    [string]$password
 )
 # Import Active Directory module
 Import-Module ActiveDirectory
@@ -9,15 +9,17 @@ $ouName = "LabUsers"
 $domain = (Get-ADDomain).DistinguishedName
 $ouPath = "OU=$ouName,$domain"
 
+$securePassword = ConvertTo-SecureString -String $password -AsPlainText -Force
+
 # Create the OU if it doesn't exist
 if (-not (Get-ADOrganizationalUnit -Filter "Name -eq '$ouName'" -ErrorAction SilentlyContinue)) {
     New-ADOrganizationalUnit -Name $ouName -Path $domain
 }
 
 # Create users in the LabUsers OU
-New-ADUser -Name "John Smith" -SamAccountName "jsmith" -AccountPassword $password -Enabled $true -Path $ouPath
-New-ADUser -Name "Ron HelpDesk" -SamAccountName "ronhd" -AccountPassword $password -Enabled $true -Path $ouPath
-New-ADUser -Name "John Admin" -SamAccountName "johna" -AccountPassword $password -Enabled $true -Path $ouPath
+New-ADUser -Name "John Smith" -SamAccountName "jsmith" -AccountPassword $securePassword -Enabled $true -Path $ouPath
+New-ADUser -Name "Ron HelpDesk" -SamAccountName "ronhd" -AccountPassword $securePassword -Enabled $true -Path $ouPath
+New-ADUser -Name "John Admin" -SamAccountName "johna" -AccountPassword $securePassword -Enabled $true -Path $ouPath
 
 # Create helpdesk group in the LabUsers OU
 New-ADGroup -Name "helpdesk" -GroupScope Global -Path $ouPath
