@@ -21,3 +21,5 @@ Install-ADDSForest `
     -Force
 
 Write-Host "Active Directory Domain Services and new domain '$DomainName' have been installed."
+
+Restart-Computer
