@@ -1,4 +1,4 @@
-params(
+param(
 	[string]$DomainName,
 	[string]$NetBiosName,
 	[securestring]$Password

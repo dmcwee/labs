@@ -1,4 +1,4 @@
-params(
+param(
     [securestring]$password
 )
 # Import Active Directory module
