@@ -54,6 +54,7 @@ var labServers = [
 
 module network '../modules/network.bicep' = {
   params: {
+    dns: ['10.0.2.5', '168.63.129.16']
     gatewayCertData: certificatedata
     gatewayCertName: certificatename
   }

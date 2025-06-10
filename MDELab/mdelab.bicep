@@ -54,20 +54,13 @@ var labServers = [
 
 module network '../Common/modules/network.bicep' = {
   params: {
-    clientRange: '10.0.2.0/24'
     dns: ['10.0.2.5', '168.63.129.16']
+    gatewayCertData: certificatedata
+    gatewayCertName: certificatename
   }
 }
 
-module gateway '../Common/modules/p2sGateway.bicep' = {
-  params: {
-    certData: certificatedata
-    certName: certificatename
-    subnetId: network.outputs.gatewaySubnetId
-  }
-}
-
-module dcModule '../Common/modules/serverVm.bicep' = {
+module dcModule '../Common/modules/virtualMachine.bicep' = {
   params: {
     name: adServerName
     sku:'2016-Datacenter'
@@ -83,7 +76,7 @@ module dcModule '../Common/modules/serverVm.bicep' = {
   }
 }
 
-module servers '../Common/modules/serverVm.bicep' = [for (server, i) in labServers: {
+module servers '../Common/modules/virtualMachine.bicep' = [for (server, i) in labServers: {
   params: {
     name: server.name
     osType: server.type
@@ -119,53 +112,11 @@ resource adSetupCommand 'Microsoft.Compute/virtualMachines/extensions@2024-11-01
 
     }
     protectedSettings: {
-      commandToExecute: 'powershell -executionpolicy bypass -File .\\DcSetup.ps1 -DomainName "${domainName}" -NetBiosName "${domainNetbiosName}" -Password ${password}'
-      fileUris: ['https://raw.githubusercontent.com/dmcwee/labs/refs/heads/dev/Common/DSC/DcSetup.ps1']
+      commandToExecute: 'powershell -executionpolicy bypass -File .\\DcSetup.ps1 -DomainName "${domainName}" -NetBiosName "${domainNetbiosName}" -Password ${password} -HydrationScript DcHydrate.ps1'
+      fileUris: [
+        'https://raw.githubusercontent.com/dmcwee/labs/refs/heads/dev/Common/DSC/DcSetup.ps1'
+        'https://raw.githubusercontent.com/dmcwee/labs/refs/heads/dev/Common/DSC/DcHydrate.ps1'
+      ]
     }
-  }
-}
-
-// resource adSetupCommand 'Microsoft.Compute/virtualMachines/runCommands@2024-11-01' = {
-//   name: '${adServerName}-adsetup'
-//   location: resourceGroup().location
-//   parent: dc
-//   properties: {
-//     source: {
-//       scriptUri: 'https://raw.githubusercontent.com/dmcwee/labs/refs/heads/dev/Common/DSC/DcSetup.ps1'
-//     }
-//     protectedParameters: [
-//       {
-//         name: 'DomainName'
-//         value: domainName
-//       }
-//       {
-//         name: 'NetBiosName'
-//         value: domainNetbiosName
-//       }
-//       {
-//         name: 'Password'
-//         value: password
-//       }
-//     ]
-//   }
-// }
-
-resource hydrationCommand 'Microsoft.Compute/virtualMachines/runCommands@2024-11-01' = {
-  name: '${adServerName}-hydration'
-  location: resourceGroup().location
-  parent: dc
-  dependsOn: [
-    adSetupCommand
-  ]
-  properties: {
-    source: {
-      scriptUri: 'https://raw.githubusercontent.com/dmcwee/labs/refs/heads/dev/Common/DSC/DcHydrate.ps1'
-    }
-    protectedParameters: [
-      {
-        name: 'password'
-        value: password
-      }
-    ]
   }
 }
