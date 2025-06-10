@@ -1,0 +1,8 @@
+{
+  "@odata.type": "#microsoft.graph.mobilityManagementPolicy",
+  //"complianceUrl": "https://portal.manage.microsoft.com/?portalAction=Compliance",
+  //"discoveryUrl": "https://enrollment.manage.microsoft.com/enrollmentserver/discovery.svc",
+  //"termsOfUseUrl": "https://portal.manage.microsoft.com/TermsofUse.aspx",
+  "appliesTo": "all",
+  "URI": "PATCH https://graph.microsoft.com/beta/policies/mobileDeviceManagementPolicies/{id?}"
+}

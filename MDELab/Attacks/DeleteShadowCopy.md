@@ -8,12 +8,14 @@ Run the following commands in PowerShell / Windows Command Prompt as Administrat
 
 ### Delete Shadow Copy
 
-```dos
+```powershell
 wmic.exe shadowcopy delete /nointeractive
 ```
 
 ### Delete Windows Backup Catalog
 
-```dos
+```powershell
 wbadmin delete catalog -quiet
 ```
+
+## Detection

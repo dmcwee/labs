@@ -1,61 +1,83 @@
 # Account Persistence
 
-This scenario is to detect if a recently created account has been added to a highly privileged group. This is a common persistence technique.
+Account persistence refers to techniques used to maintain access to a system or account over time, even after security measures are applied. Creating RunKeys, Startup Folder Entries, Boot/Logon Initialization Scripts, and scheduled tasks are common techniques in Persistence where attackers establish mechanisms to ensure their malicious programs run automatically. Utilizing these methods attackers can maintain their foothold on a system across reboots.
 
-## Scenario
+## Simulation
 
-This will create a new user and then add that user to the local admin group on the device.
+The following scenarios simulate attacker persistence techniquest using Auto-Start Extensibility Points (ASEP) registry keys and Scheduled Tasks to run scripts.
 
-### Steps: Create User
+> **Note:** Download the [simulation script here](Invoke-AccountPersistenceSimulation.ps1).
+> To execute the simulation run the command `Invoke-AccountPersistenceSimulation.ps1 -Mode` specify the type of persistence you want to simulate `HKLM`, `HKCU`, `Scheduler`.
+> To clean up the simulation run the command `Invoke-AccountPersistenceSimulation.ps1 -CleanUp -Mode` and specify the type of persistence you previously executed.
 
-On a testing machine open the Command Prompt as an Admin 
+### ASEP Registry Keys
 
-1. List current users `net user`
-1. List local groups `net localgroup`
-1. Create an example user from command line: `net user {username} {password} /add`
-1. Add user to local admin group `net localgroup Administrators {username} /add`
-1. Confirm user is in local admin group `net localgroup Administrators`
+Auto-Start Extensibility Points (ASEP) registry keys control which programs or scripts automatically execute when your system boots or when a user logs in. These keys can also be exploited by malware to achieve persistence, ensuring that malicious programs run every time the system starts.
 
-> *Script:* [download](../../AdvancedHunting/CreateAccount/CreateAccount.cmd)
+The common ASEP keys on windows are:
 
-### Advanced Hunting
+* HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run
+* HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\RunOnce
+* HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run
+* HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce
 
-In the Security Portal open Advanced hunting and walk the customer through the query creation process below.
+Run the following commands in Windows Command Prompt on a test device.
 
-1. Start by finding all account events [Query 1](../../AdvancedHunting/CreateAccount/CreateAccount-Query1.kql)
-1. Reduce results to just Account Creation & Account Added to Local Group [Query 2](../../AdvancedHunting/CreateAccount/CreateAccount-Query2.kql)
-1. Reduce our initial results to just account created and get select fields. We will merge this into a single line with the Account added to group events shortly. Note: AccountSid in this event refers to the account created SID [Query 3](../../AdvancedHunting/CreateAccount/CreateAccount-Query3.kql)
-1. Assign the results of the query to a local scaler variable and add back the query for Account Added events as well as extending the query by parsing the JSON in the Additional Fields column to extract Group Name [Query 4](../../AdvancedHunting/CreateAccount/CreateAccount-Query4.kql)
-1. Next merge the scaler value & query using an inner join method. You can now see the Time the Account was created as well as the Time the Account was added to the local group. [Query 5](../../AdvancedHunting/CreateAccount/CreateAccount-Query5.kql)
-1. Extend the query by calculating the time difference between when the account was created and when it was added to the local group. Also, reduce the output fields to just those we want to see: Created, Added, Account Name, Local Group, Device Id, Device Name, Created By [Query 6](../../AdvancedHunting/CreateAccount/CreateAccount-Query6.kql)
-1. Finally filter out the default action of adding the user to the local Users group and include the Timestamp, ReportId, and InitiatingProcessAccountObjectId fields which are required for creating Custom NRT Detection [Query Final](../../AdvancedHunting/CreateAccount/CreateAccount-QueryFinal.kql)
+```powershell
+reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run" /v ASEPAttackSim /t REG_SZ /d "powershell -executionpolicy bypass -file $env:TEMP\new-user.ps1"
+```
 
-### Create Custom Detection
+### Boot Logon
 
-1. From the Advanced Hunting page for the above final query choose the Manage rules and select Create custom detection
-1. Provide Alert DetailsDetection Name: User Created and Added to Sensitive group
-    1. Frequency: Hourly
-    1. Alert Title: User Created and Added to Sensitive group
-    1. Severity: High
-    1. Category: Persistence
-    1. MITRE Techniques: {Select the various MITRE techniquest (e.g. T1162, T1078.001, T1136.001)}
-    1. Description: Alert when a new user is created and then added to a local privileged group.
-    1. Recommended Actions: Review the account created to ensure it is a valid account and should have permission granted.
-1. Impacted Entities
-    1. Device: DeviceId
-    1. User: InitiatingProcessAccountObjectId
-1. Actions (Optional - Just showing these settings is fine and then demonstrate the alert being created)
-    1. Devices: Choose an action to perform - Isolate device (Full) or Restrict app execution are good options for demonstration
-    1. User: Mark user as compromised
-        > The user account that was used to create the account is the account that will be Marked As Compromised
-    1. Save the Custom Alert
+Windows allows these scripts to run each time a specific user or group logs into a system, providing attackers a reliable method to establish persistence.
 
-## Queries
+Target registry key path:
 
-* [Query 1](../../AdvancedHunting/CreateAccount/CreateAccount-Query1.kql)
-* [Query 2](../../AdvancedHunting/CreateAccount/CreateAccount-Query2.kql)
-* [Query 3](../../AdvancedHunting/CreateAccount/CreateAccount-Query3.kql)
-* [Query 4](../../AdvancedHunting/CreateAccount/CreateAccount-Query4.kql)
-* [Query 5](../../AdvancedHunting/CreateAccount/CreateAccount-Query5.kql)
-* [Query 6](../../AdvancedHunting/CreateAccount/CreateAccount-Query6.kql)
-* [Query Final](../../AdvancedHunting/CreateAccount/CreateAccount-QueryFinal.kql)
+* HKEY_CURRENT_USER\EnvironmentUserInitMprLogonScript
+
+Run the following commands in Windows Command Prompt on a test device.
+
+```powershell
+reg add "HKEY_CURRENT_USER\Environment" /v UserInitMprLogonScript /t REG_SZ /d "powershell -executionpolicy bypass -file $env:TEMP\new-user.ps1"
+```
+
+### Task Scheduler
+
+The following script creates the Task Action (New-ScheduledTaskAction) which launches powershell with an Execution Policy of Bypass and in a Hidden Window so the user won't notice. The Script then creates the Trigger (New-ScheduledTaskTrigger) of AtLogOn which means the script will run any time a user logs onto the system. Finally the script creates the actual Scheuled Task (Register-ScheduledTask) based on the Action and Triggers.
+
+```powershell
+# Define variables
+$TaskName = "Persistence-ScheduledTask"
+$ScriptPath = "$env:TEMP\new-user.ps1"
+
+# Create an action to run the PowerShell script
+$Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument $("-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File ""$ScriptPath"")"
+
+# Create a trigger to run the task at logon
+$Trigger = New-ScheduledTaskTrigger -AtLogOn
+
+# Register the scheduled task
+Register-ScheduledTask -TaskName $TaskName -Action $Action -Trigger $Trigger -Settings $Settings -Description "Runs a malicious PowerShell script at logon"
+```
+
+## Cleanup
+
+```powershell
+# Clean up ASEP Entries
+reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Run" /v ASEPAttackSim /f
+
+# Clean Up Boot Logon Entry
+reg delete "HKEY_CURRENT_USER\Environment" /v UserInitMprLogonScript /f
+
+# Clean Up Task Scheduler
+$TaskName = "Persistence-ScheduledTask"
+Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false
+```
+
+## Detections
+
+| Alert Title | Alert Description | Alert Details |
+| -- | -- | -- |
+| Anomaly detected in ASEP registry | A process registered a suspicious command or file in ASEP registry key, where it will be run after a reboot. An attacker may place a malicious piece of software in such a location to prevent losing access if a machine is turned off. | **Category:** Persistence<br/>**MITRE ATT&CK Techniques:** T1112: Modify Registry, T1547.001: Registry Run Keys / Startup Folder<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior,Network<br/>**Detection status:** Detected |
+| Suspicious logon script registration | A script was suspiciously registered as a logon script. Anomalies in the process chain leading up to this activity or the script file itself indicate possible malicious intent. Attackers can use logon scripts to automatically run malicious code when users sign in and establish persistence. | **Category:** Persistence<br/>**MITRE ATT&CK Techniques:** T1037: Boot or Logon Initialization Scripts, T1037.001: Logon Script (Windows)<br/>**Service source:** Microsoft Defender for Endpoint <br/>**Detection source:** EDR<br/>**Detection technology:** Behavior,Network<br/>**Detection status:** Detected |
+| Suspicious scheduled task | A potentially malicious file or command line was registered as a scheduled task. Attackers often use scheduled tasks to establish persistence, but they are also used to invoke a single activity or a chain of activities. | **Category:** Execution<br/>**MITRE ATT&CK Techniques:** T1053: Scheduled Task/Job, T1053.005: Scheduled Task<br/>**Service source:** Microsoft Defender for Endpoint <br/>**Detection source:** EDR<br/>**Detection technology:** Behavior,Network<br/>**Detection status:** Detected  |

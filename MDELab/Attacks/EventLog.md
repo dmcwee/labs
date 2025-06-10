@@ -10,27 +10,21 @@ Run the following commands in PowerShell as Administrator on a test device.
 1. Using wmic
 1. Using PowerShell Start-Process
 
----
-
 ### Direct wevtutil Commands
 
-```dos
+```powershell
 wevtutil cl system
 wevtutil cl application
 wevtutil cl security
 ```
 
----
-
 ### Using wmic
 
-```dos
+```powershell
 wmic process call create "cmd.exe /c wevtutil cl Application"
 wmic process call create "cmd.exe /c wevtutil cl system"
 wmic process call create "cmd.exe /c wevtutil cl security"
 ```
-
----
 
 ### Using PowerShell Start-Process
 
@@ -40,27 +34,11 @@ Start-Process -FilePath "wevtutil" -ArgumentList "cl", "System" -NoNewWindow -Wa
 Start-Process -FilePath "wevtutil" -ArgumentList "cl", "Security" -NoNewWindow -Wait
 ```
 
-> *Script*: [download](Clear-EventLog.ps1)
+> *Script*: [download](Invoke-EventLogSimulation.ps1)
 
 ## Detection
 
-| Alert title | Event log was cleared |
-| Alert description | An event log was cleared. This might indicate a malicious actor in the machine. |
-| Alert details |
-Category : Defense evasion
-MITRE ATT&CK Techniques : Sub-technique T1070.001
-Service source : Microsoft Defender for Endpoint 
-Detection source : EDR 
-Detection technology : Behavior,Network
-Detection status : Detected |
-
-
-| Alert title | Attempt to clear event log |
-| Alert description | A process attempted to clear the event log. An attacker might be trying to hide evidence of malicious activity. |
-| Alert details |
-Category : Defense evasion
-MITRE ATT&CK Techniques : Sub-technique T1070.001
-Service source : Microsoft Defender for Endpoint 
-Detection source : EDR 
-Detection technology : Behavior,Network
-Detection status : Detected |
+| Alert Title | Alert Description | Alert Details
+| --- | --- | --- |
+| Event log was cleared | An event log was cleared. This might indicate a malicious actor in the machine. |**Category :** Defense evasion<br/>**MITRE ATT&CK Techniques :** Sub-technique T1070.001<br/>**Service source :** Microsoft Defender for Endpoint<br/>**Detection source :** EDR<br/>**Detection technology :** Behavior,Network<br/>**Detection status :** Detected |
+| Attempt to clear event log | A process attempted to clear the event log. An attacker might be trying to hide evidence of malicious activity. |**Category :** Defense evasion<br/>**MITRE ATT&CK Techniques :** Sub-technique T1070.001<br/>**Service source :** Microsoft Defender for Endpoint<br/>**Detection source :** EDR<br/>**Detection technology :** Behavior,Network<br/>**Detection status :** Detected |
