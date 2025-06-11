@@ -6,6 +6,10 @@ Attackers will query the Registry and local file system to find credentials and 
 
 Search the local registry and file system to detect potential credentials that can be used elsewhere.
 
+> **Note:** Download the [simulation script here](Invoke-PasswordDetectionSimulation.ps1).
+> To execute the simulation run the command `Invoke-PasswordDetectionSimulation.ps1`.
+> To clean up the simulation run the command `Invoke-PasswordDetectionSimulation.ps1 -CleanUp`.
+
 ### Registry Search
 
 ```powershell

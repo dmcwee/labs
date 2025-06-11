@@ -6,11 +6,9 @@ Credential dumping is a technique used by attackers to extract stored authentica
 
 Run the following commands in PowerShell as Administrator on a test device.
 
-[ ] TODO: Create Script
-
-> **Note:** Download the [simulation script here]().
-> To execute the simulation run the command ``.
-> To clean up the simulation run the command ` -CleanUp`.
+> **Note:** Download the [simulation script here](Invoke-CredentialDumpingSimulation.ps1).
+> To execute the simulation run the command `Invoke-CredentialDumpingSimulation.ps1`.
+> To clean up the simulation run the command `Invoke-CredentialDumpingSimulation.ps1 -CleanUp`.
 
 ### LSASS Memory Dumping
 

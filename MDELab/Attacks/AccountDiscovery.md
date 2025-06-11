@@ -10,6 +10,8 @@ Run the following commands in PowerShell on a test device.
 > To execute the simulation run the command `Invoke-AccountDiscoverySimulation.ps1` and include `-IncludeDomain` if you want to discover domain and local accounts.
 > To clean up the simulation run the command `Invoke-AccountDiscoverySimulation.ps1 -CleanUp`
 
+### Local Account Recon
+
 ```powershell
 $OutputPath = "$env:TEMP\Discovery"
 New-Item -Path $OutputPath -ItemType Directory

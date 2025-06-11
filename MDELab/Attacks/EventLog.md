@@ -6,9 +6,8 @@ Clear Windows Event Logs is a technique where attackers delete records in Window
 
 Run the following commands in PowerShell as Administrator on a test device.
 
-1. Direct wevtutil Commands
-1. Using wmic
-1. Using PowerShell Start-Process
+> **Note:** Download the [simulation script here](Invoke-EventLogSimulation.ps1).
+> To execute the simulation run the command `Invoke-EventLogSimulation.ps1 -Mode` and one of the methods: `wevtutil`, `wmic`, `powershell`.
 
 ### Direct wevtutil Commands
 

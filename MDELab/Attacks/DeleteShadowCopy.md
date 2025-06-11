@@ -6,6 +6,9 @@ Shadow Copy Deletion is a technique where attackers delete or disable built-in W
 
 Run the following commands in PowerShell / Windows Command Prompt as Administrator on a test device.
 
+> **Note:** Download the [simulation script here](Invoke-DeleteShadowCopySimulation.ps1).
+> To execute the simulation run the command `Invoke-DeleteShadowCopySimulation.ps1`.
+
 ### Delete Shadow Copy
 
 ```powershell

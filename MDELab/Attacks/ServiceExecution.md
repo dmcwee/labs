@@ -6,6 +6,10 @@ Service Execution is a technique where attackers abuse the Windows Service Contr
 
 Run the following commands in PowerShell on a test device.
 
+> **Note:** Download the [simulation script here](Invoke-ServiceExecutionSimulation.ps1).
+> To execute the simulation run the command `Invoke-ServiceExecutionSimulation.ps1`.
+> To clean up the simulation run the command `Invoke-ServiceExecutionSimulation.ps1 -CleanUp`.
+
 ```powershell
 sc.exe create "MaliciousService" binPath= "%COMSPEC% /c powershell.exe -nop -w hidden -command New-Item -ItemType File C:\art-marker.txt"
 sc.exe start "MaliciousService"

