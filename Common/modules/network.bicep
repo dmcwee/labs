@@ -9,9 +9,8 @@ param gatewayClientRange string = '10.10.10.0/24'
 param dns array = ['168.63.129.16']
 param location string = resourceGroup().location
 param gatewaySku string = 'Basic'
-param gatewayVpnType string = 'RouteBased'
 param gatewayGeneration string = 'Generation1'
-param gatewayType string = 'Vpn'
+param vpnClientProtocol array = ['SSTP']
 
 resource network 'Microsoft.Network/virtualNetworks@2024-05-01' = {
   name: name
@@ -42,12 +41,11 @@ resource publicIp 'Microsoft.Network/publicIPAddresses@2024-05-01' = {
   name: '${gatewayName}-pub-ip'
   location: location
   sku: {
-    name: 'Basic'
+    name: 'Standard'
     tier: 'Regional'
   }
   properties: {
-    publicIPAllocationMethod: 'Dynamic'
-    idleTimeoutInMinutes: 4
+    publicIPAllocationMethod: 'Static'
     dnsSettings: {
       domainNameLabel: toLower(gatewayName)
     }
@@ -58,7 +56,6 @@ resource gateway 'Microsoft.Network/virtualNetworkGateways@2024-05-01' = {
   name: name
   location: location
   properties: {
-    enablePrivateIpAddress: false
     ipConfigurations: [
       {
         name: 'default'
@@ -76,13 +73,13 @@ resource gateway 'Microsoft.Network/virtualNetworkGateways@2024-05-01' = {
       name: gatewaySku
       tier: gatewaySku
     }
-    gatewayType: gatewayType
-    vpnType: gatewayVpnType
+    gatewayType: 'Vpn'
+    vpnType: 'RouteBased'
     enableBgp: false
     activeActive:false
     vpnClientConfiguration: {
       vpnClientAddressPool: {addressPrefixes: [gatewayClientRange] }
-      vpnClientProtocols: ['SSTP']
+      vpnClientProtocols: vpnClientProtocol
       vpnAuthenticationTypes: ['Certificate']
       vpnClientRootCertificates: (!empty(gatewayCertName) && !empty(gatewayCertData)) ? [
         {
