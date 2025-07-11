@@ -4,6 +4,7 @@ param storageType string
 param username string
 @secure()
 param password string
+param requirePlan bool = false
 
 param location string = resourceGroup().location
 param name string = 'Server2016'
@@ -83,6 +84,11 @@ resource serverVm 'Microsoft.Compute/virtualMachines@2024-11-01' = {
       }
     } : {}
   }
+  plan: (requirePlan) ? {
+    name: sku
+    publisher: publisher
+    product: offer
+  }: null
 }
 
 module schedule 'schedule.bicep' = {
