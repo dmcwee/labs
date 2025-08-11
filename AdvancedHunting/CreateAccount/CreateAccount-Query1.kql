@@ -1,5 +1,0 @@
-// MITRE Tactic: Persistence
-// Author: David McWee
-// Description: First query for any event that involves an Account Action on a Device
-DeviceEvents
-| where ActionType contains "Account"

@@ -1,3 +1,0 @@
-DeviceEvents
-| where ActionType contains "board" and ActionType !in("GetClipboardData")
-| project Timestamp, DeviceName, ActionType
