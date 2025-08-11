@@ -7,3 +7,5 @@ IDAMLab_DSC.zip
 *.local.*
 .vscode/
 azuredeploy.parameters.*.*.json
+*.pfx
+*.cer

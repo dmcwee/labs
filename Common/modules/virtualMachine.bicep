@@ -5,6 +5,7 @@ param username string
 @secure()
 param password string
 param requirePlan bool = false
+param tags object = {}
 
 param location string = resourceGroup().location
 param name string = 'Server2016'
@@ -89,6 +90,7 @@ resource serverVm 'Microsoft.Compute/virtualMachines@2024-11-01' = {
     publisher: publisher
     product: offer
   }: null
+  tags: tags
 }
 
 module schedule 'schedule.bicep' = {
