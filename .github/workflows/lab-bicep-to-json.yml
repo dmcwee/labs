@@ -31,5 +31,5 @@ jobs:
               run: |
                 find . -type f -name "*.bicep" | while read file; do
                   echo "Building $file"
-                  az bicep build --file $file --outfile $file.json
+                  az bicep build --file $file
                 done
