@@ -26,10 +26,7 @@ jobs:
                 inlineScript: |
                   echo "Installing Bicep"
                   az bicep install
-
-            - name: Convert Bicep to ARM JSON
-              run: |
-                find . -type f -name "*.bicep" | while read file; do
-                  echo "Building $file"
-                  az bicep build --file $file
-                done
+                  find . -type f -name "*.bicep" | while read file; do
+                    echo "Building $file"
+                    az bicep build --file $file
+                  done
