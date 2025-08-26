@@ -21,12 +21,15 @@ jobs:
 
             - name: Install Azure CLI
               uses: azure/cli@v2
+              with:
+                azcliversion: latest
+                inlineScript: |
+                  echo "Installing Bicep"
+                  az bicep install
 
             - name: Convert Bicep to ARM JSON
               if: steps.changed-files.outputs.changed_files != ''
               run: |
-                echo "Installing Bicep"
-                az bicep install
                 echo "${{ steps.changed-files.outputs.changed_files}}" | tr ' ' '\n' | while read file; do
                   echo "Building $file"
                   az bicep build --file $file --outfile $file.json
