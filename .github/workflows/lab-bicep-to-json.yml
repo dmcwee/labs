@@ -29,7 +29,7 @@ jobs:
 
             - name: Convert Bicep to ARM JSON
               run: |
-                echo find . -type f -name "*.bicep" | while read file; do
+                find . -type f -name "*.bicep" | while read file; do
                   echo "Building $file"
                   az bicep build --file $file --outfile $file.json
                 done
