@@ -16,7 +16,7 @@ jobs:
             - name: Get Changed Files
               id: changed-files
               run: |
-                CHANGED_FILES=$(git diff --name-only HEAD^ HEAD | grep '\.bicep$' || true)
+                CHANGED_FILES=$(find . -type f -name "*.bicep")
                 echo "changed_files=$CHANGED_FILES" >> $GITHUB_OUTPUT
 
             - name: Install Azure CLI
