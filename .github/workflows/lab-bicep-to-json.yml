@@ -9,7 +9,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout Labs
-              uses: actions/checkout@4
+              uses: actions/checkout@v5
               with:
                 fetch-depth: 2
 
@@ -20,7 +20,7 @@ jobs:
                 echo "changed_files=$CHANGED_FILES" >> $GITHUB_OUTPUT
 
             - name: Install Azure CLI
-              uses: azure/setup-cli@v1
+              uses: azure/cli@v2
 
             - name: Convert Bicep to ARM JSON
               if: steps.changed-files.outputs.changed_files != ''
