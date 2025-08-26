@@ -1,0 +1,33 @@
+name: lab-bicep-to-json
+run-name: Test bicep build
+on:
+    push:
+        branches:
+            - dev
+jobs:
+    build-json-templates:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout Labs
+              uses: actions/checkout@4
+              with:
+                fetch-depth: 2
+
+            - name: Get Changed Files
+              id: changed-files
+              run: |
+                CHANGED_FILES=$(git diff --name-only HEAD^ HEAD | grep '\.bicep$' || true)
+                echo "changed_files=$CHANGED_FILES" >> $GITHUB_OUTPUT
+
+            - name: Install Azure CLI
+              uses: azure/setup-cli@v1
+
+            - name: Convert Bicep to ARM JSON
+              if: steps.changed-files.outputs.changed_files != ''
+              run: |
+                echo "Installing Bicep"
+                az bicep install
+                echo "${{ steps.changed-files.outputs.changed_files}}" | tr ' ' '\n' | while read file; do
+                  echo "Building $file"
+                  az bicep build --file $file --outfile $file.json
+                done
