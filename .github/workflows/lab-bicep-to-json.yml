@@ -28,9 +28,8 @@ jobs:
                   az bicep install
 
             - name: Convert Bicep to ARM JSON
-              if: steps.changed-files.outputs.changed_files != ''
               run: |
-                echo "${{ steps.changed-files.outputs.changed_files}}" | tr ' ' '\n' | while read file; do
+                echo find . -type f -name "*.bicep" | while read file; do
                   echo "Building $file"
                   az bicep build --file $file --outfile $file.json
                 done
