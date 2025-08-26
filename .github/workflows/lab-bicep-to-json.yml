@@ -3,7 +3,7 @@ run-name: Test bicep build
 on:
     push:
         branches:
-            - dev
+            - actions
 jobs:
     build-json-templates:
         runs-on: ubuntu-latest
