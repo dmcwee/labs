@@ -3,9 +3,9 @@ param username string
 @secure()
 param password string
 @minLength(0)
-param certificatedata string
+param gatewayCertData string
 @minLength(0)
-param certificatename string
+param gatewayCertName string
 @minLength(3)
 param domainName string = 'mcweeinc.com'
 @minLength(3)
@@ -55,8 +55,8 @@ var labServers = [
 module network '../Common/modules/network.bicep' = {
   params: {
     dns: ['10.0.2.5', '168.63.129.16']
-    gatewayCertData: certificatedata
-    gatewayCertName: certificatename
+    gatewayCertData: gatewayCertData
+    gatewayCertName: gatewayCertName
   }
 }
 
