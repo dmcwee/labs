@@ -8,7 +8,7 @@ param gatewayRange string = '10.0.100.0/24'
 param gatewayClientRange string = '10.10.10.0/24'
 param dns array = ['168.63.129.16']
 param location string = resourceGroup().location
-param gatewaySku string = 'Basic'
+param gatewaySku string = 'VpnGw1'
 param gatewayGeneration string = 'Generation1'
 param vpnClientProtocol array = ['SSTP']
 
