@@ -46,7 +46,7 @@ function Get-GuaranteedGroup {
             ErrorAction    = "Stop"
         }
         try {
-            $group = New-ADGroup @newGroupParams
+            $group = New-ADGroup @newGroupParams -PassThru
             Write-Log -message "Group $GroupName created in $GroupOuPath" -source $TaskName -eventID 3101
             return $group
         }
@@ -89,7 +89,7 @@ function Get-GuaranteedUser {
         }
 
         try {
-            $user = New-ADUser @userParams
+            $user = New-ADUser @userParams -PassThru
             Write-Log -message "User $Name created in $UserOuPath" -source $TaskName -eventID 4101
             return $user
         }
@@ -117,7 +117,7 @@ try {
     # Create the OU if it doesn't exist
     if (-not (Get-ADOrganizationalUnit -Filter "Name -eq '$ouName'" -ErrorAction SilentlyContinue)) {
         Write-Log -message "OU '$ouName' does not exist. Creating OU." -source $TaskName -eventID 2200
-        New-ADOrganizationalUnit -Name $ouName -Path $domain -ErrorAction Stop | Out-Null
+        New-ADOrganizationalUnit -Name $ouName -Path $((Get-ADDomain).DistinguishedName) -ErrorAction Stop | Out-Null
         Write-Log -message "OU '$ouName' created." -source $TaskName -eventID 2201
     }
     else {
@@ -136,7 +136,7 @@ try {
         try {
             $upn = "$($user.AccountName)@$domainRoot"
             $adUser = Get-GuaranteedUser -Name $user.Name -AccountName $user.AccountName -UPN $upn -UserOuPath $ouPath -AccountPassword $securePassword
-            if($adUser) {
+            if($null -ne $adUser) {
                 foreach ($group in $user.Groups) {
                     if([string]::IsNullOrEmpty($group) -or [string]::IsNullOrWhiteSpace($group)) {
                         Write-Log -message "User $($user.Name) has no groups specified." -source $TaskName -eventID 2301
@@ -145,7 +145,7 @@ try {
                     {
                         try {
                             $adGroup = Get-GuaranteedGroup -GroupName $group -GroupOuPath $ouPath
-                            if($adGroup) {
+                            if($null -ne $adGroup) {
                                 Add-ADGroupMember -Identity $adGroup -Members $adUser -ErrorAction Stop
                                 Write-Log -message "User $($user.Name) was added to group $($group) successfully." -source $TaskName -eventID 2302
                             }
