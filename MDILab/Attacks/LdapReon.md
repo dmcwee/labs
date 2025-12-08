@@ -1,8 +1,26 @@
-# LDAP Recon
+# LDAP Reconnaisance
 
 Attackers will use LDAP reconnaisance techniquest to discover valid users accounts and other objects within active directory. This information helps adversaries identify additional account and computer targets to further identify their foothold in the environment.
 
 ## Simulation
+
+Run the following commands in PowerShell on a test device.
+
+> Download the [simulation script here](./Invoke-LdapRecon.ps1)
+
+### Perform Reconnaisance
+
+```powershell
+.\Invoke-LdapRecon.ps1 -DomainController <dc_name_here> -Username <domain_account> -Password $(ConvertTo-SecureString -AsPlainText -force) -DomainName <domain_name>
+```
+
+This will generate a series of csv files in the $env:TEMP\LdapRecon folder that contain details of various object from the domain.
+
+### Cleanup Reconnaisance
+
+```powershell
+Invoke-LdapRecon.ps1 -Cleanup
+```
 
 ## Detection
 | Alert Title | Alert Description | Alert Details |
