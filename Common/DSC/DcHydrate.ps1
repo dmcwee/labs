@@ -112,6 +112,9 @@ try {
     $domainRoot = (Get-ADDomain).DNSRoot
     Write-Log -message $("DNS Root: $domainRoot") -source $TaskName -eventID 2101
 
+    Add-KdsRootKey -EffectiveTime ((Get-Date).addhours(-10))
+    Write-Log -message "KDS Root Key added" -source $TaskName -eventID 2102
+
     $securePassword = ConvertTo-SecureString -String $password -AsPlainText -Force
 
     # Create the OU if it doesn't exist
@@ -130,6 +133,7 @@ try {
         @{ Name = "John Smith"; AccountName = "jsmith"; Groups = @() },
         @{ Name = "Ron HelpDesk"; AccountName = "ronhd"; Groups = @("Helpdesk") },
         @{ Name = "John Admin"; AccountName = "johna"; Groups = @("Domain Admins") }
+        @{ Name = "Admin Backup"; AccountName = "admin_bak"; Groups = @("Remote IT Admin", "Admin Backup")}
     )
 
     foreach ($user in $users) {
