@@ -59,5 +59,5 @@ jobs:
               out=$dir/../$base.json
               echo "Building $file to $out"
 
-              az bicep build --file "$file" --out "$out""
+              az bicep build --file "$file" --out "$out"
             done
