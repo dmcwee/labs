@@ -87,8 +87,8 @@ jobs:
           rsync -a --delete tmp/ $CURRENT_BRANCH/
           rsync -a --delete DSC $CURRENT_BRANCH/
 
-          git add pub
-      
+          git add $CURRENT_BRANCH
+
       - name: Commit and push to publish branch
         run: | 
           TARGET_BRANCH="${{ github.event.inputs.target-branch }}"
