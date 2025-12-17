@@ -57,7 +57,7 @@ jobs:
               firstdir="${file#./}"
               firstdir="${firstdir%%/*}"
 
-              out=""./pub/$firstdir"
+              out="./pub/$firstdir"
               echo "Building $file to $out"
               
               az bicep build --file "$file" --outdir "$out"
