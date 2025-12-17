@@ -84,6 +84,19 @@ jobs:
             echo "Adding $file to publication branch"
             git add "$file"
           done
+
+          cd ..
+
+      - name: Copy supporting files
+        run: |
+          TARGET_BRANCH="${{ github.event.inputs.target-branch }}"
+          echo "Copying supporting files to branch $TARGET_BRANCH"
+
+          mkdir -p pub/DSC
+          cp ./Common/DSC/* pub/DSC
+
+          git add pub/DSC
+
       
       - name: Commit and push to publish branch
         run: | 
