@@ -31,10 +31,34 @@ resource gatewaySubnet 'Microsoft.Network/virtualNetworks/subnets@2024-05-01' = 
   }
 }
 
+resource publicNatIp 'Microsoft.Network/publicIPAddresses@2024-05-01' = {
+  name: 'nat-pub-ip'
+  location: location
+  sku: {
+    name: 'Standard'
+  }
+  properties: {
+    publicIPAllocationMethod: 'Static'
+  }
+}
+
+resource natGateway 'Microsoft.Network/natGateways@2024-05-01' = {
+  name: 'client-subnet-gateway'
+  location: location
+  sku: { name: 'Standard' }
+  properties: {
+    publicIpAddresses: [
+      { id: publicNatIp.id }
+  ]}
+}
+
 resource clientSubnet 'Microsoft.Network/virtualNetworks/subnets@2024-05-01' = {
   name: 'client-subnet'
   parent: network
-  properties: {addressPrefix: clientRange}
+  properties: {
+    addressPrefix: clientRange
+    natGateway: { id: natGateway.id }
+  }
 }
 
 resource publicIp 'Microsoft.Network/publicIPAddresses@2024-05-01' = {
