@@ -76,4 +76,9 @@ jobs:
             git pull
           else
             git checkout -b $TARGET_BRANCH
-          fi  
+          fi
+
+          find pub -type f | while read file; do
+            echo "Adding $file to publication branch"
+            git add "$file"
+          done
