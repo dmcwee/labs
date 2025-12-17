@@ -63,11 +63,8 @@ jobs:
               az bicep build --file "$file" --outdir "$out"
             done
 
-      - name: Copy supporting files
-        run: |
-          echo "Copying supporting files to branch tmp"
-          mkdir -p ./tmp/DSC
-          rsync -a Common/DSC/ tmp/DSC/
+            echo "Copying supporting files to branch tmp"
+            rsync -a Common/DSC tmp/
 
       - name: Switch to target branch and stage artifacts
         id: prepare
