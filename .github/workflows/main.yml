@@ -47,17 +47,16 @@ jobs:
         with:
           azcliversion: latest
           inlineScript: |
+            echo "Az Version"
             az version
-            az bicep --version
-            # find . -type f -name "*.bicep" | while read file; do
-            #   echo "Building $file"
-            #   az bicep build --file $file
-            # done
 
-      # - name: Git published branch
-      #   run: | 
-      #           git config user.name "github-actions"
-      #           git config user.email "github-actions@davidmcwee.com"
-      #           git fetch origin master
-      #           git checkout master
-      #           ls
+            echo "bicep version"
+            az bicep --version
+
+      - name: Find bicep files and build them
+        run: |
+          echo "Finding Bicep files and building them"
+          # find . -type f -name "*.bicep" | while read file; do
+          #   echo "Building $file"
+          #   az bicep build --file $file
+          # done
