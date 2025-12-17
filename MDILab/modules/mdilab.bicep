@@ -14,8 +14,9 @@ param subDomain2 string = 'tech.mcweeinc.com'
 param netbiosName1 string = 'mayor'
 @minLength(3)
 param netbiosName2 string = 'tech'
+param size string = 'Standard_B1ms'
 
-module network '../Common/modules/network.bicep' = {
+module network '../../Common/modules/network.bicep' = {
   params: {
     dns: ['10.0.2.15', '168.63.129.16']
     gatewayCertData: gatewayCertData
@@ -23,7 +24,7 @@ module network '../Common/modules/network.bicep' = {
   }
 }
 
-module dcModule1 '../Common/modules/virtualMachine.bicep' = {
+module dcModule1 '../../Common/modules/virtualMachine.bicep' = {
   params: {
     name: 'LabSubAd1'
     sku:'2022-Datacenter'
@@ -39,7 +40,7 @@ module dcModule1 '../Common/modules/virtualMachine.bicep' = {
   }
 }
 
-module dcModule2 '../Common/modules/virtualMachine.bicep' = {
+module dcModule2 '../../Common/modules/virtualMachine.bicep' = {
   params: {
     name: 'LabSubAd2'
     sku:'2022-Datacenter'
@@ -112,3 +113,4 @@ resource adSetupCommand2 'Microsoft.Compute/virtualMachines/extensions@2024-11-0
     }
   }
 }
+

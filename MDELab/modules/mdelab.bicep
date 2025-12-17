@@ -52,7 +52,7 @@ var labServers = [
   }
 ]
 
-module network '../Common/modules/network.bicep' = {
+module network '../../Common/modules/network.bicep' = {
   params: {
     dns: ['10.0.2.5', '168.63.129.16']
     gatewayCertData: gatewayCertData
@@ -60,7 +60,7 @@ module network '../Common/modules/network.bicep' = {
   }
 }
 
-module dcModule '../Common/modules/virtualMachine.bicep' = {
+module dcModule '../../Common/modules/virtualMachine.bicep' = {
   params: {
     name: adServerName
     sku:'2016-Datacenter'
@@ -76,7 +76,7 @@ module dcModule '../Common/modules/virtualMachine.bicep' = {
   }
 }
 
-module servers '../Common/modules/virtualMachine.bicep' = [for (server, i) in labServers: {
+module servers '../../Common/modules/virtualMachine.bicep' = [for (server, i) in labServers: {
   params: {
     name: server.name
     osType: server.type
