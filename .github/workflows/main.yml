@@ -14,7 +14,7 @@ on:
       target-branch:
         description: 'The branch to run the workflow against'
         required: true
-        default: publish
+        default: published
 
 permissions:
   contents: write
@@ -57,12 +57,10 @@ jobs:
               firstdir="${file#./}"
               firstdir="${firstdir%%/*}"
 
-              dir=$(dirname "$file")
-              base=$(basename "$file" .bicep)
-              out=$dir/../$base.json
-              echo "Building $file to $firstdir"
+              out=""./pub/$firstdir"
+              echo "Building $file to $out"
               
-              az bicep build --file "$file" --outdir "./pub/$firstdir"
+              az bicep build --file "$file" --outdir "$out"
             done
 
       - name: Switch to target branch and stage artifacts
