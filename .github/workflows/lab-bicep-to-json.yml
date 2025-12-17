@@ -44,10 +44,12 @@ jobs:
 
       - name: Build Bicep to ARM JSON
         run: |
-            find . -type f -name "*.bicep" | while read file; do
-              echo "Building $file"
-              az bicep build --file $file
-            done
+          az version
+          az bicep --version
+            # find . -type f -name "*.bicep" | while read file; do
+            #   echo "Building $file"
+            #   az bicep build --file $file
+            # done
 
       # - name: Git published branch
       #   run: | 
