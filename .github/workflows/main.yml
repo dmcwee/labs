@@ -84,3 +84,19 @@ jobs:
             echo "Adding $file to publication branch"
             git add "$file"
           done
+      
+      - name: Commit and push to publish branch
+        run: | 
+          TARGET_BRANCH="${{ github.event.inputs.target-branch }}"
+          echo "Committing and pushing to branch $TARGET_BRANCH"
+
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git commit -m "Bicep build artifacts for commit $GITHUB_SHA" || echo "No changes to commit"
+          git push origin HEAD:$TARGET_BRANCH
