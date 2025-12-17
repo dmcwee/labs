@@ -54,10 +54,10 @@ jobs:
             az bicep version
 
             find . -type f -name "*.bicep" | while read file; do
-              dir=$(dirname "$file")
+              dir=$(dirname "modules/$file")
               base=$(basename "$file" .bicep)
-              out=$dir/../$base.json
-              echo "Building $file to $out"
+              out=$dir/$base.json
+              echo "Building $file to dir $dir"
 
-              az bicep build --file "$file" --out "$out"
+              az bicep build --file "$file" --outdir "$dir"
             done
