@@ -63,14 +63,13 @@ jobs:
               az bicep build --file "$file" --outdir "$out"
             done
 
-            echo "Copying supporting files to branch tmp"
-            rsync -a Common/DSC tmp/
-
       - name: Switch to target branch and stage artifacts
         id: prepare
         run: |
           TARGET_BRANCH="${{ github.event.inputs.target-branch }}"
           echo "Switching to branch $TARGET_BRANCH"
+
+          dir
 
           #fetch and checkout branch
           git fetch origin $TARGET_BRANCH || true
