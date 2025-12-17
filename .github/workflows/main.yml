@@ -72,9 +72,8 @@ jobs:
         id: prepare
         run: |
           TARGET_BRANCH="${{ github.event.inputs.target-branch }}"
-          echo "Switching to branch $TARGET_BRANCH"
-
-          dir
+          CURRENT_BRANCH="${{ github.ref_name }}"
+          echo "Switching to branch $TARGET_BRANCH. Current Branch is $CURRENT_BRANCH"
 
           #fetch and checkout branch
           git fetch origin $TARGET_BRANCH || true
@@ -85,8 +84,8 @@ jobs:
             git checkout -b $TARGET_BRANCH
           fi
 
-          rsync -a --delete tmp/ pub/
-          rsync -a --delete DSC pub/
+          rsync -a --delete tmp/ $CURRENT_BRANCH/
+          rsync -a --delete DSC $CURRENT_BRANCH/
 
           git add pub
       
