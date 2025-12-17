@@ -53,7 +53,7 @@ jobs:
             echo "bicep version"
             az bicep version
 
-            find . -type f -name "*.bicep" | while read file; do
+            find . -type f -name '*.bicep' ! -path '*/Common/*' | while read file; do
               dir=$(dirname "$file")
               base=$(basename "$file" .bicep)
               out=$dir/../$base.json
