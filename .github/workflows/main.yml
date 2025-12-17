@@ -1,0 +1,62 @@
+name: Build Bicep to ARM and push to publish branch
+
+run-name: Test bicep build
+on:
+  push:
+    branches:
+      - actions
+    paths:
+      - MDELab/modules/*.bicep
+      - MDILab/modules/*.bicep
+      - OceanLotus/modules/*.bicep
+  workflow_dispatch:
+    inputs:
+      target-branch:
+        description: 'The branch to run the workflow against'
+        required: true
+        default: publish
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bicep-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Labs
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Install Bicep and build templates
+        uses: azure/cli@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            echo "Installing Bicep"
+            az bicep install
+            az bicep upgrade
+
+      - name: Build Bicep to ARM JSON
+        uses: azure/cli@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            echo "Az Version"
+            az version
+
+            echo "bicep version"
+            az bicep --version
+
+      - name: Find bicep files and build them
+        run: |
+          echo "Finding Bicep files and building them"
+          # find . -type f -name "*.bicep" | while read file; do
+          #   echo "Building $file"
+          #   az bicep build --file $file
+          # done
