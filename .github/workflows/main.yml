@@ -78,7 +78,9 @@ jobs:
             git checkout -b $TARGET_BRANCH
           fi
 
-          find pub -type f | while read file; do
+          cd pub
+
+          find . -type f | while read file; do
             echo "Adding $file to publication branch"
             git add "$file"
           done
