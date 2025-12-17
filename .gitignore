@@ -1,0 +1,11 @@
+DSC/xActiveDirectory
+DSC-test
+IDAMLab_DSC.zip
+.vs/
+*.txt
+*.testing.*
+*.local.*
+.vscode/
+azuredeploy.parameters.*.*.json
+*.pfx
+*.cer
