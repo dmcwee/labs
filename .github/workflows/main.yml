@@ -53,10 +53,7 @@ jobs:
             echo "bicep version"
             az bicep --version
 
-      - name: Find bicep files and build them
-        run: |
-          echo "Finding Bicep files and building them"
-          # find . -type f -name "*.bicep" | while read file; do
-          #   echo "Building $file"
-          #   az bicep build --file $file
-          # done
+            find . -type f -name "*.bicep" | while read file; do
+              echo "Building $file"
+              az bicep build --file $file
+            done
