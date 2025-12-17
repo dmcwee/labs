@@ -43,9 +43,12 @@ jobs:
             az bicep upgrade
 
       - name: Build Bicep to ARM JSON
-        run: |
-          az version
-          az bicep --version
+        uses: azure/cli@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az version
+            az bicep --version
             # find . -type f -name "*.bicep" | while read file; do
             #   echo "Building $file"
             #   az bicep build --file $file
