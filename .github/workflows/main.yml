@@ -63,6 +63,11 @@ jobs:
               az bicep build --file "$file" --outdir "$out"
             done
 
+      - name: Copy supporting files
+        run: |
+          echo "Copying supporting files to branch tmp"
+          rsync -a Common/DSC tmp/
+
       - name: Switch to target branch and stage artifacts
         id: prepare
         run: |
@@ -81,17 +86,6 @@ jobs:
           rsync -a --delete tmp/ pub/
 
           git add pub
-
-      - name: Copy supporting files
-        run: |
-          TARGET_BRANCH="${{ github.event.inputs.target-branch }}"
-          echo "Copying supporting files to branch $TARGET_BRANCH"
-
-          mkdir -p pub/DSC
-          cp ./Common/DSC/* pub/DSC
-
-          git add pub/DSC
-
       
       - name: Commit and push to publish branch
         run: | 
