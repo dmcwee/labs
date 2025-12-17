@@ -54,10 +54,28 @@ jobs:
             az bicep version
 
             find . -type f -name '*.bicep' ! -path '*/Common/*' | while read file; do
+              firstdir="${file#./}"
+              firstdir="${firstdir%%/*}"
+
               dir=$(dirname "$file")
               base=$(basename "$file" .bicep)
               out=$dir/../$base.json
-              echo "Building $file to $out"
-
-              az bicep build --file "$file" --outfile "$out"
+              echo "Building $file to $firstdir"
+              
+              az bicep build --file "$file" --outdir "./pub/$firstdir"
             done
+
+      - name: Switch to target branch and stage artifacts
+        id: prepare
+        run: |
+          TARGET_BRANCH="${{ github.event.inputs.target-branch }}"
+          echo "Switching to branch $TARGET_BRANCH"
+
+          #fetch and checkout branch
+          git fetch origin $TARGET_BRANCH || true
+          if git rev-parse --verify origin/$TARGET_BRANCH; then
+            git checkout $TARGET_BRANCH
+            git pull
+          else
+            git checkout -b $TARGET_BRANCH
+          fi  
