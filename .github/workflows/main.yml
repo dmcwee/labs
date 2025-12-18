@@ -1,6 +1,6 @@
 name: Build Bicep to ARM and push to publish branch
 
-run-name: Test bicep build
+run-name: Build Bicep to ARM and push to publish branch
 on:
   push:
     branches:
@@ -73,7 +73,10 @@ jobs:
         run: |
           TARGET_BRANCH="${{ github.event.inputs.target-branch }}"
           CURRENT_BRANCH="${{ github.ref_name }}"
-          echo "Switching to branch $TARGET_BRANCH. Current Branch is $CURRENT_BRANCH"
+          if [ $CURRENT_BRANCH == "master" ]; then
+            CURRENT_BRANCH="pub"
+          fi
+          echo "Switching to branch $TARGET_BRANCH. Current Branch folder is $CURRENT_BRANCH"
 
           #fetch and checkout branch
           git fetch origin $TARGET_BRANCH || true
@@ -92,7 +95,7 @@ jobs:
       - name: Commit and push to publish branch
         run: | 
           TARGET_BRANCH="${{ github.event.inputs.target-branch }}"
-          echo "Committing and pushing to branch $TARGET_BRANCH"
+          
 
           if [ -z "$(git status --porcelain)" ]; then
             echo "No changes to commit"
