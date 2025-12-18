@@ -1,5 +1,5 @@
 @minLength(3)
-param username string
+param username string = 'cmadmin'
 @secure()
 param password string
 @minLength(0)
@@ -10,7 +10,8 @@ param gatewayCertName string
 param domainName string = 'mcweeinc.com'
 @minLength(3)
 param domainNetbiosName string = 'mcwee'
-param size string = 'Standard_B1ms'
+@minLength(1)
+param size string
 
 var adServerName = 'LabAd'
 var labServers = [
@@ -47,7 +48,7 @@ var labServers = [
     offer: 'windows-11'
     sku:'win11-23h2-ent'
     type: 'Windows'
-    size: 'Standard_B2ms'
+    size: size
     ip: ''
   }
 ]
@@ -67,7 +68,7 @@ module dcModule '../../Common/modules/virtualMachine.bicep' = {
     offer: 'WindowsServer'
     publisher: 'MicrosoftWindowsServer'
     osType: 'Windows'
-    size: 'Standard_B2ms'
+    size: size
     privateIp: '10.0.2.5'
     password: password
     username: username
@@ -114,8 +115,8 @@ resource adSetupCommand 'Microsoft.Compute/virtualMachines/extensions@2024-11-01
     protectedSettings: {
       commandToExecute: 'powershell -executionpolicy bypass -File .\\DcSetup.ps1 -DomainName "${domainName}" -NetBiosName "${domainNetbiosName}" -Password ${password} -HydrationScript DcHydrate.ps1'
       fileUris: [
-        'https://raw.githubusercontent.com/dmcwee/labs/refs/heads/dev/Common/DSC/DcSetup.ps1'
-        'https://raw.githubusercontent.com/dmcwee/labs/refs/heads/dev/Common/DSC/DcHydrate.ps1'
+        'https://raw.githubusercontent.com/dmcwee/labs/refs/heads/published/dev/DSC/DcSetup.ps1'
+        'https://raw.githubusercontent.com/dmcwee/labs/refs/heads/published/dev/DSC/DcHydrate.ps1'
       ]
     }
   }

@@ -4,11 +4,14 @@ run-name: Build Bicep to ARM and push to publish branch
 on:
   push:
     branches:
-      - actions
+      - dev
+      - master
     paths:
       - MDELab/modules/*.bicep
       - MDILab/modules/*.bicep
       - OceanLotus/modules/*.bicep
+      - Linux/modules/*.bicep
+      - Common/DSC/*.ps1
   workflow_dispatch:
     inputs:
       target-branch:
