@@ -1,20 +1,23 @@
 name: Build Bicep to ARM and push to publish branch
 
-run-name: Test bicep build
+run-name: Build Bicep to ARM and push to publish branch
 on:
   push:
     branches:
-      - actions
+      - dev
+      - master
     paths:
       - MDELab/modules/*.bicep
       - MDILab/modules/*.bicep
       - OceanLotus/modules/*.bicep
+      - Linux/modules/*.bicep
+      - Common/DSC/*.ps1
   workflow_dispatch:
     inputs:
       target-branch:
         description: 'The branch to run the workflow against'
         required: true
-        default: publish
+        default: published
 
 permissions:
   contents: write
@@ -54,10 +57,56 @@ jobs:
             az bicep version
 
             find . -type f -name '*.bicep' ! -path '*/Common/*' | while read file; do
-              dir=$(dirname "$file")
-              base=$(basename "$file" .bicep)
-              out=$dir/../$base.json
-              echo "Building $file to $out"
+              firstdir="${file#./}"
+              firstdir="${firstdir%%/*}"
 
-              az bicep build --file "$file" --outfile "$out"
+              out="./tmp/$firstdir"
+              echo "Building $file to $out"
+              
+              az bicep build --file "$file" --outdir "$out"
             done
+
+      - name: Copy Supporting Files
+        run: |
+         mkdir -p DSC
+         rsync -a Common/DSC/ DSC/
+
+      - name: Switch to target branch and stage artifacts
+        id: prepare
+        run: |
+          TARGET_BRANCH="${{ github.event.inputs.target-branch }}"
+          CURRENT_BRANCH="${{ github.ref_name }}"
+          if [ $CURRENT_BRANCH == "master" ]; then
+            CURRENT_BRANCH="pub"
+          fi
+          echo "Switching to branch $TARGET_BRANCH. Current Branch folder is $CURRENT_BRANCH"
+
+          #fetch and checkout branch
+          git fetch origin $TARGET_BRANCH || true
+          if git rev-parse --verify origin/$TARGET_BRANCH; then
+            git checkout $TARGET_BRANCH
+            git pull
+          else
+            git checkout -b $TARGET_BRANCH
+          fi
+
+          rsync -a --delete tmp/ $CURRENT_BRANCH/
+          rsync -a --delete DSC $CURRENT_BRANCH/
+
+          git add $CURRENT_BRANCH
+
+      - name: Commit and push to publish branch
+        run: | 
+          TARGET_BRANCH="${{ github.event.inputs.target-branch }}"
+          
+
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git commit -m "Bicep build artifacts for commit $GITHUB_SHA" || echo "No changes to commit"
+          git push origin HEAD:$TARGET_BRANCH

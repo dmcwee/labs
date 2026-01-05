@@ -131,8 +131,10 @@ try {
     Write-Log -message "Creating User Accounts." -source $TaskName -eventID 2300
     $users = @(
         @{ Name = "John Smith"; AccountName = "jsmith"; Groups = @() },
+        @{ Name = "Jeff Leatherman"; AccountName = "jeffl"; Groups = @() },
         @{ Name = "Ron HelpDesk"; AccountName = "ronhd"; Groups = @("Helpdesk") },
-        @{ Name = "John Admin"; AccountName = "johna"; Groups = @("Domain Admins") }
+        @{ Name = "John Admin"; AccountName = "johna"; Groups = @("Domain Admins") },
+        @{ Name = "Samira Abbasi"; AccountName = "samiraa"; Groups = @("Domain Admins") },
         @{ Name = "Admin Backup"; AccountName = "admin_bak"; Groups = @("Remote IT Admin", "Admin Backup")}
     )
 

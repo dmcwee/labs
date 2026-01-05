@@ -9,3 +9,4 @@ IDAMLab_DSC.zip
 azuredeploy.parameters.*.*.json
 *.pfx
 *.cer
+parameters/
