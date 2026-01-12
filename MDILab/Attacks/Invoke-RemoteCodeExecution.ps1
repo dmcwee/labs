@@ -51,7 +51,7 @@ try {
         # Write the event log entry
         Write-EventLog -LogName Application `
                        -Source $sourceName `
-                       -EventId 1337 `
+                       -EventId 2026 `
                        -EntryType Warning `
                        -Message $eventMessage `
                        -Category 0

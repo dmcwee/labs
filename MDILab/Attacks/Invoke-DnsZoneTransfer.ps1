@@ -13,7 +13,8 @@ param(
     [int]$TimeoutSec = 15,
 
     [Parameter(Mandatory = $false)]
-    [string[]]$RecordTypes = @('TXT','NS','CNAME','MX', 'NULL', 'SOA'),
+    [string[]]$RecordTypes = @('UNKNOWN', 'A_AAAA', 'A', 'NS', 'MD', 'MF', ' CNAME', 'SOA', 'MB', 'MG', 'MR', 'NULL', 'WKS', 'PTR', 'HINFO', 'MINFO', 'MX', 'TXT', 'RP', 'AFSDB', 'X25', 'ISDN',
+    'RT', 'AAAA', 'SRV', 'DNAME', 'OPT', 'DS', 'RRSIG', 'NSEC', 'DNSKEY', 'DHCID', 'NSEC3', 'NSEC3PARAM', 'ANY', 'ALL', 'WINS'),
 
     [Parameter(Mandatory = $false)]
     [switch]$CleanUp,

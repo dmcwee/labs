@@ -17,15 +17,15 @@
     Filter results to only show sessions for a specific user.
 
 .EXAMPLE
-    .\Get-NetSession.ps1
+    .\Invoke-NetSessionEnumeration.ps1
     Lists all sessions on the local computer.
 
 .EXAMPLE
-    .\Get-NetSession.ps1 -ComputerName "SERVER01"
+    .\Invoke-NetSessionEnumeration.ps1 -ComputerName "SERVER01"
     Lists all sessions on SERVER01.
 
 .EXAMPLE
-    .\Get-NetSession.ps1 -ComputerName "SERVER01" -UserName "john"
+    .\Invoke-NetSessionEnumeration.ps1 -ComputerName "SERVER01" -UserName "john"
     Lists all sessions for user 'john' on SERVER01.
 #>
 

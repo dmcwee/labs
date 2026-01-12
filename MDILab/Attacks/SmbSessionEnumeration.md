@@ -25,4 +25,4 @@ Lists all sessions for user 'john' on SERVER01.
 
 | Alert Title | Alert Description | Alert Details |
 | -- | -- | -- |
-| xxx| xxx | **Category:** xxx<br/>**MITRE ATT&CK Techniques:** xxx<br/>**Service source:** xxx<br/>**Detection source:** xxx<br/>**Detection technology:** xxx<br/>**Detection status:** xxx |
+| Suspicious Server Message Block (SMB) enumeration from untrusted host | Suspicious SMB session enumeration targeting the MDI sensor. This indicates adversary reconnaissance aimed at identifying active user sessions on the host. | **Category:** Discovery<br/>**MITRE ATT&CK Techniques:** T1049: System Network Connections Discovery<br/>**Service source:** MDI<br/>**Detection source:** Defender XDR<br/>**Detection technology:** -<br/>**Detection status:** Unknown |
