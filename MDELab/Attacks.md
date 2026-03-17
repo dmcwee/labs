@@ -16,4 +16,4 @@
 
 ## Attack Scenarios
 
-For attack scenarios review the [Attack scripts and documentation](./Attacks/)
+For attack scenarios review the [Attack scripts and documentation](./Attacks/README.md)
