@@ -16,13 +16,4 @@
 
 ## Attack Scenarios
 
-1. [MDE Demonstration Scenarios (MS Learn)](https://learn.microsoft.com/en-us/defender-endpoint/defender-endpoint-demonstrations)
-1. [Account Discovery](Attacks/AccountDiscovery.md)
-1. [Account Persistence](Attacks/AccountPersistence.md)
-1. [Credential Dumping](Attacks/CredentialDumping.md)
-1. [Defender Tampering](Attacks/DefenderTampering.md)
-1. [Delete Shadow Copy](Attacks/DeleteShadowCopy.md)
-1. [Event Log Tampering](Attacks/EventLog.md)
-1. [Password Detection](Attacks/PasswordDetection.md)
-1. [Service Execution](Attacks/ServiceExecution.md)
-1. [UAC Bypass](Attacks/UACBypass.md)
+For attack scenarios review the [Attack scripts and documentation](./Attacks/)
