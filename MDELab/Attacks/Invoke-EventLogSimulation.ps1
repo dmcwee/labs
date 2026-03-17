@@ -36,7 +36,7 @@ if (!$Force) {
     Start-Sleep -Seconds 2
 }
 
-if($Mode -eq "webtutil") {
+if($Mode -eq "wevtutil") {
     wevtutil cl system
     wevtutil cl application
     wevtutil cl security

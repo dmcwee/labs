@@ -10,3 +10,4 @@ azuredeploy.parameters.*.*.json
 *.pfx
 *.cer
 parameters/
+CLAUDE.md

@@ -64,7 +64,7 @@ module network '../../Common/modules/network.bicep' = {
 module dcModule '../../Common/modules/virtualMachine.bicep' = {
   params: {
     name: adServerName
-    sku:'2016-Datacenter'
+    sku:'2022-Datacenter'
     offer: 'WindowsServer'
     publisher: 'MicrosoftWindowsServer'
     osType: 'Windows'
