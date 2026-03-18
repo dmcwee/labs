@@ -14,7 +14,7 @@ param subDomain2 string = 'tech.mcweeinc.com'
 param netbiosName1 string = 'mayor'
 @minLength(3)
 param netbiosName2 string = 'tech'
-param size string = 'Standard_B1ms'
+param size string = 'Standard_B2ms'
 
 module network '../../Common/modules/network.bicep' = {
   params: {
@@ -31,7 +31,7 @@ module dcModule1 '../../Common/modules/virtualMachine.bicep' = {
     offer: 'WindowsServer'
     publisher: 'MicrosoftWindowsServer'
     osType: 'Windows'
-    size: 'Standard_B2ms'
+    size: size
     privateIp: '10.0.2.15'
     password: password
     username: username
@@ -47,7 +47,7 @@ module dcModule2 '../../Common/modules/virtualMachine.bicep' = {
     offer: 'WindowsServer'
     publisher: 'MicrosoftWindowsServer'
     osType: 'Windows'
-    size: 'Standard_B2ms'
+    size: size
     privateIp: '10.0.2.16'
     password: password
     username: username
@@ -114,3 +114,18 @@ resource adSetupCommand2 'Microsoft.Compute/virtualMachines/extensions@2024-11-0
   }
 }
 
+module servers '../../Common/modules/virtualMachine.bicep' = {
+  params: {
+    name: 'WinClient11'
+    osType: 'Windows'
+    publisher: 'microsoftwindowsdesktop'
+    offer: 'windows-11'
+    sku: 'win11-23h2-ent'
+    size: size
+    password: password
+    username: username
+    subnetId: network.outputs.clientSubnetId
+    privateIp: '10.0.2.50'
+    storageType: 'Standard_LRS'
+  }
+}
