@@ -56,6 +56,38 @@ module dcModule2 '../../Common/modules/virtualMachine.bicep' = {
   }
 }
 
+module server '../../Common/modules/virtualMachine.bicep' = {
+  params: {
+    name: 'Win2022'
+    osType: 'Windows'
+    publisher: 'MicrosoftWindowsServer'
+    offer: 'WindowsServer'
+    sku: '2022-Datacenter'
+    size: size
+    password: password
+    username: username
+    subnetId: network.outputs.clientSubnetId
+    privateIp: '10.0.2.50'
+    storageType: 'Standard_LRS'
+  }
+}
+
+module client '../../Common/modules/virtualMachine.bicep' = {
+  params: {
+    name: 'WinClient11'
+    osType: 'Windows'
+    publisher: 'microsoftwindowsdesktop'
+    offer: 'windows-11'
+    sku: 'win11-23h2-ent'
+    size: size
+    password: password
+    username: username
+    subnetId: network.outputs.clientSubnetId
+    privateIp: '10.0.2.51'
+    storageType: 'Standard_LRS'
+  }
+}
+
 resource dc1 'Microsoft.Compute/virtualMachines@2024-11-01' existing = {
   name: 'LabSubAd1'
   dependsOn: [
@@ -67,6 +99,13 @@ resource dc2 'Microsoft.Compute/virtualMachines@2024-11-01' existing = {
   name: 'LabSubAd2'
   dependsOn: [
     dcModule2
+  ]
+}
+
+resource badclient 'Microsoft.Compute/virtualMachines@2024-11-01' existing = {
+  name: 'WinClient11'
+  dependsOn: [
+    client
   ]
 }
 
@@ -114,18 +153,23 @@ resource adSetupCommand2 'Microsoft.Compute/virtualMachines/extensions@2024-11-0
   }
 }
 
-module servers '../../Common/modules/virtualMachine.bicep' = {
-  params: {
-    name: 'WinClient11'
-    osType: 'Windows'
-    publisher: 'microsoftwindowsdesktop'
-    offer: 'windows-11'
-    sku: 'win11-23h2-ent'
-    size: size
-    password: password
-    username: username
-    subnetId: network.outputs.clientSubnetId
-    privateIp: '10.0.2.50'
-    storageType: 'Standard_LRS'
+resource badClientSetup 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = {
+  name: 'WinClient11-customscriptextension'
+  location: resourceGroup().location
+  parent: badclient
+  properties: {
+    publisher: 'Microsoft.Compute'
+    type: 'CustomScriptExtension'
+    typeHandlerVersion: '1.10'
+    autoUpgradeMinorVersion: true
+    settings: {
+
+    }
+    protectedSettings: {
+      commandToExecute: 'powershell -executionpolicy bypass -command "New-Item -Path c:\\hydration -ItemType Directory -Force; Copy-Item -Path .\\*.ps1 -Destination c:\\hydration\\ -Force"'
+      fileUris: [
+        'https://raw.githubusercontent.com/dmcwee/labs/refs/heads/published/dev/DSC/run-victimpc.ps1'
+      ]
+    }
   }
 }

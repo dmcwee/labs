@@ -44,7 +44,7 @@ var labServers = [
   }
 ]
 
-module network 'network.bicep' = {
+module network '../../Common/modules/network.bicep' = {
   params: {
     dns: ['10.0.2.5', '168.63.129.16']
     gatewayCertData: gatewayCertData
@@ -52,7 +52,7 @@ module network 'network.bicep' = {
   }
 }
 
-module labad 'virtualMachine.bicep' = {
+module labad '../../Common/modules/virtualMachine.bicep' = {
   params: {
     name: 'LabAd'
     sku:'2022-Datacenter'
@@ -68,7 +68,7 @@ module labad 'virtualMachine.bicep' = {
   }
 }
 
-module labsubad 'virtualMachine.bicep' = {
+module labsubad '../../Common/modules/virtualMachine.bicep' = {
   params: {
     name: 'LabSubAd'
     sku:'2022-Datacenter'
@@ -84,7 +84,7 @@ module labsubad 'virtualMachine.bicep' = {
   }
 }
 
-module client 'virtualMachine.bicep' = {
+module client '../../Common/modules/virtualMachine.bicep' = {
   params: {
     name: 'WinClient11'
     osType: 'Windows'
@@ -100,7 +100,7 @@ module client 'virtualMachine.bicep' = {
   }
 }
 
-module servers 'virtualMachine.bicep' = [for (server, i) in labServers: {
+module servers '../../Common/modules/virtualMachine.bicep' = [for (server, i) in labServers: {
   params: {
     name: server.name
     osType: server.type
