@@ -16,19 +16,19 @@ On a testing machine open the Command Prompt as an Admin
 1. Add user to local admin group `net localgroup Administrators {username} /add`
 1. Confirm user is in local admin group `net localgroup Administrators`
 
-> *Script:* [download](../../AdvancedHunting/CreateAccount/CreateAccount.cmd)
+> *Script:* [download](https://github.com/dmcwee/AdvancedHunting/blob/main/CreateAccount/CreateAccount.cmd)
 
 ### Advanced Hunting
 
 In the Security Portal open Advanced hunting and walk the customer through the query creation process below.
 
-1. Start by finding all account events [Query 1](../../AdvancedHunting/CreateAccount/CreateAccount-Query1.kql)
-1. Reduce results to just Account Creation & Account Added to Local Group [Query 2](../../AdvancedHunting/CreateAccount/CreateAccount-Query2.kql)
-1. Reduce our initial results to just account created and get select fields. We will merge this into a single line with the Account added to group events shortly. Note: AccountSid in this event refers to the account created SID [Query 3](../../AdvancedHunting/CreateAccount/CreateAccount-Query3.kql)
-1. Assign the results of the query to a local scaler variable and add back the query for Account Added events as well as extending the query by parsing the JSON in the Additional Fields column to extract Group Name [Query 4](../../AdvancedHunting/CreateAccount/CreateAccount-Query4.kql)
-1. Next merge the scaler value & query using an inner join method. You can now see the Time the Account was created as well as the Time the Account was added to the local group. [Query 5](../../AdvancedHunting/CreateAccount/CreateAccount-Query5.kql)
-1. Extend the query by calculating the time difference between when the account was created and when it was added to the local group. Also, reduce the output fields to just those we want to see: Created, Added, Account Name, Local Group, Device Id, Device Name, Created By [Query 6](../../AdvancedHunting/CreateAccount/CreateAccount-Query6.kql)
-1. Finally filter out the default action of adding the user to the local Users group and include the Timestamp, ReportId, and InitiatingProcessAccountObjectId fields which are required for creating Custom NRT Detection [Query Final](../../AdvancedHunting/CreateAccount/CreateAccount-QueryFinal.kql)
+1. Start by finding all account events [Query 1](https://github.com/dmcwee/AdvancedHunting/blob/main/CreateAccount/CreateAccount-Query1.kql)
+1. Reduce results to just Account Creation & Account Added to Local Group [Query 2](https://github.com/dmcwee/AdvancedHunting/blob/main/CreateAccount/CreateAccount-Query2.kql)
+1. Reduce our initial results to just account created and get select fields. We will merge this into a single line with the Account added to group events shortly. Note: AccountSid in this event refers to the account created SID [Query 3](https://github.com/dmcwee/AdvancedHunting/blob/main/CreateAccount/CreateAccount-Query3.kql)
+1. Assign the results of the query to a local scaler variable and add back the query for Account Added events as well as extending the query by parsing the JSON in the Additional Fields column to extract Group Name [Query 4](https://github.com/dmcwee/AdvancedHunting/blob/main/CreateAccount/CreateAccount-Query4.kql)
+1. Next merge the scaler value & query using an inner join method. You can now see the Time the Account was created as well as the Time the Account was added to the local group. [Query 5](https://github.com/dmcwee/AdvancedHunting/blob/main/CreateAccount/CreateAccount-Query5.kql)
+1. Extend the query by calculating the time difference between when the account was created and when it was added to the local group. Also, reduce the output fields to just those we want to see: Created, Added, Account Name, Local Group, Device Id, Device Name, Created By [Query 6](https://github.com/dmcwee/AdvancedHunting/blob/main/CreateAccount/CreateAccount-Query6.kql)
+1. Finally filter out the default action of adding the user to the local Users group and include the Timestamp, ReportId, and InitiatingProcessAccountObjectId fields which are required for creating Custom NRT Detection [Query Final](https://github.com/dmcwee/AdvancedHunting/blob/main/CreateAccount/CreateAccount-QueryFinal.kql)
 
 ### Create Custom Detection
 
@@ -52,10 +52,10 @@ In the Security Portal open Advanced hunting and walk the customer through the q
 
 ## Queries
 
-* [Query 1](../../AdvancedHunting/CreateAccount/CreateAccount-Query1.kql)
-* [Query 2](../../AdvancedHunting/CreateAccount/CreateAccount-Query2.kql)
-* [Query 3](../../AdvancedHunting/CreateAccount/CreateAccount-Query3.kql)
-* [Query 4](../../AdvancedHunting/CreateAccount/CreateAccount-Query4.kql)
-* [Query 5](../../AdvancedHunting/CreateAccount/CreateAccount-Query5.kql)
-* [Query 6](../../AdvancedHunting/CreateAccount/CreateAccount-Query6.kql)
-* [Query Final](../../AdvancedHunting/CreateAccount/CreateAccount-QueryFinal.kql)
+* [Query 1](https://github.com/dmcwee/AdvancedHunting/blob/main/CreateAccount/CreateAccount-Query1.kql)
+* [Query 2](https://github.com/dmcwee/AdvancedHunting/blob/main/CreateAccount/CreateAccount-Query2.kql)
+* [Query 3](https://github.com/dmcwee/AdvancedHunting/blob/main/CreateAccount/CreateAccount-Query3.kql)
+* [Query 4](https://github.com/dmcwee/AdvancedHunting/blob/main/CreateAccount/CreateAccount-Query4.kql)
+* [Query 5](https://github.com/dmcwee/AdvancedHunting/blob/main/CreateAccount/CreateAccount-Query5.kql)
+* [Query 6](https://github.com/dmcwee/AdvancedHunting/blob/main/CreateAccount/CreateAccount-Query6.kql)
+* [Query Final](https://github.com/dmcwee/AdvancedHunting/blob/main/CreateAccount/CreateAccount-QueryFinal.kql)

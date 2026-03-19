@@ -2,6 +2,8 @@
 
 Attackers will use LDAP reconnaisance techniquest to discover valid users accounts and other objects within active directory. This information helps adversaries identify additional account and computer targets to further identify their foothold in the environment.
 
+This simulation also includes searching and enumerating SPN values in the domain.
+
 ## Simulation
 
 Run the following commands in PowerShell on a test device.

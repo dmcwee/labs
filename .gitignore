@@ -10,3 +10,7 @@ azuredeploy.parameters.*.*.json
 *.pfx
 *.cer
 parameters/
+CLAUDE.md
+modules/*.json
+MDILab/modules/mdilab.json
+MDELab/modules/mdelab.json

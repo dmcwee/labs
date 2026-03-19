@@ -6,13 +6,10 @@ param(
     [string]$Password = 'P@ssw0rd!TestOnly',
     
     [Parameter()]
-    [string]$UPN = 'adm_backup@contoso.com',
-    
-    [Parameter()]
     [string]$Description = 'Decoy honeytoken - do not use (lab only)',
     
     [Parameter()]
-    [string]$OU = 'OU=Service Accounts',
+    [string]$OU = 'CN=Users',
     
     [Parameter()]
     [switch]$Cleanup,
@@ -24,8 +21,12 @@ param(
 # 2.1 Create a decoy user (enable only for test; don't assign real privileges)
 Import-Module ActiveDirectory
 
-# Get the domain DN from the current domain
-$domainDN = (Get-ADDomain).DistinguishedName
+# Get the domain DN and UPN suffix from the current domain
+$domain = Get-ADDomain
+$domainDN = $domain.DistinguishedName
+$domainUPN = $domain.Forest
+
+$UPN = "$Username@$domainUPN"
 
 # Construct the full path by combining OU parameter with domain DN
 $fullPath = "$OU,$domainDN"
@@ -94,7 +95,7 @@ New-ADUser -Name $Username `
   -Path $fullPath `
   -Description $Description
 
-# 2.2 Create "Remote IT Admin" group and add the user to it
+# Create "Remote IT Admin" group if it doesn't exist and add the user to it
 if (!(Get-ADGroup -Filter "Name -eq '$groupName'" -ErrorAction SilentlyContinue)) {
     New-ADGroup -Name $groupName `
       -GroupScope Global `
@@ -109,5 +110,3 @@ if (!(Get-ADGroup -Filter "Name -eq '$groupName'" -ErrorAction SilentlyContinue)
 # Add the user to the group
 Add-ADGroupMember -Identity $groupName -Members $Username
 Write-Host "Added $Username to $groupName"
-
-# 2.3 Capture the SID for hunting queries later

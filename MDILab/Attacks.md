@@ -1,6 +1,5 @@
-# MDI Lab Attack Scenarios
+# MDI Attack Lab
 
-## Scenarios
+## Attack Scenarios
 
-1. [LDAP Recon Script](./Attacks/Invoke-LdapRecon.md)
-1. [Account Discovery](../MDELab/Attacks/AccountDiscovery.md)
+For attack scenarios refer to [MDI Attack Folder](./Attacks/README.md).

@@ -14,7 +14,7 @@ param subDomain2 string = 'tech.mcweeinc.com'
 param netbiosName1 string = 'mayor'
 @minLength(3)
 param netbiosName2 string = 'tech'
-param size string = 'Standard_B1ms'
+param size string = 'Standard_B2ms'
 
 module network '../../Common/modules/network.bicep' = {
   params: {
@@ -31,7 +31,7 @@ module dcModule1 '../../Common/modules/virtualMachine.bicep' = {
     offer: 'WindowsServer'
     publisher: 'MicrosoftWindowsServer'
     osType: 'Windows'
-    size: 'Standard_B2ms'
+    size: size
     privateIp: '10.0.2.15'
     password: password
     username: username
@@ -47,11 +47,43 @@ module dcModule2 '../../Common/modules/virtualMachine.bicep' = {
     offer: 'WindowsServer'
     publisher: 'MicrosoftWindowsServer'
     osType: 'Windows'
-    size: 'Standard_B2ms'
+    size: size
     privateIp: '10.0.2.16'
     password: password
     username: username
     subnetId: network.outputs.clientSubnetId
+    storageType: 'Standard_LRS'
+  }
+}
+
+module server '../../Common/modules/virtualMachine.bicep' = {
+  params: {
+    name: 'Win2022'
+    osType: 'Windows'
+    publisher: 'MicrosoftWindowsServer'
+    offer: 'WindowsServer'
+    sku: '2022-Datacenter'
+    size: size
+    password: password
+    username: username
+    subnetId: network.outputs.clientSubnetId
+    privateIp: '10.0.2.50'
+    storageType: 'Standard_LRS'
+  }
+}
+
+module client '../../Common/modules/virtualMachine.bicep' = {
+  params: {
+    name: 'WinClient11'
+    osType: 'Windows'
+    publisher: 'microsoftwindowsdesktop'
+    offer: 'windows-11'
+    sku: 'win11-23h2-ent'
+    size: size
+    password: password
+    username: username
+    subnetId: network.outputs.clientSubnetId
+    privateIp: '10.0.2.51'
     storageType: 'Standard_LRS'
   }
 }
@@ -67,6 +99,13 @@ resource dc2 'Microsoft.Compute/virtualMachines@2024-11-01' existing = {
   name: 'LabSubAd2'
   dependsOn: [
     dcModule2
+  ]
+}
+
+resource badclient 'Microsoft.Compute/virtualMachines@2024-11-01' existing = {
+  name: 'WinClient11'
+  dependsOn: [
+    client
   ]
 }
 
@@ -114,3 +153,23 @@ resource adSetupCommand2 'Microsoft.Compute/virtualMachines/extensions@2024-11-0
   }
 }
 
+resource badClientSetup 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = {
+  name: 'WinClient11-customscriptextension'
+  location: resourceGroup().location
+  parent: badclient
+  properties: {
+    publisher: 'Microsoft.Compute'
+    type: 'CustomScriptExtension'
+    typeHandlerVersion: '1.10'
+    autoUpgradeMinorVersion: true
+    settings: {
+
+    }
+    protectedSettings: {
+      commandToExecute: 'powershell -executionpolicy bypass -command "New-Item -Path c:\\hydration -ItemType Directory -Force; Copy-Item -Path .\\*.ps1 -Destination c:\\hydration\\ -Force"'
+      fileUris: [
+        'https://raw.githubusercontent.com/dmcwee/labs/refs/heads/published/dev/DSC/run-victimpc.ps1'
+      ]
+    }
+  }
+}
