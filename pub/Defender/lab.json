@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.41.2.15936",
-      "templateHash": "9316404188679310345"
+      "templateHash": "4315669813605517292"
     }
   },
   "parameters": {
@@ -36,13 +36,28 @@
       "defaultValue": "mcwee",
       "minLength": 3
     },
+    "subDomain": {
+      "type": "string",
+      "defaultValue": "tech.mcweeinc.com",
+      "minLength": 3
+    },
+    "subDomainNetbiosName": {
+      "type": "string",
+      "defaultValue": "tech",
+      "minLength": 3
+    },
     "size": {
       "type": "string",
+      "defaultValue": "Standard_B2ms",
+      "minLength": 1
+    },
+    "setupFilePaths": {
+      "type": "string",
+      "defaultValue": "https://raw.githubusercontent.com/dmcwee/labs/refs/heads/published/pub/DSC",
       "minLength": 1
     }
   },
   "variables": {
-    "adServerName": "LabAd",
     "labServers": [
       {
         "name": "Win2016",
@@ -50,8 +65,7 @@
         "offer": "WindowsServer",
         "publisher": "MicrosoftWindowsServer",
         "type": "Windows",
-        "size": "[parameters('size')]",
-        "ip": ""
+        "size": "[parameters('size')]"
       },
       {
         "name": "Win2022",
@@ -59,8 +73,7 @@
         "offer": "WindowsServer",
         "publisher": "MicrosoftWindowsServer",
         "type": "Windows",
-        "size": "[parameters('size')]",
-        "ip": ""
+        "size": "[parameters('size')]"
       },
       {
         "name": "LinuxUbuntu",
@@ -68,34 +81,64 @@
         "offer": "0001-com-ubuntu-server-jammy",
         "sku": "22_04-lts-gen2",
         "type": "Linux",
-        "size": "[parameters('size')]",
-        "ip": ""
-      },
-      {
-        "name": "WinClient11",
-        "publisher": "microsoftwindowsdesktop",
-        "offer": "windows-11",
-        "sku": "win11-23h2-ent",
-        "type": "Windows",
-        "size": "[parameters('size')]",
-        "ip": ""
+        "size": "[parameters('size')]"
       }
     ]
   },
   "resources": {
-    "dc": {
+    "dc1": {
       "existing": true,
       "type": "Microsoft.Compute/virtualMachines",
       "apiVersion": "2024-11-01",
-      "name": "[variables('adServerName')]",
+      "name": "LabAd",
       "dependsOn": [
-        "dcModule"
+        "labad"
       ]
     },
-    "adSetupCommand": {
+    "dc2": {
+      "existing": true,
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2024-11-01",
+      "name": "LabSubAd",
+      "dependsOn": [
+        "labsubad"
+      ]
+    },
+    "badClient": {
+      "existing": true,
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2024-11-01",
+      "name": "WinClient11",
+      "dependsOn": [
+        "client"
+      ]
+    },
+    "badClientSetup": {
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "apiVersion": "2024-11-01",
-      "name": "[format('{0}/{1}', variables('adServerName'), format('{0}-customscriptextension', variables('adServerName')))]",
+      "name": "[format('{0}/{1}', 'WinClient11', 'WinClient11-customscriptextension')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "CustomScriptExtension",
+        "typeHandlerVersion": "1.10",
+        "autoUpgradeMinorVersion": true,
+        "settings": {},
+        "protectedSettings": {
+          "commandToExecute": "powershell -executionpolicy bypass -command \"New-Item -Path c:\\hydration -ItemType Directory -Force; Copy-Item -Path .\\*.ps1 -Destination c:\\hydration\\ -Force\"",
+          "fileUris": [
+            "[format('{0}/run-victimpc.ps1', parameters('setupFilePaths'))]"
+          ]
+        }
+      },
+      "dependsOn": [
+        "client"
+      ]
+    },
+    "adDomainSetup": {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "apiVersion": "2024-11-01",
+      "name": "[format('{0}/{1}', 'LabAd', 'LabAd-customscriptextension')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "publisher": "Microsoft.Compute",
@@ -106,13 +149,36 @@
         "protectedSettings": {
           "commandToExecute": "[format('powershell -executionpolicy bypass -File .\\DcSetup.ps1 -DomainName \"{0}\" -NetBiosName \"{1}\" -Password {2} -HydrationScript DcHydrate.ps1', parameters('domainName'), parameters('domainNetbiosName'), parameters('password'))]",
           "fileUris": [
-            "https://raw.githubusercontent.com/dmcwee/labs/refs/heads/published/dev/DSC/DcSetup.ps1",
-            "https://raw.githubusercontent.com/dmcwee/labs/refs/heads/published/dev/DSC/DcHydrate.ps1"
+            "[format('{0}/DcSetup.ps1', parameters('setupFilePaths'))]",
+            "[format('{0}/DcHydrate.ps1', parameters('setupFilePaths'))]"
           ]
         }
       },
       "dependsOn": [
-        "dcModule"
+        "labad"
+      ]
+    },
+    "adSubdomainSetup": {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "apiVersion": "2024-11-01",
+      "name": "[format('{0}/{1}', 'LabSubAd', 'LabSubAd-customscriptextension')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "CustomScriptExtension",
+        "typeHandlerVersion": "1.10",
+        "autoUpgradeMinorVersion": true,
+        "settings": {},
+        "protectedSettings": {
+          "commandToExecute": "[format('powershell -executionpolicy bypass -File .\\DcSetup.ps1 -DomainName \"{0}\" -NetBiosName \"{1}\" -Password {2} -HydrationScript DcHydrate.ps1', parameters('subDomain'), parameters('subDomainNetbiosName'), parameters('password'))]",
+          "fileUris": [
+            "[format('{0}/DcSetup.ps1', parameters('setupFilePaths'))]",
+            "[format('{0}/DcHydrate.ps1', parameters('setupFilePaths'))]"
+          ]
+        }
+      },
+      "dependsOn": [
+        "labsubad"
       ]
     },
     "network": {
@@ -354,10 +420,10 @@
         }
       }
     },
-    "dcModule": {
+    "labad": {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2025-04-01",
-      "name": "[format('dcModule-{0}', uniqueString('dcModule', deployment().name))]",
+      "name": "[format('labad-{0}', uniqueString('labad', deployment().name))]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -365,7 +431,7 @@
         "mode": "Incremental",
         "parameters": {
           "name": {
-            "value": "[variables('adServerName')]"
+            "value": "LabAd"
           },
           "sku": {
             "value": "2022-Datacenter"
@@ -393,6 +459,522 @@
           },
           "subnetId": {
             "value": "[reference('network').outputs.clientSubnetId.value]"
+          },
+          "storageType": {
+            "value": "Standard_LRS"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "languageVersion": "2.0",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.41.2.15936",
+              "templateHash": "2067995219985810298"
+            }
+          },
+          "parameters": {
+            "subnetId": {
+              "type": "string"
+            },
+            "privateIp": {
+              "type": "string"
+            },
+            "storageType": {
+              "type": "string"
+            },
+            "username": {
+              "type": "string"
+            },
+            "password": {
+              "type": "securestring"
+            },
+            "requirePlan": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {}
+            },
+            "location": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().location]"
+            },
+            "name": {
+              "type": "string",
+              "defaultValue": "Server2016"
+            },
+            "size": {
+              "type": "string",
+              "defaultValue": "Standard_B4ms"
+            },
+            "publisher": {
+              "type": "string",
+              "defaultValue": "MicrosoftWindowsServer"
+            },
+            "offer": {
+              "type": "string",
+              "defaultValue": "WindowsServer"
+            },
+            "sku": {
+              "type": "string",
+              "defaultValue": "2016-Datacenter"
+            },
+            "version": {
+              "type": "string",
+              "defaultValue": "latest"
+            },
+            "osType": {
+              "type": "string",
+              "defaultValue": "Windows",
+              "allowedValues": [
+                "Linux",
+                "Windows"
+              ]
+            }
+          },
+          "resources": {
+            "networkInterface": {
+              "type": "Microsoft.Network/networkInterfaces",
+              "apiVersion": "2024-05-01",
+              "name": "[format('{0}-nic', parameters('name'))]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "ipConfigurations": [
+                  {
+                    "name": "ipconfig1",
+                    "properties": {
+                      "subnet": {
+                        "id": "[parameters('subnetId')]"
+                      },
+                      "privateIPAllocationMethod": "Static",
+                      "privateIPAddress": "[parameters('privateIp')]"
+                    }
+                  }
+                ]
+              }
+            },
+            "serverVm": {
+              "type": "Microsoft.Compute/virtualMachines",
+              "apiVersion": "2024-11-01",
+              "name": "[parameters('name')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "hardwareProfile": {
+                  "vmSize": "[parameters('size')]"
+                },
+                "osProfile": "[if(equals(parameters('osType'), 'Linux'), createObject('adminPassword', parameters('password'), 'adminUsername', parameters('username'), 'computerName', parameters('name'), 'allowExtensionOperations', true(), 'linuxConfiguration', createObject('disablePasswordAuthentication', false(), 'provisionVMAgent', true(), 'patchSettings', createObject('patchMode', 'ImageDefault', 'assessmentMode', 'ImageDefault'))), createObject('adminPassword', parameters('password'), 'adminUsername', parameters('username'), 'computerName', parameters('name'), 'allowExtensionOperations', true()))]",
+                "storageProfile": {
+                  "imageReference": {
+                    "publisher": "[parameters('publisher')]",
+                    "offer": "[parameters('offer')]",
+                    "sku": "[parameters('sku')]",
+                    "version": "[parameters('version')]"
+                  },
+                  "osDisk": {
+                    "name": "[format('{0}-osdisk', parameters('name'))]",
+                    "createOption": "FromImage",
+                    "managedDisk": {
+                      "storageAccountType": "[parameters('storageType')]"
+                    },
+                    "osType": "[parameters('osType')]"
+                  }
+                },
+                "networkProfile": {
+                  "networkInterfaces": [
+                    {
+                      "id": "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', parameters('name')))]"
+                    }
+                  ]
+                },
+                "diagnosticsProfile": "[if(equals(parameters('osType'), 'Linux'), createObject('bootDiagnostics', createObject('enabled', true())), createObject())]"
+              },
+              "plan": "[if(parameters('requirePlan'), createObject('name', parameters('sku'), 'publisher', parameters('publisher'), 'product', parameters('offer')), null())]",
+              "tags": "[parameters('tags')]",
+              "dependsOn": [
+                "networkInterface"
+              ]
+            },
+            "schedule": {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2025-04-01",
+              "name": "[format('schedule-{0}', uniqueString('schedule', deployment().name))]",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "name": {
+                    "value": "[parameters('name')]"
+                  },
+                  "id": {
+                    "value": "[resourceId('Microsoft.Compute/virtualMachines', parameters('name'))]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.41.2.15936",
+                      "templateHash": "1937038184597547080"
+                    }
+                  },
+                  "parameters": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "time": {
+                      "type": "string",
+                      "defaultValue": "1900"
+                    },
+                    "timeZone": {
+                      "type": "string",
+                      "defaultValue": "Eastern Standard Time"
+                    },
+                    "location": {
+                      "type": "string",
+                      "defaultValue": "[resourceGroup().location]"
+                    }
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.DevTestLab/schedules",
+                      "apiVersion": "2018-09-15",
+                      "name": "[format('shutdown-computevm-{0}', toLower(parameters('name')))]",
+                      "location": "[parameters('location')]",
+                      "properties": {
+                        "dailyRecurrence": {
+                          "time": "[parameters('time')]"
+                        },
+                        "status": "Enabled",
+                        "taskType": "ComputeVmShutdownTask",
+                        "timeZoneId": "[parameters('timeZone')]",
+                        "notificationSettings": {
+                          "status": "Disabled"
+                        },
+                        "targetResourceId": "[parameters('id')]"
+                      }
+                    }
+                  ]
+                }
+              },
+              "dependsOn": [
+                "serverVm"
+              ]
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "network"
+      ]
+    },
+    "labsubad": {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "[format('labsubad-{0}', uniqueString('labsubad', deployment().name))]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "LabSubAd"
+          },
+          "sku": {
+            "value": "2022-Datacenter"
+          },
+          "offer": {
+            "value": "WindowsServer"
+          },
+          "publisher": {
+            "value": "MicrosoftWindowsServer"
+          },
+          "osType": {
+            "value": "Windows"
+          },
+          "size": {
+            "value": "[parameters('size')]"
+          },
+          "privateIp": {
+            "value": "10.0.2.6"
+          },
+          "password": {
+            "value": "[parameters('password')]"
+          },
+          "username": {
+            "value": "[parameters('username')]"
+          },
+          "subnetId": {
+            "value": "[reference('network').outputs.clientSubnetId.value]"
+          },
+          "storageType": {
+            "value": "Standard_LRS"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "languageVersion": "2.0",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.41.2.15936",
+              "templateHash": "2067995219985810298"
+            }
+          },
+          "parameters": {
+            "subnetId": {
+              "type": "string"
+            },
+            "privateIp": {
+              "type": "string"
+            },
+            "storageType": {
+              "type": "string"
+            },
+            "username": {
+              "type": "string"
+            },
+            "password": {
+              "type": "securestring"
+            },
+            "requirePlan": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {}
+            },
+            "location": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().location]"
+            },
+            "name": {
+              "type": "string",
+              "defaultValue": "Server2016"
+            },
+            "size": {
+              "type": "string",
+              "defaultValue": "Standard_B4ms"
+            },
+            "publisher": {
+              "type": "string",
+              "defaultValue": "MicrosoftWindowsServer"
+            },
+            "offer": {
+              "type": "string",
+              "defaultValue": "WindowsServer"
+            },
+            "sku": {
+              "type": "string",
+              "defaultValue": "2016-Datacenter"
+            },
+            "version": {
+              "type": "string",
+              "defaultValue": "latest"
+            },
+            "osType": {
+              "type": "string",
+              "defaultValue": "Windows",
+              "allowedValues": [
+                "Linux",
+                "Windows"
+              ]
+            }
+          },
+          "resources": {
+            "networkInterface": {
+              "type": "Microsoft.Network/networkInterfaces",
+              "apiVersion": "2024-05-01",
+              "name": "[format('{0}-nic', parameters('name'))]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "ipConfigurations": [
+                  {
+                    "name": "ipconfig1",
+                    "properties": {
+                      "subnet": {
+                        "id": "[parameters('subnetId')]"
+                      },
+                      "privateIPAllocationMethod": "Static",
+                      "privateIPAddress": "[parameters('privateIp')]"
+                    }
+                  }
+                ]
+              }
+            },
+            "serverVm": {
+              "type": "Microsoft.Compute/virtualMachines",
+              "apiVersion": "2024-11-01",
+              "name": "[parameters('name')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "hardwareProfile": {
+                  "vmSize": "[parameters('size')]"
+                },
+                "osProfile": "[if(equals(parameters('osType'), 'Linux'), createObject('adminPassword', parameters('password'), 'adminUsername', parameters('username'), 'computerName', parameters('name'), 'allowExtensionOperations', true(), 'linuxConfiguration', createObject('disablePasswordAuthentication', false(), 'provisionVMAgent', true(), 'patchSettings', createObject('patchMode', 'ImageDefault', 'assessmentMode', 'ImageDefault'))), createObject('adminPassword', parameters('password'), 'adminUsername', parameters('username'), 'computerName', parameters('name'), 'allowExtensionOperations', true()))]",
+                "storageProfile": {
+                  "imageReference": {
+                    "publisher": "[parameters('publisher')]",
+                    "offer": "[parameters('offer')]",
+                    "sku": "[parameters('sku')]",
+                    "version": "[parameters('version')]"
+                  },
+                  "osDisk": {
+                    "name": "[format('{0}-osdisk', parameters('name'))]",
+                    "createOption": "FromImage",
+                    "managedDisk": {
+                      "storageAccountType": "[parameters('storageType')]"
+                    },
+                    "osType": "[parameters('osType')]"
+                  }
+                },
+                "networkProfile": {
+                  "networkInterfaces": [
+                    {
+                      "id": "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', parameters('name')))]"
+                    }
+                  ]
+                },
+                "diagnosticsProfile": "[if(equals(parameters('osType'), 'Linux'), createObject('bootDiagnostics', createObject('enabled', true())), createObject())]"
+              },
+              "plan": "[if(parameters('requirePlan'), createObject('name', parameters('sku'), 'publisher', parameters('publisher'), 'product', parameters('offer')), null())]",
+              "tags": "[parameters('tags')]",
+              "dependsOn": [
+                "networkInterface"
+              ]
+            },
+            "schedule": {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2025-04-01",
+              "name": "[format('schedule-{0}', uniqueString('schedule', deployment().name))]",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "name": {
+                    "value": "[parameters('name')]"
+                  },
+                  "id": {
+                    "value": "[resourceId('Microsoft.Compute/virtualMachines', parameters('name'))]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.41.2.15936",
+                      "templateHash": "1937038184597547080"
+                    }
+                  },
+                  "parameters": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "time": {
+                      "type": "string",
+                      "defaultValue": "1900"
+                    },
+                    "timeZone": {
+                      "type": "string",
+                      "defaultValue": "Eastern Standard Time"
+                    },
+                    "location": {
+                      "type": "string",
+                      "defaultValue": "[resourceGroup().location]"
+                    }
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.DevTestLab/schedules",
+                      "apiVersion": "2018-09-15",
+                      "name": "[format('shutdown-computevm-{0}', toLower(parameters('name')))]",
+                      "location": "[parameters('location')]",
+                      "properties": {
+                        "dailyRecurrence": {
+                          "time": "[parameters('time')]"
+                        },
+                        "status": "Enabled",
+                        "taskType": "ComputeVmShutdownTask",
+                        "timeZoneId": "[parameters('timeZone')]",
+                        "notificationSettings": {
+                          "status": "Disabled"
+                        },
+                        "targetResourceId": "[parameters('id')]"
+                      }
+                    }
+                  ]
+                }
+              },
+              "dependsOn": [
+                "serverVm"
+              ]
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "network"
+      ]
+    },
+    "client": {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "[format('client-{0}', uniqueString('client', deployment().name))]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "WinClient11"
+          },
+          "osType": {
+            "value": "Windows"
+          },
+          "publisher": {
+            "value": "microsoftwindowsdesktop"
+          },
+          "offer": {
+            "value": "windows-11"
+          },
+          "sku": {
+            "value": "win11-23h2-ent"
+          },
+          "size": {
+            "value": "[parameters('size')]"
+          },
+          "password": {
+            "value": "[parameters('password')]"
+          },
+          "username": {
+            "value": "[parameters('username')]"
+          },
+          "subnetId": {
+            "value": "[reference('network').outputs.clientSubnetId.value]"
+          },
+          "privateIp": {
+            "value": "10.0.2.40"
           },
           "storageType": {
             "value": "Standard_LRS"
@@ -641,7 +1223,9 @@
           "sku": {
             "value": "[variables('labServers')[copyIndex()].sku]"
           },
-          "size": "[if(not(empty(variables('labServers')[copyIndex()].size)), createObject('value', variables('labServers')[copyIndex()].size), createObject('value', parameters('size')))]",
+          "size": {
+            "value": "[parameters('size')]"
+          },
           "password": {
             "value": "[parameters('password')]"
           },
@@ -651,7 +1235,9 @@
           "subnetId": {
             "value": "[reference('network').outputs.clientSubnetId.value]"
           },
-          "privateIp": "[if(not(empty(variables('labServers')[copyIndex()].ip)), createObject('value', variables('labServers')[copyIndex()].ip), createObject('value', format('10.0.2.{0}', add(copyIndex(), 50))))]",
+          "privateIp": {
+            "value": "[format('10.0.2.{0}', add(copyIndex(), 50))]"
+          },
           "storageType": {
             "value": "Standard_LRS"
           }
