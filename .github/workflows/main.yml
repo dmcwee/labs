@@ -11,6 +11,7 @@ on:
       - MDILab/modules/*.bicep
       - OceanLotus/modules/*.bicep
       - Linux/modules/*.bicep
+      - Defender/modules/*.bicep
       - Common/DSC/*.ps1
   workflow_dispatch:
     inputs:
