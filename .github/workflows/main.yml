@@ -75,7 +75,7 @@ jobs:
       - name: Switch to target branch and stage artifacts
         id: prepare
         run: |
-          TARGET_BRANCH="published"
+          TARGET_BRANCH="${{ github.event.inputs.target-branch.default }}"
           CURRENT_BRANCH="${{ github.ref_name }}"
           if [ $CURRENT_BRANCH == "master" ]; then
             CURRENT_BRANCH="pub"
@@ -98,7 +98,7 @@ jobs:
 
       - name: Commit and push to publish branch
         run: | 
-          TARGET_BRANCH="published"
+          TARGET_BRANCH="${{ github.event.inputs.target-branch.default }}"
 
           if [ -z "$(git status --porcelain)" ]; then
             echo "No changes to commit"
