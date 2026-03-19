@@ -18,7 +18,7 @@ param subDomainNetbiosName string = 'tech'
 param size string = 'Standard_B2ms'
 @minLength(1)
 param setupFilePaths string = 'https://raw.githubusercontent.com/dmcwee/labs/refs/heads/published/pub/DSC'
-
+ 
 var labServers = [
   {
     name:'Win2016'
