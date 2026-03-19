@@ -16,6 +16,8 @@ param subDomain string = 'tech.mcweeinc.com'
 param subDomainNetbiosName string = 'tech'
 @minLength(1)
 param size string = 'Standard_B2ms'
+@minLength(1)
+param setupFilePaths string = 'https://raw.githubusercontent.com/dmcwee/labs/refs/heads/published/pub/DSC'
 
 var labServers = [
   {
@@ -152,7 +154,7 @@ resource badClientSetup 'Microsoft.Compute/virtualMachines/extensions@2024-11-01
     protectedSettings: {
       commandToExecute: 'powershell -executionpolicy bypass -command "New-Item -Path c:\\hydration -ItemType Directory -Force; Copy-Item -Path .\\*.ps1 -Destination c:\\hydration\\ -Force"'
       fileUris: [
-        'https://raw.githubusercontent.com/dmcwee/labs/refs/heads/published/dev/DSC/run-victimpc.ps1'
+        '${setupFilePaths}/run-victimpc.ps1'
       ]
     }
   }
@@ -173,8 +175,8 @@ resource adDomainSetup 'Microsoft.Compute/virtualMachines/extensions@2024-11-01'
     protectedSettings: {
       commandToExecute: 'powershell -executionpolicy bypass -File .\\DcSetup.ps1 -DomainName "${domainName}" -NetBiosName "${domainNetbiosName}" -Password ${password} -HydrationScript DcHydrate.ps1'
       fileUris: [
-        'https://raw.githubusercontent.com/dmcwee/labs/refs/heads/published/dev/DSC/DcSetup.ps1'
-        'https://raw.githubusercontent.com/dmcwee/labs/refs/heads/published/dev/DSC/DcHydrate.ps1'
+        '${setupFilePaths}/DcSetup.ps1'
+        '${setupFilePaths}/DcHydrate.ps1'
       ]
     }
   }
@@ -195,8 +197,8 @@ resource adSubdomainSetup 'Microsoft.Compute/virtualMachines/extensions@2024-11-
     protectedSettings: {
       commandToExecute: 'powershell -executionpolicy bypass -File .\\DcSetup.ps1 -DomainName "${subDomain}" -NetBiosName "${subDomainNetbiosName}" -Password ${password} -HydrationScript DcHydrate.ps1'
       fileUris: [
-        'https://raw.githubusercontent.com/dmcwee/labs/refs/heads/published/dev/DSC/DcSetup.ps1'
-        'https://raw.githubusercontent.com/dmcwee/labs/refs/heads/published/dev/DSC/DcHydrate.ps1'
+        '${setupFilePaths}/DcSetup.ps1'
+        '${setupFilePaths}/DcHydrate.ps1'
       ]
     }
   }
