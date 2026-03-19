@@ -6,21 +6,24 @@
     "_generator": {
       "name": "bicep",
       "version": "0.41.2.15936",
-      "templateHash": "11586250064138821946"
+      "templateHash": "13996233121239559850"
     }
   },
   "parameters": {
+    "username": {
+      "type": "string",
+      "minLength": 3
+    },
     "password": {
       "type": "securestring"
     },
-    "username": {
-      "type": "string"
-    },
     "gatewayCertData": {
-      "type": "string"
+      "type": "string",
+      "minLength": 0
     },
     "gatewayCertName": {
-      "type": "string"
+      "type": "string",
+      "minLength": 0
     },
     "size": {
       "type": "string",
@@ -28,47 +31,24 @@
     }
   },
   "variables": {
-    "labServers": [
+    "linuxServers": [
       {
-        "name": "vhagar",
-        "ip": "10.90.30.20",
-        "sku": "2019-DataCenter",
-        "offer": "WindowsServer",
-        "publisher": "MicrosoftWindowsServer",
-        "osType": "Windows",
-        "requirePlan": false,
-        "tags": {
-          "ExcludeMdeAutoProvisioning": "True"
-        }
-      },
-      {
-        "name": "drogon",
-        "ip": "10.90.30.7",
+        "name": "LinuxUbuntu",
         "publisher": "canonical",
         "offer": "0001-com-ubuntu-server-jammy",
         "sku": "22_04-lts-gen2",
-        "osType": "Linux",
-        "requirePlan": false,
-        "tags": {
-          "ExcludeMdeAutoProvisioning": "True"
-        }
+        "type": "Linux",
+        "size": "[parameters('size')]",
+        "ip": ""
       },
       {
-        "name": "kali",
-        "ip": "10.90.30.26",
-        "publisher": "kali-linux",
-        "offer": "kali",
-        "sku": "kali-2024-4",
-        "osType": "Linux",
-        "requirePlan": true,
-        "plan": {
-          "name": "kali-2024-4",
-          "publisher": "kali-linux",
-          "product": "kali"
-        },
-        "tags": {
-          "ExcludeMdeAutoProvisioning": "True"
-        }
+        "name": "LinuxSuseOs1",
+        "publisher": "suse",
+        "offer": "sles-12-sp5-basic",
+        "sku": "gen2",
+        "type": "Linux",
+        "size": "[parameters('size')]",
+        "ip": ""
       }
     ]
   },
@@ -83,31 +63,16 @@
         },
         "mode": "Incremental",
         "parameters": {
+          "dns": {
+            "value": [
+              "168.63.129.16"
+            ]
+          },
           "gatewayCertData": {
             "value": "[parameters('gatewayCertData')]"
           },
           "gatewayCertName": {
             "value": "[parameters('gatewayCertName')]"
-          },
-          "range": {
-            "value": "10.90.0.0/16"
-          },
-          "clientRange": {
-            "value": "10.90.30.0/24"
-          },
-          "gatewayRange": {
-            "value": "10.90.100.0/24"
-          },
-          "gatewayClientRange": {
-            "value": "10.10.10.0/24"
-          },
-          "vpnClientProtocol": {
-            "value": [
-              "IkeV2"
-            ]
-          },
-          "gatewaySku": {
-            "value": "VpnGw1"
           }
         },
         "template": {
@@ -329,7 +294,7 @@
     "servers": {
       "copy": {
         "name": "servers",
-        "count": "[length(variables('labServers'))]"
+        "count": "[length(variables('linuxServers'))]"
       },
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2025-04-01",
@@ -341,23 +306,21 @@
         "mode": "Incremental",
         "parameters": {
           "name": {
-            "value": "[variables('labServers')[copyIndex()].name]"
+            "value": "[variables('linuxServers')[copyIndex()].name]"
           },
           "osType": {
-            "value": "[variables('labServers')[copyIndex()].osType]"
+            "value": "[variables('linuxServers')[copyIndex()].type]"
           },
           "publisher": {
-            "value": "[variables('labServers')[copyIndex()].publisher]"
+            "value": "[variables('linuxServers')[copyIndex()].publisher]"
           },
           "offer": {
-            "value": "[variables('labServers')[copyIndex()].offer]"
+            "value": "[variables('linuxServers')[copyIndex()].offer]"
           },
           "sku": {
-            "value": "[variables('labServers')[copyIndex()].sku]"
+            "value": "[variables('linuxServers')[copyIndex()].sku]"
           },
-          "size": {
-            "value": "[parameters('size')]"
-          },
+          "size": "[if(not(empty(variables('linuxServers')[copyIndex()].size)), createObject('value', variables('linuxServers')[copyIndex()].size), createObject('value', parameters('size')))]",
           "password": {
             "value": "[parameters('password')]"
           },
@@ -367,15 +330,9 @@
           "subnetId": {
             "value": "[reference('network').outputs.clientSubnetId.value]"
           },
-          "privateIp": "[if(not(empty(variables('labServers')[copyIndex()].ip)), createObject('value', variables('labServers')[copyIndex()].ip), createObject('value', format('10.50.30.{0}', add(copyIndex(), 50))))]",
+          "privateIp": "[if(not(empty(variables('linuxServers')[copyIndex()].ip)), createObject('value', variables('linuxServers')[copyIndex()].ip), createObject('value', format('10.0.2.{0}', add(copyIndex(), 50))))]",
           "storageType": {
             "value": "Standard_LRS"
-          },
-          "requirePlan": {
-            "value": "[variables('labServers')[copyIndex()].requirePlan]"
-          },
-          "tags": {
-            "value": "[variables('labServers')[copyIndex()].tags]"
           }
         },
         "template": {
