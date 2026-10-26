@@ -1,5 +1,10 @@
 # Clear Windows Event Log
 
+> **Lab context:** On standalone MDE, start on `WinClient11` (`10.0.2.53`)
+> using deployment `username` (`.\cmadmin` by default) and the supplied
+> `password`. See [scenario setup and domain accounts](README.md#before-running-a-scenario)
+> before domain-dependent steps; domain joining and MDE onboarding are manual.
+
 ## Overview
 
 Clear Windows Event Logs is a technique where attackers delete records in Windows Event Logs to erase evidence of their activities. This action is part of the Defense Evasion tactic, as it helps attackers avoid detection by removing traces of their unauthorized actions from the logs, making it harder for security teams to investigate or respond to the intrusion.
@@ -9,13 +14,6 @@ Clear Windows Event Logs is a technique where attackers delete records in Window
 | Tactic | Technique ID | Technique Name |
 | --- | --- | --- |
 | Defense Evasion | T1070.001 | Indicator Removal: Clear Windows Event Logs |
-
-## Expected Alerts
-
-| Alert Title | Alert Description | Alert Details |
-| --- | --- | --- |
-| Event log was cleared | An event log was cleared. This might indicate a malicious actor in the machine. | **Category:** Defense evasion<br/>**MITRE ATT&CK Techniques:** T1070.001: Indicator Removal: Clear Windows Event Logs<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior, Network<br/>**Detection status:** Detected |
-| Attempt to clear event log | A process attempted to clear the event log. An attacker might be trying to hide evidence of malicious activity. | **Category:** Defense evasion<br/>**MITRE ATT&CK Techniques:** T1070.001: Indicator Removal: Clear Windows Event Logs<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior, Network<br/>**Detection status:** Detected |
 
 ## Attack Simulation
 
@@ -31,8 +29,8 @@ Clear Windows Event Logs is a technique where attackers delete records in Window
 
 | Parameter | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
-| `Mode` | String | No | `powershell` | The method to use for clearing logs. Valid values: `wevtutil` (direct command), `wmic` (via WMI process creation), `powershell` (using Start-Process) |
-| `Force` | Switch | No | — | Skip the confirmation prompt before execution |
+| `-Mode` | String | No | `powershell` | The method to use for clearing logs. Valid values: `wevtutil` (direct command), `wmic` (via WMI process creation), `powershell` (using Start-Process) |
+| `-Force` | Switch | No | Not set | Skip the confirmation prompt before execution |
 
 #### What the Script Does
 
@@ -87,6 +85,13 @@ Proceeding with event log clearing simulation...
 5. The script clears Application, System, and Security event logs.
 6. Monitor the Microsoft Defender for Endpoint portal for defense evasion alerts.
 
+## Expected Alerts
+
+| Alert Title | Alert Description | Alert Details |
+| --- | --- | --- |
+| Event log was cleared | An event log was cleared. This might indicate a malicious actor in the machine. | **Category:** Defense evasion<br/>**MITRE ATT&CK Techniques:** T1070.001: Indicator Removal: Clear Windows Event Logs<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior, Network<br/>**Detection status:** Detected |
+| Attempt to clear event log | A process attempted to clear the event log. An attacker might be trying to hide evidence of malicious activity. | **Category:** Defense evasion<br/>**MITRE ATT&CK Techniques:** T1070.001: Indicator Removal: Clear Windows Event Logs<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior, Network<br/>**Detection status:** Detected |
+
 ## Why Does This Matter
 
 Event log clearing is a critical anti-forensics technique because:
@@ -119,13 +124,9 @@ Write-EventLog -LogName Application -Source "Application" -EventId 1000 -Message
 Get-EventLog -LogName Application -Newest 1
 ```
 
-## References
+## Manual Commands
 
-- [MITRE ATT&CK T1070.001 - Clear Windows Event Logs](https://attack.mitre.org/techniques/T1070/001/)
-- [Microsoft Docs - wevtutil](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/wevtutil)
-- [Microsoft Docs - Windows Event Log](https://docs.microsoft.com/en-us/windows/win32/wes/windows-event-log)
-
-## Additional Manual Commands
+<a id="additional-manual-commands"></a>
 
 ### Clear Event Logs (Manual Commands)
 
@@ -152,3 +153,9 @@ Start-Process -FilePath "wevtutil" -ArgumentList "cl", "Application" -NoNewWindo
 Start-Process -FilePath "wevtutil" -ArgumentList "cl", "System" -NoNewWindow -Wait
 Start-Process -FilePath "wevtutil" -ArgumentList "cl", "Security" -NoNewWindow -Wait
 ```
+
+## References
+
+- [MITRE ATT&CK T1070.001 - Clear Windows Event Logs](https://attack.mitre.org/techniques/T1070/001/)
+- [Microsoft Docs - wevtutil](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/wevtutil)
+- [Microsoft Docs - Windows Event Log](https://docs.microsoft.com/en-us/windows/win32/wes/windows-event-log)

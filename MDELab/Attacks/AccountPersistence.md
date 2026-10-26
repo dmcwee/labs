@@ -1,5 +1,10 @@
 # Account Persistence
 
+> **Lab context:** On standalone MDE, start on `WinClient11` (`10.0.2.53`)
+> using deployment `username` (`.\cmadmin` by default) and the supplied
+> `password`. See [scenario setup and domain accounts](README.md#before-running-a-scenario)
+> before domain-dependent steps; domain joining and MDE onboarding are manual.
+
 ## Overview
 
 Account persistence refers to techniques used by attackers to maintain long-term access to a system even after security measures are applied or the system is rebooted. Creating registry Run keys, Startup Folder entries, Boot/Logon Initialization Scripts, and scheduled tasks are common persistence techniques. By establishing these mechanisms, attackers ensure their malicious programs run automatically, maintaining their foothold across system reboots.
@@ -15,14 +20,6 @@ Account persistence refers to techniques used by attackers to maintain long-term
 | Persistence | T1547.001 | Boot or Logon Autostart Execution: Registry Run Keys / Startup Folder |
 | Execution | T1053.005 | Scheduled Task/Job: Scheduled Task |
 
-## Expected Alerts
-
-| Alert Title | Alert Description | Alert Details |
-| --- | --- | --- |
-| Anomaly detected in ASEP registry | A process registered a suspicious command or file in ASEP registry key, where it will be run after a reboot. An attacker may place a malicious piece of software in such a location to prevent losing access if a machine is turned off. | **Category:** Persistence<br/>**MITRE ATT&CK Techniques:** T1112: Modify Registry, T1547.001: Registry Run Keys / Startup Folder<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior,Network<br/>**Detection status:** Detected |
-| Suspicious logon script registration | A script was suspiciously registered as a logon script. Anomalies in the process chain leading up to this activity or the script file itself indicate possible malicious intent. Attackers can use logon scripts to automatically run malicious code when users sign in and establish persistence. | **Category:** Persistence<br/>**MITRE ATT&CK Techniques:** T1037: Boot or Logon Initialization Scripts, T1037.001: Logon Script (Windows)<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior,Network<br/>**Detection status:** Detected |
-| Suspicious scheduled task | A potentially malicious file or command line was registered as a scheduled task. Attackers often use scheduled tasks to establish persistence, but they are also used to invoke a single activity or a chain of activities. | **Category:** Execution<br/>**MITRE ATT&CK Techniques:** T1053: Scheduled Task/Job, T1053.005: Scheduled Task<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior,Network<br/>**Detection status:** Detected |
-
 ## Attack Simulation
 
 ### Prerequisites
@@ -37,10 +34,10 @@ Account persistence refers to techniques used by attackers to maintain long-term
 
 | Parameter | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
-| `Mode` | String | No | `HKLM` | The persistence method to simulate. Valid values: `HKLM` (HKEY_LOCAL_MACHINE Run key), `HKCU` (HKEY_CURRENT_USER Run key), `Scheduler` (Scheduled Task) |
-| `OutputPath` | String | No | `$env:TEMP\Persistence` | Directory where persistence artifacts are created |
-| `Cleanup` | Switch | No | — | Removes all persistence mechanisms and files created by the simulation |
-| `Force` | Switch | No | — | Skip the confirmation prompt before execution |
+| `-Mode` | String | No | `HKLM` | The persistence method to simulate. Valid values: `HKLM` (HKEY_LOCAL_MACHINE Run key), `HKCU` (HKEY_CURRENT_USER Run key), `Scheduler` (Scheduled Task) |
+| `-OutputPath` | String | No | `$env:TEMP\Persistence` | Directory where persistence artifacts are created |
+| `-Cleanup` | Switch | No | Not set | Removes all persistence mechanisms and files created by the simulation |
+| `-Force` | Switch | No | Not set | Skip the confirmation prompt before execution |
 
 #### What the Script Does
 
@@ -109,6 +106,14 @@ Do you want to continue? (Y/N): Y
 7. Monitor the Microsoft Defender for Endpoint portal for persistence-related alerts.
 8. After testing, run `.\Invoke-AccountPersistenceSimulation.ps1 -Cleanup -Mode HKLM` to remove artifacts.
 
+## Expected Alerts
+
+| Alert Title | Alert Description | Alert Details |
+| --- | --- | --- |
+| Anomaly detected in ASEP registry | A process registered a suspicious command or file in ASEP registry key, where it will be run after a reboot. An attacker may place a malicious piece of software in such a location to prevent losing access if a machine is turned off. | **Category:** Persistence<br/>**MITRE ATT&CK Techniques:** T1112: Modify Registry, T1547.001: Registry Run Keys / Startup Folder<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior,Network<br/>**Detection status:** Detected |
+| Suspicious logon script registration | A script was suspiciously registered as a logon script. Anomalies in the process chain leading up to this activity or the script file itself indicate possible malicious intent. Attackers can use logon scripts to automatically run malicious code when users sign in and establish persistence. | **Category:** Persistence<br/>**MITRE ATT&CK Techniques:** T1037: Boot or Logon Initialization Scripts, T1037.001: Logon Script (Windows)<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior,Network<br/>**Detection status:** Detected |
+| Suspicious scheduled task | A potentially malicious file or command line was registered as a scheduled task. Attackers often use scheduled tasks to establish persistence, but they are also used to invoke a single activity or a chain of activities. | **Category:** Execution<br/>**MITRE ATT&CK Techniques:** T1053: Scheduled Task/Job, T1053.005: Scheduled Task<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior,Network<br/>**Detection status:** Detected |
+
 ## Why Does This Matter
 
 Persistence mechanisms are critical to attacker operations because:
@@ -128,59 +133,6 @@ Detecting and removing persistence mechanisms is essential for complete incident
 - **Use PowerShell logging** — Enable Script Block Logging to capture persistence payload contents
 - **Review logon scripts** — Regularly audit logon script configurations in registry and Group Policy
 - **Enable Tamper Protection** — Prevent attackers from disabling security controls before establishing persistence
-
-## Clean-Up
-
-Auto-Start Extensibility Points (ASEP) registry keys control which programs or scripts automatically execute when your system boots or when a user logs in. These keys can also be exploited by malware to achieve persistence, ensuring that malicious programs run every time the system starts.
-
-The common ASEP keys on windows are:
-
-* HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run
-* HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\RunOnce
-* HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run
-* HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce
-
-Run the following commands in Windows Command Prompt on a test device.
-
-```powershell
-reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run" /v ASEPAttackSim /t REG_SZ /d "powershell -executionpolicy bypass -file $env:TEMP\new-user.ps1"
-```
-
-### Boot Logon
-
-Windows allows these scripts to run each time a specific user or group logs into a system, providing attackers a reliable method to establish persistence.
-
-Target registry key path:
-
-* HKEY_CURRENT_USER\EnvironmentUserInitMprLogonScript
-
-Run the following commands in Windows Command Prompt on a test device.
-
-```powershell
-reg add "HKEY_CURRENT_USER\Environment" /v UserInitMprLogonScript /t REG_SZ /d "powershell -executionpolicy bypass -file $env:TEMP\new-user.ps1"
-```
-
-### Task Scheduler
-
-The following script creates the Task Action (New-ScheduledTaskAction) which launches powershell with an Execution Policy of Bypass and in a Hidden Window so the user won't notice. The Script then creates the Trigger (New-ScheduledTaskTrigger) of AtLogOn which means the script will run any time a user logs onto the system. Finally the script creates the actual Scheuled Task (Register-ScheduledTask) based on the Action and Triggers.
-
-```powershell
-# Define variables
-$TaskName = "Persistence-ScheduledTask"
-$ScriptPath = "$env:TEMP\new-user.ps1"
-
-# Create an action to run the PowerShell script
-$Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument $("-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File ""$ScriptPath"")"
-
-# Create a trigger to run the task at logon
-$Trigger = New-ScheduledTaskTrigger -AtLogOn
-
-# Create settings for the task
-$Settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable
-
-# Register the scheduled task
-Register-ScheduledTask -TaskName $TaskName -Action $Action -Trigger $Trigger -Settings $Settings -Description "Runs a malicious PowerShell script at logon"
-```
 
 ## Clean-Up
 
@@ -204,16 +156,9 @@ Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false
 Remove-LocalUser -Name "BackdoorAdmin" -ErrorAction SilentlyContinue
 ```
 
-## References
+## Manual Commands
 
-- [MITRE ATT&CK T1547.001 - Registry Run Keys / Startup Folder](https://attack.mitre.org/techniques/T1547/001/)
-- [MITRE ATT&CK T1053.005 - Scheduled Task](https://attack.mitre.org/techniques/T1053/005/)
-- [MITRE ATT&CK T1037.001 - Logon Script (Windows)](https://attack.mitre.org/techniques/T1037/001/)
-- [Microsoft Docs - Windows Auto-Start Extensibility Points](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)
-
-## Additional Manual Commands
-
-### ASEP Registry Keys (Manual Commands)
+### ASEP Registry Keys
 
 Auto-Start Extensibility Points (ASEP) registry keys control which programs or scripts automatically execute when your system boots or when a user logs in. These keys can also be exploited by malware to achieve persistence, ensuring that malicious programs run every time the system starts.
 
@@ -254,7 +199,7 @@ $TaskName = "Persistence-ScheduledTask"
 $ScriptPath = "$env:TEMP\new-user.ps1"
 
 # Create an action to run the PowerShell script
-$Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument $("-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File ""$ScriptPath"")"
+$Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$ScriptPath`""
 
 # Create a trigger to run the task at logon
 $Trigger = New-ScheduledTaskTrigger -AtLogOn
@@ -265,3 +210,10 @@ $Settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoi
 # Register the scheduled task
 Register-ScheduledTask -TaskName $TaskName -Action $Action -Trigger $Trigger -Settings $Settings -Description "Runs a malicious PowerShell script at logon"
 ```
+
+## References
+
+- [MITRE ATT&CK T1547.001 - Registry Run Keys / Startup Folder](https://attack.mitre.org/techniques/T1547/001/)
+- [MITRE ATT&CK T1053.005 - Scheduled Task](https://attack.mitre.org/techniques/T1053/005/)
+- [MITRE ATT&CK T1037.001 - Logon Script (Windows)](https://attack.mitre.org/techniques/T1037/001/)
+- [Microsoft Docs - Windows Auto-Start Extensibility Points](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)

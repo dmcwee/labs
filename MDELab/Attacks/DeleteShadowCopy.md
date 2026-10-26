@@ -1,5 +1,10 @@
 # Shadow Copy Delete
 
+> **Lab context:** On standalone MDE, start on `WinClient11` (`10.0.2.53`)
+> using deployment `username` (`.\cmadmin` by default) and the supplied
+> `password`. See [scenario setup and domain accounts](README.md#before-running-a-scenario)
+> before domain-dependent steps; domain joining and MDE onboarding are manual.
+
 ## Overview
 
 Shadow Copy Deletion is a technique commonly associated with ransomware attacks where attackers delete or disable built-in Windows shadow copies and recovery services. This prevents system recovery by denying access to backups, making it significantly more challenging for victims to restore corrupted or encrypted data. By removing these recovery options, attackers increase the pressure on victims to pay ransoms.
@@ -10,13 +15,6 @@ Shadow Copy Deletion is a technique commonly associated with ransomware attacks 
 | --- | --- | --- |
 | Impact | T1490 | Inhibit System Recovery |
 | Defense Evasion | T1070 | Indicator Removal |
-
-## Expected Alerts
-
-| Alert Title | Alert Description | Alert Details |
-| --- | --- | --- |
-| Possible ransomware activity | Shadow copies have been deleted. This activity is commonly associated with ransomware. | **Category:** Impact<br/>**MITRE ATT&CK Techniques:** T1490: Inhibit System Recovery<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior<br/>**Detection status:** Detected |
-| Suspicious Volume Shadow Copy deletion | A process attempted to delete Volume Shadow Copies in a manner consistent with ransomware behavior. | **Category:** Impact<br/>**MITRE ATT&CK Techniques:** T1490: Inhibit System Recovery<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior<br/>**Detection status:** Detected |
 
 ## Attack Simulation
 
@@ -33,8 +31,8 @@ Shadow Copy Deletion is a technique commonly associated with ransomware attacks 
 
 | Parameter | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
-| `Method` | String | No | `WMIC` | The deletion method to use. Valid values: `WMIC` (deprecated but still common), `VSSAdmin` (using vssadmin.exe), `PowerShell` (using CIM cmdlets) |
-| `Force` | Switch | No | — | Skip the confirmation prompt before execution |
+| `-Method` | String | No | `WMIC` | The deletion method to use. Valid values: `WMIC` (deprecated but still common), `VSSAdmin` (using vssadmin.exe), `PowerShell` (using CIM cmdlets) |
+| `-Force` | Switch | No | Not set | Skip the confirmation prompt before execution |
 
 #### What the Script Does
 
@@ -97,6 +95,13 @@ Shadow copy deletion simulation complete.
 5. The script deletes all shadow copies and backup catalogs.
 6. Monitor the Microsoft Defender for Endpoint portal for ransomware-related alerts.
 
+## Expected Alerts
+
+| Alert Title | Alert Description | Alert Details |
+| --- | --- | --- |
+| Possible ransomware activity | Shadow copies have been deleted. This activity is commonly associated with ransomware. | **Category:** Impact<br/>**MITRE ATT&CK Techniques:** T1490: Inhibit System Recovery<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior<br/>**Detection status:** Detected |
+| Suspicious Volume Shadow Copy deletion | A process attempted to delete Volume Shadow Copies in a manner consistent with ransomware behavior. | **Category:** Impact<br/>**MITRE ATT&CK Techniques:** T1490: Inhibit System Recovery<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior<br/>**Detection status:** Detected |
+
 ## Why Does This Matter
 
 Shadow copy deletion is a critical indicator of ransomware activity because:
@@ -129,15 +134,9 @@ Enable-ComputerRestore -Drive "C:\"
 Checkpoint-Computer -Description "Post-simulation restore point"
 ```
 
-## References
+## Manual Commands
 
-- [MITRE ATT&CK T1490 - Inhibit System Recovery](https://attack.mitre.org/techniques/T1490/)
-- [Microsoft Docs - Volume Shadow Copy Service](https://docs.microsoft.com/en-us/windows-server/storage/file-server/volume-shadow-copy-service)
-- [Microsoft Docs - Controlled Folder Access](https://docs.microsoft.com/en-us/microsoft-365/security/defender-endpoint/controlled-folders)
-
-## Additional Manual Commands
-
-### Delete Shadow Copy (Manual Commands)
+### Delete Shadow Copy
 
 #### Using WMIC (deprecated)
 
@@ -162,3 +161,9 @@ Get-CimInstance -ClassName Win32_ShadowCopy | Remove-CimInstance
 ```powershell
 wbadmin delete catalog -quiet
 ```
+
+## References
+
+- [MITRE ATT&CK T1490 - Inhibit System Recovery](https://attack.mitre.org/techniques/T1490/)
+- [Microsoft Docs - Volume Shadow Copy Service](https://docs.microsoft.com/en-us/windows-server/storage/file-server/volume-shadow-copy-service)
+- [Microsoft Docs - Controlled Folder Access](https://docs.microsoft.com/en-us/microsoft-365/security/defender-endpoint/controlled-folders)

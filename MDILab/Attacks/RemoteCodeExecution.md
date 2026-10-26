@@ -1,5 +1,12 @@
 # Remote Code Execution via PowerShell Remoting
 
+> **Lab context:** Use `WinClient11` (`10.0.2.51`) as hydrated
+> `mayor\johna` when administrative remoting access is required.
+> The primary target is `LabSubAd1` (`10.0.2.15`, `mayor.mcweeinc.com`);
+> the optional member server is `Win2022` (`10.0.2.50`) after joining it.
+> Complete the [scenario setup](README.md#before-running-a-scenario), WinRM,
+> and target permissions first; domain membership and sensors are not automatic.
+
 ## Overview
 
 This attack simulation demonstrates a lateral movement technique where an attacker uses PowerShell Remoting (`Invoke-Command`) to execute code on a remote machine. The script connects to a target computer and writes an entry into the Windows Application Event Log, simulating a remote code execution scenario.
@@ -30,10 +37,10 @@ The `Invoke-RemoteCodeExecution.ps1` script connects to a remote machine via Pow
 
 #### Parameters
 
-| Parameter | Type | Default | Description |
-| -- | -- | -- | -- |
-| `-ComputerName` | String | *(Required)* | The name of the remote computer to connect to |
-| `-Credential` | PSCredential | *(Current user)* | Optional credentials to use for the remote connection |
+| Parameter | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `-ComputerName` | String | Yes | Not set | The name of the remote computer to connect to |
+| `-Credential` | PSCredential | No | *(Current user)* | Optional credentials to use for the remote connection |
 
 #### What the Script Does
 
@@ -58,36 +65,36 @@ Enable-PSRemoting -Force
 #### Basic remote execution using current credentials
 
 ```powershell
-.\Invoke-RemoteCodeExecution.ps1 -ComputerName "DC01"
+.\Invoke-RemoteCodeExecution.ps1 -ComputerName "LabSubAd1.mayor.mcweeinc.com"
 ```
 
-Connects to DC01 using the current user's credentials and writes an event log entry.
+Connects to `LabSubAd1` using the current user's credentials and writes an event log entry.
 
 #### Remote execution with explicit credentials
 
 ```powershell
-.\Invoke-RemoteCodeExecution.ps1 -ComputerName "DC01" -Credential (Get-Credential)
+.\Invoke-RemoteCodeExecution.ps1 -ComputerName "LabSubAd1.mayor.mcweeinc.com" -Credential (Get-Credential -UserName "mayor\johna" -Message "Enter the lab administrator's password")
 ```
 
-Prompts for credentials, then connects and executes on DC01.
+Prompts for credentials, then connects and executes on `LabSubAd1`.
 
 #### Remote execution with stored credentials
 
 ```powershell
-$cred = Get-Credential -UserName "CONTOSO\admin" -Message "Enter admin credentials"
-.\Invoke-RemoteCodeExecution.ps1 -ComputerName "SERVER01" -Credential $cred
+$cred = Get-Credential -UserName "mayor\johna" -Message "Enter the lab administrator's password"
+.\Invoke-RemoteCodeExecution.ps1 -ComputerName "Win2022.mayor.mcweeinc.com" -Credential $cred
 ```
 
 ### Expected Output
 
 ```
-Attempting to connect to remote machine: DC01
-Source machine: WORKSTATION01
+Attempting to connect to remote machine: LabSubAd1.mayor.mcweeinc.com
+Source machine: WinClient11
 
 Remote Execution Results:
 Created event source: RemoteCodeExecution
 Event log entry created successfully
-Message: Remote code was executed on this machine from a connection on WORKSTATION01
+Message: Remote code was executed on this machine from a connection on WinClient11
 
 Remote code execution simulation completed successfully!
 ```
@@ -137,7 +144,7 @@ Remote code execution simulation completed successfully!
 Remove the event source created by the script on the target machine:
 
 ```powershell
-Invoke-Command -ComputerName "DC01" -ScriptBlock {
+Invoke-Command -ComputerName "LabSubAd1.mayor.mcweeinc.com" -ScriptBlock {
     Remove-EventLog -Source "RemoteCodeExecution" -ErrorAction SilentlyContinue
 }
 ```

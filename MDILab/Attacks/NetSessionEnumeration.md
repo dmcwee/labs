@@ -1,5 +1,11 @@
 # Net Session Enumeration (SMB Session Enumeration)
 
+> **Lab context:** Use `WinClient11` (`10.0.2.51`) in the first forest
+> on `LabSubAd1` (`10.0.2.15`, `mayor.mcweeinc.com`).
+> Start with `mayor\jsmith`; use `mayor\johna` only for steps requiring
+> administrative access. Complete the [scenario setup](README.md#before-running-a-scenario)
+> first; membership, sensors, and the example SMB sessions are not preconfigured.
+
 ## Overview
 
 Net Session Enumeration is a reconnaissance technique used by attackers to discover active SMB sessions on remote computers within a network. By calling the Windows `NetSessionEnum` API, attackers can identify which users are currently logged into which machines, enabling them to locate high-value targets such as Domain Admins with active sessions and plan lateral movement accordingly.
@@ -31,11 +37,11 @@ The `Invoke-NetSessionEnumeration.ps1` script uses the Windows `NetSessionEnum` 
 
 #### Parameters
 
-| Parameter | Type | Default | Description |
-| -- | -- | -- | -- |
-| `-ComputerName` | String | Local computer | The name of the computer to query for sessions |
-| `-ClientName` | String | - | Filter results to only show sessions from a specific client computer |
-| `-UserName` | String | - | Filter results to only show sessions for a specific user |
+| Parameter | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `-ComputerName` | String | No | Local computer | The name of the computer to query for sessions |
+| `-ClientName` | String | No | Not set | Filter results to only show sessions from a specific client computer |
+| `-UserName` | String | No | Not set | Filter results to only show sessions for a specific user |
 
 #### What the Script Does
 
@@ -63,10 +69,11 @@ Lists all active SMB sessions on the local computer.
 #### Enumerate sessions on a remote server
 
 ```powershell
-.\Invoke-NetSessionEnumeration.ps1 -ComputerName "DC01"
+.\Invoke-NetSessionEnumeration.ps1 -ComputerName "LabSubAd1"
 ```
 
-Lists all sessions on the domain controller DC01. This is the most common attack scenario as domain controllers typically have sessions from many users.
+Lists sessions on `LabSubAd1`, the first-forest controller. Results depend on
+actual SMB activity and the caller's permissions; deployment does not seed sessions.
 
 #### Enumerate sessions on multiple domain controllers
 
@@ -76,32 +83,35 @@ Get-ADDomainController -Filter * | ForEach-Object {
 }
 ```
 
-Enumerates sessions across all domain controllers to find where privileged users are logged in.
+Enumerates controllers in the current forest only. It does not automatically
+include `LabSubAd2` in the independent `tech.mcweeinc.com` forest.
 
 #### Filter sessions for a specific user
 
 ```powershell
-.\Invoke-NetSessionEnumeration.ps1 -ComputerName "DC01" -UserName "admin"
+.\Invoke-NetSessionEnumeration.ps1 -ComputerName "LabSubAd1" -UserName "johna"
 ```
 
-Lists only sessions for user 'admin' on DC01.
+Lists only sessions for hydrated user `johna` on `LabSubAd1`, if such sessions exist.
 
 #### Filter sessions from a specific client
 
 ```powershell
-.\Invoke-NetSessionEnumeration.ps1 -ComputerName "DC01" -ClientName "WORKSTATION01"
+.\Invoke-NetSessionEnumeration.ps1 -ComputerName "LabSubAd1" -ClientName "WinClient11"
 ```
 
-Lists sessions originating from WORKSTATION01.
+Lists sessions originating from `WinClient11`, if any are active.
 
 ### Expected Output
+
+Illustrative output after creating the relevant sessions in the selected forest;
+these sessions are not automatically created by deployment:
 
 ```
 ComputerName ClientName    UserName       ActiveTime       IdleTime
 ------------ ----------    --------       ----------       --------
-DC01         WORKSTATION01 john.smith     00:45:23         00:02:15
-DC01         WORKSTATION02 jane.admin     01:23:45         00:00:30
-DC01         SERVER01      svc_backup     12:34:56         00:00:00
+LabSubAd1    WinClient11   jsmith         00:45:23         00:02:15
+LabSubAd1    Win2022       johna          01:23:45         00:00:30
 ```
 
 #### Error Codes

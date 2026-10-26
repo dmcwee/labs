@@ -2,6 +2,7 @@ name: Build Bicep to ARM and push to publish branch
 
 run-name: Build Bicep to ARM and push to publish branch
 on:
+  workflow_dispatch:
   push:
     branches:
       - dev
@@ -13,16 +14,20 @@ on:
       - Linux/modules/*.bicep
       - Defender/modules/*.bicep
       - Common/DSC/*.ps1
+      - Common/modules/*.bicep
+      - .github/workflows/main.yml
+      - tests/infrastructure/**
 
 permissions:
   contents: write
 
 concurrency:
-  group: bicep-build-${{ github.ref }}
-  cancel-in-progress: true
+  group: bicep-publish
+  cancel-in-progress: false
 
 jobs:
   build-and-push:
+    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
 
     steps:
@@ -45,11 +50,14 @@ jobs:
         with:
           azcliversion: latest
           inlineScript: |
+            set -e
             echo "Az Version"
             az version
 
             echo "bicep version"
             az bicep version
+
+            python3 -m unittest discover -s tests/infrastructure
 
             find . -type f -name '*.bicep' ! -path '*/Common/*' | while read file; do
               firstdir="${file#./}"

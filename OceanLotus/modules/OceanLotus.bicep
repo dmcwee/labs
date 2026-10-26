@@ -58,7 +58,6 @@ module network '../../Common/modules/network.bicep' = {
     gatewayRange: '10.90.100.0/24'
     gatewayClientRange: '10.10.10.0/24'
     vpnClientProtocol: ['IkeV2']
-    gatewaySku: 'VpnGw1'
   }
 }
 

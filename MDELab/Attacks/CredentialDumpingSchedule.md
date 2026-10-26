@@ -1,5 +1,10 @@
 # Credential Dumping via Scheduled Tasks
 
+> **Lab context:** On standalone MDE, start on `WinClient11` (`10.0.2.53`)
+> using deployment `username` (`.\cmadmin` by default) and the supplied
+> `password`. See [scenario setup and domain accounts](README.md#before-running-a-scenario)
+> before domain-dependent steps; domain joining and MDE onboarding are manual.
+
 ## Overview
 
 This simulation extends the standard credential dumping attack by executing credential extraction techniques through Windows Scheduled Tasks. By leveraging the Task Scheduler, attackers can execute credential dumping operations under the SYSTEM context, evade user-level monitoring, and establish recurring credential harvesting. This approach combines credential access techniques (LSASS dumping, SAM extraction, browser credential theft) with persistence and execution via scheduled tasks, making it harder to detect and attribute.
@@ -14,13 +19,6 @@ This simulation extends the standard credential dumping attack by executing cred
 | Execution | T1053.005 | Scheduled Task/Job: Scheduled Task |
 | Persistence | T1053.005 | Scheduled Task/Job: Scheduled Task |
 | Defense Evasion | T1140 | Deobfuscate/Decode Files or Information |
-
-## Expected Alerts
-
-| Alert Title | Alert Description | Alert Details |
-| --- | --- | --- |
-| Suspicious scheduled task activity | A scheduled task was created or modified with characteristics commonly associated with malicious activity. | **Category:** Persistence<br/>**MITRE ATT&CK Techniques:** T1053.005: Scheduled Task<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior<br/>**Detection status:** Detected |
-| Possible theft of passwords and other sensitive web browser information | A process might be attempting to retrieve sensitive web browser information, such as saved passwords, cookies, or the browsing history. | **Category:** Credential access<br/>**MITRE ATT&CK Techniques:** T1003: OS Credential Dumping, T1555.003: Credentials from Web Browsers<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior,Network<br/>**Detection status:** Detected |
 
 ## Attack Simulation
 
@@ -37,12 +35,12 @@ This simulation extends the standard credential dumping attack by executing cred
 
 | Parameter | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
-| `OutputPath` | String | No | `$env:TEMP\creddump` | Directory where dumped credential files are saved |
-| `CleanUp` | Switch | No | — | Removes all dumped files and scheduled tasks created by the simulation |
-| `skipLsass` | Switch | No | — | Skip the LSASS memory dumping simulation |
-| `skipSam` | Switch | No | — | Skip the SAM registry hive extraction simulation |
-| `skipBrowser` | Switch | No | — | Skip the browser credential dumping simulation |
-| `Force` | Switch | No | — | Skip the confirmation prompt before execution |
+| `-OutputPath` | String | No | `$env:TEMP\creddump` | Directory where dumped credential files are saved |
+| `-CleanUp` | Switch | No | Not set | Removes all dumped files and scheduled tasks created by the simulation |
+| `-skipLsass` | Switch | No | Not set | Skip the LSASS memory dumping simulation |
+| `-skipSam` | Switch | No | Not set | Skip the SAM registry hive extraction simulation |
+| `-skipBrowser` | Switch | No | Not set | Skip the browser credential dumping simulation |
+| `-Force` | Switch | No | Not set | Skip the confirmation prompt before execution |
 
 #### What the Script Does
 
@@ -106,6 +104,13 @@ Running BrowserDump Simulation via Scheduled Task
 4. The script will sequentially create and execute three scheduled tasks that perform credential dumping.
 5. Monitor the Microsoft Defender for Endpoint portal for alerts related to credential access and scheduled task creation.
 6. After testing, run `.\Invoke-CredentialDumpingScheduleSimulation.ps1 -CleanUp` to remove all artifacts.
+
+## Expected Alerts
+
+| Alert Title | Alert Description | Alert Details |
+| --- | --- | --- |
+| Suspicious scheduled task activity | A scheduled task was created or modified with characteristics commonly associated with malicious activity. | **Category:** Persistence<br/>**MITRE ATT&CK Techniques:** T1053.005: Scheduled Task<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior<br/>**Detection status:** Detected |
+| Possible theft of passwords and other sensitive web browser information | A process might be attempting to retrieve sensitive web browser information, such as saved passwords, cookies, or the browsing history. | **Category:** Credential access<br/>**MITRE ATT&CK Techniques:** T1003: OS Credential Dumping, T1555.003: Credentials from Web Browsers<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior,Network<br/>**Detection status:** Detected |
 
 ## Why Does This Matter
 

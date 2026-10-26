@@ -1,0 +1,90 @@
+site_name: Security Labs
+site_description: Lab environments and learning scenarios for Microsoft Defender.
+site_url: https://davidmcwee.com/labs/
+repo_url: https://github.com/dmcwee/labs
+repo_name: dmcwee/labs
+edit_uri: edit/master/
+docs_dir: docs
+site_dir: site
+
+theme:
+  name: material
+  features:
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.action.edit
+
+plugins:
+  - search
+
+hooks:
+  - docs/hooks.py
+
+exclude_docs: |
+  hooks.py
+
+validation:
+  nav:
+    omitted_files: warn
+    not_found: warn
+  links:
+    not_found: warn
+    unrecognized_links: warn
+    anchors: warn
+
+markdown_extensions:
+  - tables
+  - fenced_code
+  - toc:
+      permalink: true
+
+nav:
+  - Home: README.md
+  - Getting started: getting-started.md
+  - Deployment alignment: deployment-alignment.md
+  - Environments:
+      - Defender unified (preview): Defender/README.md
+      - Defender for Endpoint: MDELab/README.md
+      - Defender for Identity: MDILab/README.md
+      - Linux: Linux/README.md
+      - OceanLotus: OceanLotus/README.md
+  - Scenarios:
+      - Defender for Endpoint:
+          - Overview: MDELab/Attacks/README.md
+          - Run multiple scenarios: MDELab/Attacks/AllAttacks.md
+          - Account discovery: MDELab/Attacks/AccountDiscovery.md
+          - Account persistence: MDELab/Attacks/AccountPersistence.md
+          - Credential dumping: MDELab/Attacks/CredentialDumping.md
+          - Scheduled credential dumping: MDELab/Attacks/CredentialDumpingSchedule.md
+          - Defender tampering: MDELab/Attacks/DefenderTampering.md
+          - Shadow copy deletion: MDELab/Attacks/DeleteShadowCopy.md
+          - Event log tampering: MDELab/Attacks/EventLog.md
+          - Password detection: MDELab/Attacks/PasswordDetection.md
+          - Service execution: MDELab/Attacks/ServiceExecution.md
+          - Service with embedded executable: MDELab/Attacks/ServiceWithEmbeddedExe.md
+          - UAC bypass: MDELab/Attacks/UACBypass.md
+          - Account advanced hunting: MDELab/Attacks/AccountAdvancedHunting.md
+      - Defender for Identity:
+          - Overview: MDILab/Attacks/README.md
+          - Account over-permissions: MDILab/Attacks/AccountOverPermissions.md
+          - DNS zone transfer: MDILab/Attacks/DnsZoneTransfer.md
+          - Honeytoken account: MDILab/Attacks/HoneytokenAccount.md
+          - LDAP reconnaissance: MDILab/Attacks/LdapRecon.md
+          - Net / SMB session enumeration: MDILab/Attacks/NetSessionEnumeration.md
+          - Network mapping: MDILab/Attacks/NetworkMappingRecon.md
+          - Remote code execution: MDILab/Attacks/RemoteCodeExecution.md
+          - Suspicious account addition: MDILab/Attacks/SuspiciousAccountAddition.md
+      - Linux context: Linux/Scenarios/README.md
+      - OceanLotus context: OceanLotus/Scenarios/README.md
+  - Tools and policies:
+      - MDE scheduling scripts: MDELab/Scripts/README.md
+      - MDE offline updates: MDELab/Offline/README.Docker.md
+      - Defender policy settings: MDELab/Policy/Policies.md
+  - Legacy and external resources:
+      - Previous MDI lab name: AzATP_Lab/README.md
+      - Advanced Hunting: AdvancedHunting/README.md
+      - Live Response: LiveResponse/README.md
+      - Federation: Federation/README.md
+  - Documentation publishing: publishing.md

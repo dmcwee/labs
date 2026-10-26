@@ -1,5 +1,10 @@
 # Service Creation with Embedded Executable
 
+> **Lab context:** On standalone MDE, start on `WinClient11` (`10.0.2.53`)
+> using deployment `username` (`.\cmadmin` by default) and the supplied
+> `password`. See [scenario setup and domain accounts](README.md#before-running-a-scenario)
+> before domain-dependent steps; domain joining and MDE onboarding are manual.
+
 ## Overview
 
 This simulation demonstrates how an attacker can compile malicious C# code directly on a target system and install the resulting executable as a Windows service. By embedding source code within a script and using the .NET compiler present on Windows systems, attackers can create and deploy custom service executables without needing to transfer pre-compiled binaries—evading file-based detection mechanisms that rely on known signatures.
@@ -12,12 +17,6 @@ This simulation demonstrates how an attacker can compile malicious C# code direc
 | Persistence | T1543.003 | Create or Modify System Process: Windows Service |
 | Defense Evasion | T1027.004 | Obfuscated Files or Information: Compile After Delivery |
 | Defense Evasion | T1036.004 | Masquerading: Masquerade Task or Service |
-
-## Expected Alerts
-
-| Alert Title | Alert Description | Alert Details |
-| --- | --- | --- |
-| Suspicious service registration | A system program was registered as a service. This can indicate malicious intent to establish persistence or gain system privileges. | **Category:** Persistence<br/>**MITRE ATT&CK Techniques:** T1036: Masquerading, T1036.004: Masquerade Task or Service, T1543.003: Windows Service, T1569.002: Service Execution, T1574.011: Services Registry Permissions Weakness<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior<br/>**Detection status:** Detected |
 
 ## Attack Simulation
 
@@ -34,11 +33,11 @@ This simulation demonstrates how an attacker can compile malicious C# code direc
 
 | Parameter | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
-| `ServiceName` | String | No | `CustomTestService` | The name of the Windows service to create |
-| `ServiceDisplayName` | String | No | `Custom Test Service` | The display name shown in the Services console |
-| `ExePath` | String | No | `$env:TEMP\CustomTestService.exe` | The file path where the compiled executable will be created |
-| `Force` | Switch | No | — | Skip the confirmation prompt before execution |
-| `Cleanup` | Switch | No | — | Remove the service, executable, and event log source created by the simulation |
+| `-ServiceName` | String | No | `CustomTestService` | The name of the Windows service to create |
+| `-ServiceDisplayName` | String | No | `Custom Test Service` | The display name shown in the Services console |
+| `-ExePath` | String | No | `$env:TEMP\CustomTestService.exe` | The file path where the compiled executable will be created |
+| `-Force` | Switch | No | Not set | Skip the confirmation prompt before execution |
+| `-Cleanup` | Switch | No | Not set | Remove the service, executable, and event log source created by the simulation |
 
 #### What the Script Does
 
@@ -98,6 +97,12 @@ This simulation demonstrates how an attacker can compile malicious C# code direc
 6. Check the Application event log for entries from the service.
 7. Monitor the Microsoft Defender for Endpoint portal for service creation and suspicious executable alerts.
 8. After testing, run `.\Invoke-ServiceWithEmbeddedExeSimulation.ps1 -Cleanup` to remove all artifacts.
+
+## Expected Alerts
+
+| Alert Title | Alert Description | Alert Details |
+| --- | --- | --- |
+| Suspicious service registration | A system program was registered as a service. This can indicate malicious intent to establish persistence or gain system privileges. | **Category:** Persistence<br/>**MITRE ATT&CK Techniques:** T1036: Masquerading, T1036.004: Masquerade Task or Service, T1543.003: Windows Service, T1569.002: Service Execution, T1574.011: Services Registry Permissions Weakness<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior<br/>**Detection status:** Detected |
 
 ## Why Does This Matter
 

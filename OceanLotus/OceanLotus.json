@@ -5,8 +5,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.37.4.10188",
-      "templateHash": "8510332850560573938"
+      "version": "0.47.16.16243",
+      "templateHash": "13468642535233583836"
     }
   },
   "parameters": {
@@ -75,7 +75,7 @@
   "resources": {
     "network": {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "[format('network-{0}', uniqueString('network', deployment().name))]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -105,9 +105,6 @@
             "value": [
               "IkeV2"
             ]
-          },
-          "gatewaySku": {
-            "value": "VpnGw1"
           }
         },
         "template": {
@@ -116,8 +113,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.37.4.10188",
-              "templateHash": "18296141148413522557"
+              "version": "0.47.16.16243",
+              "templateHash": "5116595280099959009"
             }
           },
           "parameters": {
@@ -165,7 +162,7 @@
             },
             "gatewaySku": {
               "type": "string",
-              "defaultValue": "Basic"
+              "defaultValue": "VpnGw1AZ"
             },
             "gatewayGeneration": {
               "type": "string",
@@ -209,13 +206,48 @@
               ]
             },
             {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2024-05-01",
+              "name": "nat-pub-ip",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard"
+              },
+              "properties": {
+                "publicIPAllocationMethod": "Static"
+              }
+            },
+            {
+              "type": "Microsoft.Network/natGateways",
+              "apiVersion": "2024-05-01",
+              "name": "client-subnet-gateway",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard"
+              },
+              "properties": {
+                "publicIpAddresses": [
+                  {
+                    "id": "[resourceId('Microsoft.Network/publicIPAddresses', 'nat-pub-ip')]"
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', 'nat-pub-ip')]"
+              ]
+            },
+            {
               "type": "Microsoft.Network/virtualNetworks/subnets",
               "apiVersion": "2024-05-01",
               "name": "[format('{0}/{1}', parameters('name'), 'client-subnet')]",
               "properties": {
-                "addressPrefix": "[parameters('clientRange')]"
+                "addressPrefix": "[parameters('clientRange')]",
+                "natGateway": {
+                  "id": "[resourceId('Microsoft.Network/natGateways', 'client-subnet-gateway')]"
+                }
               },
               "dependsOn": [
+                "[resourceId('Microsoft.Network/natGateways', 'client-subnet-gateway')]",
                 "[resourceId('Microsoft.Network/virtualNetworks', parameters('name'))]"
               ]
             },
@@ -225,22 +257,20 @@
               "name": "[format('{0}-pub-ip', parameters('gatewayName'))]",
               "location": "[parameters('location')]",
               "sku": {
-                "name": "Standard",
-                "tier": "Regional"
+                "name": "Standard"
               },
               "properties": {
                 "publicIPAllocationMethod": "Static",
-                "dnsSettings": {
-                  "domainNameLabel": "[toLower(parameters('gatewayName'))]"
-                }
+                "publicIPAddressVersion": "IPv4"
               }
             },
             {
               "type": "Microsoft.Network/virtualNetworkGateways",
               "apiVersion": "2024-05-01",
-              "name": "[parameters('name')]",
+              "name": "[parameters('gatewayName')]",
               "location": "[parameters('location')]",
               "properties": {
+                "gatewayType": "Vpn",
                 "ipConfigurations": [
                   {
                     "name": "default",
@@ -255,15 +285,12 @@
                     }
                   }
                 ],
+                "vpnType": "RouteBased",
                 "vpnGatewayGeneration": "[parameters('gatewayGeneration')]",
                 "sku": {
                   "name": "[parameters('gatewaySku')]",
                   "tier": "[parameters('gatewaySku')]"
                 },
-                "gatewayType": "Vpn",
-                "vpnType": "RouteBased",
-                "enableBgp": false,
-                "activeActive": false,
                 "vpnClientConfiguration": {
                   "vpnClientAddressPool": {
                     "addressPrefixes": [
@@ -302,7 +329,7 @@
         "count": "[length(variables('labServers'))]"
       },
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "[format('servers-{0}-{1}', copyIndex(), uniqueString('servers', deployment().name))]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -355,8 +382,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.37.4.10188",
-              "templateHash": "11771803485414475267"
+              "version": "0.47.16.16243",
+              "templateHash": "1045241030111118321"
             }
           },
           "parameters": {
@@ -484,7 +511,7 @@
             },
             "schedule": {
               "type": "Microsoft.Resources/deployments",
-              "apiVersion": "2022-09-01",
+              "apiVersion": "2025-04-01",
               "name": "[format('schedule-{0}', uniqueString('schedule', deployment().name))]",
               "properties": {
                 "expressionEvaluationOptions": {
@@ -505,8 +532,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.37.4.10188",
-                      "templateHash": "16675595891287740702"
+                      "version": "0.47.16.16243",
+                      "templateHash": "10491282635081377069"
                     }
                   },
                   "parameters": {
