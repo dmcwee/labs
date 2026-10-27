@@ -1,5 +1,10 @@
 # Credential Dumping & Exfiltration
 
+> **Lab context:** On standalone MDE, start on `WinClient11` (`10.0.2.53`)
+> using deployment `username` (`.\cmadmin` by default) and the supplied
+> `password`. See [scenario setup and domain accounts](README.md#before-running-a-scenario)
+> before domain-dependent steps; domain joining and MDE onboarding are manual.
+
 ## Overview
 
 Credential dumping is a technique used by attackers to extract stored authentication credentials—such as usernames, passwords, or hashes—from a system's memory or security databases. These credentials can then be used for lateral movement, privilege escalation, or unauthorized access to sensitive systems. This simulation demonstrates multiple credential extraction methods including LSASS memory dumping, SAM registry extraction, and browser credential theft.
@@ -14,14 +19,6 @@ Credential dumping is a technique used by attackers to extract stored authentica
 | Credential Access | T1555.003 | Credentials from Password Stores: Credentials from Web Browsers |
 | Collection | T1005 | Data from Local System |
 | Collection | T1119 | Automated Collection |
-
-## Expected Alerts
-
-| Alert Title | Alert Description | Alert Details |
-| --- | --- | --- |
-| Suspicious access to LSASS | A process attempted to access the Local Security Authority Subsystem Service (LSASS) memory. LSASS manages user credentials, and attackers commonly target it to extract passwords and hashes. | **Category:** Credential access<br/>**MITRE ATT&CK Techniques:** T1003: OS Credential Dumping, T1003.001: LSASS Memory<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior<br/>**Detection status:** Detected |
-| An active 'RegistryExfil' malware in a command line was prevented from executing | Malware and unwanted software are undesirable applications that perform annoying, disruptive, or harmful actions on affected machines. Some of these undesirable applications can replicate and spread from one machine to another. Others are able to receive commands from remote attackers and perform activities associated with cyber attacks. A malware is considered active if it is found running on the machine or it already has persistence mechanisms in place. Active malware detections are assigned higher severity ratings. Because this malware was active, take precautionary measures and check for residual signs of infection. | **Category:** Malware<br/>**MITRE ATT&CK Techniques:** N/A<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** Antivirus<br/>**Detection technology:** Client,Heuristic<br/>**Detection status:** Blocked |
-| Possible theft of passwords and other sensitive web browser information | A process might be attempting to retrieve sensitive web browser information, such as saved passwords, cookies, or the browsing history. | **Category:** Credential access<br/>**MITRE ATT&CK Techniques:** T1003: OS Credential Dumping, T1005: Data from Local System, T1119: Automated Collection, T1539: Steal Web Session Cookie, T1550.004: Web Session Cookie, T1552.001: Credentials In Files, T1555.003: Credentials from Web Browsers, T1555.004: Windows Credential Manager<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior,Network<br/>**Detection status:** Detected |
 
 ## Attack Simulation
 
@@ -38,12 +35,12 @@ Credential dumping is a technique used by attackers to extract stored authentica
 
 | Parameter | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
-| `OutputPath` | String | No | `$env:TEMP\creddump` | Directory where dumped credential files are saved |
-| `CleanUp` | Switch | No | — | Removes all dumped files created by the simulation |
-| `skipLsass` | Switch | No | — | Skip the LSASS memory dumping simulation |
-| `skipSam` | Switch | No | — | Skip the SAM registry hive extraction simulation |
-| `skipBrowser` | Switch | No | — | Skip the browser credential dumping simulation |
-| `Force` | Switch | No | — | Skip the confirmation prompt before execution |
+| `-OutputPath` | String | No | `$env:TEMP\creddump` | Directory where dumped credential files are saved |
+| `-CleanUp` | Switch | No | Not set | Removes all dumped files created by the simulation |
+| `-skipLsass` | Switch | No | Not set | Skip the LSASS memory dumping simulation |
+| `-skipSam` | Switch | No | Not set | Skip the SAM registry hive extraction simulation |
+| `-skipBrowser` | Switch | No | Not set | Skip the browser credential dumping simulation |
+| `-Force` | Switch | No | Not set | Skip the confirmation prompt before execution |
 
 #### What the Script Does
 
@@ -103,6 +100,14 @@ After execution, the output directory will contain:
 6. Monitor the Microsoft Defender for Endpoint portal for credential access alerts.
 7. After testing, run `.\Invoke-CredentialDumpingSimulation.ps1 -CleanUp` to remove all artifacts.
 
+## Expected Alerts
+
+| Alert Title | Alert Description | Alert Details |
+| --- | --- | --- |
+| Suspicious access to LSASS | A process attempted to access the Local Security Authority Subsystem Service (LSASS) memory. LSASS manages user credentials, and attackers commonly target it to extract passwords and hashes. | **Category:** Credential access<br/>**MITRE ATT&CK Techniques:** T1003: OS Credential Dumping, T1003.001: LSASS Memory<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior<br/>**Detection status:** Detected |
+| An active 'RegistryExfil' malware in a command line was prevented from executing | Malware and unwanted software are undesirable applications that perform annoying, disruptive, or harmful actions on affected machines. Some of these undesirable applications can replicate and spread from one machine to another. Others are able to receive commands from remote attackers and perform activities associated with cyber attacks. A malware is considered active if it is found running on the machine or it already has persistence mechanisms in place. Active malware detections are assigned higher severity ratings. Because this malware was active, take precautionary measures and check for residual signs of infection. | **Category:** Malware<br/>**MITRE ATT&CK Techniques:** N/A<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** Antivirus<br/>**Detection technology:** Client,Heuristic<br/>**Detection status:** Blocked |
+| Possible theft of passwords and other sensitive web browser information | A process might be attempting to retrieve sensitive web browser information, such as saved passwords, cookies, or the browsing history. | **Category:** Credential access<br/>**MITRE ATT&CK Techniques:** T1003: OS Credential Dumping, T1005: Data from Local System, T1119: Automated Collection, T1539: Steal Web Session Cookie, T1550.004: Web Session Cookie, T1552.001: Credentials In Files, T1555.003: Credentials from Web Browsers, T1555.004: Windows Credential Manager<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior,Network<br/>**Detection status:** Detected |
+
 ## Why Does This Matter
 
 Credential dumping is one of the most critical techniques in an attacker's arsenal because:
@@ -134,16 +139,9 @@ $OutputPath = "$env:TEMP\creddump"
 Remove-Item -Path $OutputPath -Recurse -Force
 ```
 
-## References
+## Manual Commands
 
-- [MITRE ATT&CK T1003 - OS Credential Dumping](https://attack.mitre.org/techniques/T1003/)
-- [MITRE ATT&CK T1003.001 - LSASS Memory](https://attack.mitre.org/techniques/T1003/001/)
-- [MITRE ATT&CK T1003.002 - Security Account Manager](https://attack.mitre.org/techniques/T1003/002/)
-- [MITRE ATT&CK T1555.003 - Credentials from Web Browsers](https://attack.mitre.org/techniques/T1555/003/)
-- [Microsoft Docs - Credential Guard](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/)
-- [Github: LearningKijo/ResearchDev/LSASS Dumping](https://github.com/LearningKijo/ResearchDev/blob/main/DEV/DEV04-LSASSdumping-MiniDump/Dev04-LSASSdumping-MiniDump.md)
-
-## Additional Manual Commands
+<a id="additional-manual-commands"></a>
 
 ### LSASS Memory Dumping (Manual Commands)
 
@@ -180,3 +178,12 @@ esentutl.exe /y "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Login Data" /
 esentutl.exe /y "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Login Data For Account" /d "$folderPath\Chrome_Login_DataForAccount.tmp"
 esentutl.exe /y "$env:LOCALAPPDATA\Microsoft\Edge\User Data\Default\Login Data" /d "$folderPath\Edge_Login_Data.tmp"
 ```
+
+## References
+
+- [MITRE ATT&CK T1003 - OS Credential Dumping](https://attack.mitre.org/techniques/T1003/)
+- [MITRE ATT&CK T1003.001 - LSASS Memory](https://attack.mitre.org/techniques/T1003/001/)
+- [MITRE ATT&CK T1003.002 - Security Account Manager](https://attack.mitre.org/techniques/T1003/002/)
+- [MITRE ATT&CK T1555.003 - Credentials from Web Browsers](https://attack.mitre.org/techniques/T1555/003/)
+- [Microsoft Docs - Credential Guard](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/)
+- [Github: LearningKijo/ResearchDev/LSASS Dumping](https://github.com/LearningKijo/ResearchDev/blob/main/DEV/DEV04-LSASSdumping-MiniDump/Dev04-LSASSdumping-MiniDump.md)

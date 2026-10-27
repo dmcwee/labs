@@ -1,5 +1,10 @@
 # Account Discovery
 
+> **Lab context:** On standalone MDE, start on `WinClient11` (`10.0.2.53`)
+> using deployment `username` (`.\cmadmin` by default) and the supplied
+> `password`. See [scenario setup and domain accounts](README.md#before-running-a-scenario)
+> before domain-dependent steps; domain joining and MDE onboarding are manual.
+
 ## Overview
 
 Account discovery is a technique used by attackers to enumerate valid usernames and user accounts within a system or network. This reconnaissance activity helps adversaries identify existing accounts, enabling follow-on activities such as brute-forcing, spear-phishing attacks, privilege escalation, or lateral movement. Attackers may enumerate local users, local groups, and—on domain-joined machines—domain users and privileged groups like Domain Admins and Enterprise Admins.
@@ -14,12 +19,6 @@ Account discovery is a technique used by attackers to enumerate valid usernames 
 | Discovery | T1087 | Account Discovery |
 | Discovery | T1087.001 | Account Discovery: Local Account |
 | Discovery | T1087.002 | Account Discovery: Domain Account |
-
-## Expected Alerts
-
-| Alert Title | Alert Description | Alert Details |
-| --- | --- | --- |
-| Suspicious sequence of exploration activities | A process performed multiple suspicious exploration activities in a short time, including user and group enumeration. This may indicate reconnaissance activity by an attacker mapping the environment. | **Category:** Discovery<br/>**MITRE ATT&CK Techniques:** T1033: System Owner/User Discovery, T1069: Permission Groups Discovery, T1087: Account Discovery<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior<br/>**Detection status:** Detected |
 
 ## Attack Simulation
 
@@ -36,9 +35,9 @@ Account discovery is a technique used by attackers to enumerate valid usernames 
 
 | Parameter | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
-| `OutputPath` | String | No | `$env:TEMP\Discovery` | Directory where enumerated account data is saved |
-| `CleanUp` | Switch | No | — | Removes all files and folders created by the simulation |
-| `Force` | Switch | No | — | Skip the confirmation prompt before execution |
+| `-OutputPath` | String | No | `$env:TEMP\Discovery` | Directory where enumerated account data is saved |
+| `-CleanUp` | Switch | No | Not set | Removes all files and folders created by the simulation |
+| `-Force` | Switch | No | Not set | Skip the confirmation prompt before execution |
 
 #### What the Script Does
 
@@ -95,6 +94,12 @@ After running the simulation, the following files will be created in the output 
 6. Review the generated files in the output directory (`$env:TEMP\Discovery` by default)
 7. Monitor the Microsoft Defender for Endpoint portal for alerts
 8. Run cleanup when finished: `.\Invoke-AccountDiscoverySimulation.ps1 -CleanUp`
+
+## Expected Alerts
+
+| Alert Title | Alert Description | Alert Details |
+| --- | --- | --- |
+| Suspicious sequence of exploration activities | A process performed multiple suspicious exploration activities in a short time, including user and group enumeration. This may indicate reconnaissance activity by an attacker mapping the environment. | **Category:** Discovery<br/>**MITRE ATT&CK Techniques:** T1033: System Owner/User Discovery, T1069: Permission Groups Discovery, T1087: Account Discovery<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior<br/>**Detection status:** Detected |
 
 ## Why Does This Matter
 

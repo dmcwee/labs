@@ -1,5 +1,10 @@
 # DNS Zone Transfer & Record Enumeration
 
+> **Lab context:** Use `WinClient11` (`10.0.2.51`) as `mayor\jsmith`,
+> querying `LabSubAd1` (`10.0.2.15`) in `mayor.mcweeinc.com`.
+> Complete the [scenario setup](README.md#before-running-a-scenario) first;
+> domain membership and MDI onboarding are not automatic.
+
 ## Overview
 
 DNS Zone Transfer is a reconnaissance technique used by attackers to obtain a complete copy of DNS records for a domain. By performing zone transfer requests (AXFR) or exhaustively querying DNS record types, attackers can map the network infrastructure, discover internal hostnames, identify servers, and locate potential targets for further exploitation.
@@ -9,7 +14,7 @@ Microsoft Defender for Identity (MDI) detects suspicious DNS activity including 
 ## MITRE ATT&CK Mapping
 
 | Tactic | Technique | ID |
-| -- | -- | -- |
+| --- | --- | --- |
 | Discovery | Network Service Discovery | T1046 |
 | Discovery | Remote System Discovery | T1018 |
 | Reconnaissance | Active Scanning: Vulnerability Scanning | T1595.002 |
@@ -21,32 +26,8 @@ Microsoft Defender for Identity (MDI) detects suspicious DNS activity including 
 
 - Domain-joined Windows machine with PowerShell
 - Network connectivity to the domain's DNS server(s)
-- The `Resolve-DnsName` cmdlet (available in Windows 8.1+ / Server 2012 R2+)
+- For Script Execution the `Resolve-DnsName` cmdlet (available in Windows 8.1+ / Server 2012 R2+) 
 - Standard domain user account (DNS queries typically don't require elevated privileges)
-
-### Script: Invoke-DnsZoneTransfer.ps1
-
-The `Invoke-DnsZoneTransfer.ps1` script attempts to enumerate DNS records by querying all possible DNS record types against the domain's name servers. It can auto-discover name servers or target a specific one.
-
-#### Parameters
-
-| Parameter | Type | Default | Description |
-| -- | -- | -- | -- |
-| `-Domain` | String | - | The domain name to enumerate DNS records for |
-| `-NameServer` | String | *(Auto-discover)* | Specific name server to query. If not provided, NS records are resolved automatically |
-| `-OutputPath` | String | `$env:TEMP\DnsZoneTransfer` | Directory path where results are saved |
-| `-TimeoutSec` | Int | `15` | Timeout in seconds for DNS queries |
-| `-RecordTypes` | String[] | All standard DNS types | Array of DNS record types to query (A, AAAA, MX, CNAME, SOA, NS, TXT, SRV, PTR, etc.) |
-| `-CleanUp` | Switch | - | Removes previous output files from the output path |
-| `-Force` | Switch | - | Skips the confirmation prompt |
-
-#### What the Script Does
-
-1. Displays a banner with configuration details and prompts for confirmation (unless `-Force` is specified)
-2. Auto-discovers name servers via NS record lookup if `-NameServer` is not provided
-3. Iterates through all specified DNS record types and queries each against every discovered name server
-4. Saves results to text files in the output directory, one file per name server
-5. Reports success or failure for each record type query
 
 ## Setup
 
@@ -57,33 +38,33 @@ Use the [Invoke-DnsZoneTransfer.ps1](./Invoke-DnsZoneTransfer.ps1) script to per
 #### Basic DNS enumeration with auto-discovered name servers
 
 ```powershell
-.\Invoke-DnsZoneTransfer.ps1 -Domain "contoso.com"
+.\Invoke-DnsZoneTransfer.ps1 -Domain "mayor.mcweeinc.com"
 ```
 
-Discovers NS records for contoso.com and queries all DNS record types against each name server.
+Discovers NS records for mayor.mcweeinc.com and queries all DNS record types against each name server.
 
 #### Target a specific name server
 
 ```powershell
-.\Invoke-DnsZoneTransfer.ps1 -Domain "contoso.com" -NameServer "DC01.contoso.com"
+.\Invoke-DnsZoneTransfer.ps1 -Domain "mayor.mcweeinc.com" -NameServer "LabSubAd1.mayor.mcweeinc.com"
 ```
 
 #### Query specific record types only
 
 ```powershell
-.\Invoke-DnsZoneTransfer.ps1 -Domain "contoso.com" -RecordTypes @("A", "AAAA", "MX", "NS", "SOA", "TXT", "SRV")
+.\Invoke-DnsZoneTransfer.ps1 -Domain "mayor.mcweeinc.com" -RecordTypes @("A", "AAAA", "MX", "NS", "SOA", "TXT", "SRV")
 ```
 
 #### Skip confirmation prompt
 
 ```powershell
-.\Invoke-DnsZoneTransfer.ps1 -Domain "contoso.com" -Force
+.\Invoke-DnsZoneTransfer.ps1 -Domain "mayor.mcweeinc.com" -Force
 ```
 
 #### Custom output directory
 
 ```powershell
-.\Invoke-DnsZoneTransfer.ps1 -Domain "contoso.com" -OutputPath "C:\Results\DnsEnum"
+.\Invoke-DnsZoneTransfer.ps1 -Domain "mayor.mcweeinc.com" -OutputPath "C:\Results\DnsEnum"
 ```
 
 ### Expected Output
@@ -92,8 +73,8 @@ Discovers NS records for contoso.com and queries all DNS record types against ea
 ===============================================
    DNS Zone Transfer & Record Enumeration Tool
 ===============================================
-Domain: contoso.com
-Output Path: C:\Users\user\AppData\Local\Temp\DnsZoneTransfer
+Domain: mayor.mcweeinc.com
+Output Path: C:\Users\jsmith\AppData\Local\Temp\DnsZoneTransfer
 Record Types: A, AAAA, NS, MX, SOA, TXT, SRV, CNAME, ...
 Name Server: (auto-discover)
 Timeout (sec): 15
@@ -102,43 +83,69 @@ This script will attempt to enumerate DNS records and perform a zone transfer if
 Output will be saved to the specified path.
 
 Do you want to continue? (Y/N): Y
-[*] Discovering NS records for contoso.com
-[+] DNS Resolve from DC01.contoso.com for A succeeded
-[+] DNS Resolve from DC01.contoso.com for NS succeeded
-[-] DNS Resolve from DC01.contoso.com for AXFR failed or returned no results
-[+] DNS Resolve from DC01.contoso.com for MX succeeded
+[*] Discovering NS records for mayor.mcweeinc.com
+[+] DNS Resolve from LabSubAd1.mayor.mcweeinc.com for A succeeded
+[+] DNS Resolve from LabSubAd1.mayor.mcweeinc.com for NS succeeded
+[-] DNS Resolve from LabSubAd1.mayor.mcweeinc.com for AXFR failed or returned no results
+[+] DNS Resolve from LabSubAd1.mayor.mcweeinc.com for MX succeeded
 ...
 ```
 
 Results are saved to `$OutputPath\ResolveDnsName_<nameserver>.txt`.
 
-### Manual Zone Transfer (Alternative)
-
-You can also trigger a zone transfer detection using `nslookup` from a command prompt:
-
-```bash
-nslookup
-server DC01.contoso.com
-ls -d contoso.com
-exit
-```
+###
 
 ## Scenario Execution
 
-1. Run the script against your lab domain to enumerate all DNS record types
-2. For maximum detection coverage, run the script multiple times to generate excessive DNS query volume
-3. Wait 5–15 minutes for MDI to process the activity
-4. Check the Microsoft Security Portal for generated alerts
+1. Using a command prompt run the Zone Transfer commaonds below. This should generate an error in the console, but will also generate an alert in XDR.
+2. Run the `Invoke-DnsZoneTransfer.ps1` script against your domain to enumerate all DNS record types.
+3. For maximum detection coverage, run the script multiple times to generate excessive DNS query volume
+4. Wait 5–15 minutes for MDI to process the activity
+5. Check the Microsoft Security Portal for generated alerts
+
+### Zone Transfer
+
+You can also trigger a zone transfer detection using `nslookup` from a command prompt:
+
+```cmd
+nslookup
+server LabSubAd1.mayor.mcweeinc.com
+ls -d mayor.mcweeinc.com
+exit
+```
+### Script: Invoke-DnsZoneTransfer.ps1
+
+The `Invoke-DnsZoneTransfer.ps1` script attempts to enumerate DNS records by querying all possible DNS record types against the domain's name servers. It can auto-discover name servers or target a specific one. However, the script does not always trigger the same detections as the manual commands performed via nslookup.
+
+#### Parameters
+
+| Parameter | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `-Domain` | String | No | Not set | The domain name to enumerate DNS records for |
+| `-NameServer` | String | No | *(Auto-discover)* | Specific name server to query. If not provided, NS records are resolved automatically |
+| `-OutputPath` | String | No | `$env:TEMP\DnsZoneTransfer` | Directory path where results are saved |
+| `-TimeoutSec` | Int | No | `15` | Timeout in seconds for DNS queries |
+| `-RecordTypes` | String[] | No | All standard DNS types | Array of DNS record types to query (A, AAAA, MX, CNAME, SOA, NS, TXT, SRV, PTR, etc.) |
+| `-CleanUp` | Switch | No | Not set | Removes previous output files from the output path |
+| `-Force` | Switch | No | Not set | Skips the confirmation prompt |
+
+#### What the Script Does
+
+1. Displays a banner with configuration details and prompts for confirmation (unless `-Force` is specified)
+2. Auto-discovers name servers via NS record lookup if `-NameServer` is not provided
+3. Iterates through all specified DNS record types and queries each against every discovered name server
+4. Saves results to text files in the output directory, one file per name server
+5. Reports success or failure for each record type query
 
 ## Expected Alerts
 
 | Alert Title | Alert Description | Severity | Timeline |
-| -- | -- | -- | -- |
+| --- | --- | --- | --- |
 | Network mapping reconnaissance (DNS) | Suspicious DNS activity detected, indicating potential network reconnaissance | Medium | 5–15 minutes |
 
 | Alert Title | Alert Description | Alert Details |
-| -- | -- | -- |
-| Network mapping reconnaissance (DNS) | Suspicious DNS queries originating from non-DNS server or excessive DNS enumeration detected | **Category:** Discovery<br/>**MITRE ATT&CK Techniques:** T1046: Network Service Discovery, T1018: Remote System Discovery<br/>**Service source:** MDI<br/>**Detection source:** Defender XDR<br/>**Detection technology:** Behavioral analytics<br/>**Detection status:** Unknown |
+| --- | --- | --- |
+| Network mapping reconnaissance (DNS) | Suspicious DNS queries originating from non-DNS server or excessive DNS enumeration detected | **Category:** Discovery<br>**MITRE ATT&CK Techniques:** T1046: Network Service Discovery, T1018: Remote System Discovery<br>**Service source:** MDI<br>**Detection source:** Defender XDR<br>**Detection technology:** Behavioral analytics<br>**Detection status:** Unknown |
 
 ## Why Does This Matter
 

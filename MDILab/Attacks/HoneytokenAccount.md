@@ -1,5 +1,12 @@
 # Honeytoken Account Activity Detection
 
+> **Lab context:** Use `WinClient11` (`10.0.2.51`) in the first forest
+> on `LabSubAd1` (`10.0.2.15`, `mayor.mcweeinc.com`).
+> Create the decoy as `mayor\johna`; tag it using your authorized Defender
+> tenant account. Use a separate test session for authentication attempts.
+> Complete the [scenario setup](README.md#before-running-a-scenario)
+> first and observe the shared-group cleanup warning below.
+
 ## Overview
 
 Honeytoken accounts are decoy accounts strategically placed in an environment to act as early warning indicators of malicious activity. These accounts are intentionally made to appear valuable (e.g., administrative accounts with enticing names) but are never used for legitimate purposes. Any authentication attempt, LDAP query, or interaction with a honeytoken account is immediately suspicious and indicates potential reconnaissance or credential theft activity.
@@ -30,14 +37,14 @@ The `Invoke-HoneyTokenAccount.ps1` script automates the creation of a honeytoken
 
 #### Parameters
 
-| Parameter | Type | Default | Description |
-| -- | -- | -- | -- |
-| `-Username` | String | `adm_backup` | The username for the honeytoken account |
-| `-Password` | String | `P@ssw0rd!TestOnly` | Password for the honeytoken account |
-| `-Description` | String | `Decoy honeytoken - do not use (lab only)` | Description for the account (use a convincing description in production) |
-| `-OU` | String | `CN=Users` | Organizational Unit path where the account will be created |
-| `-Cleanup` | Switch | - | Removes the honeytoken account and group |
-| `-Force` | Switch | - | Skips the confirmation prompt |
+| Parameter | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `-Username` | String | No | `adm_backup` | The username for the honeytoken account |
+| `-Password` | String | No | `P@ssw0rd!TestOnly` | Password for the honeytoken account |
+| `-Description` | String | No | `Decoy honeytoken - do not use (lab only)` | Description for the account (use a convincing description in production) |
+| `-OU` | String | No | `CN=Users` | Organizational Unit path where the account will be created |
+| `-Cleanup` | Switch | No | Not set | Removes the honeytoken account and group |
+| `-Force` | Switch | No | Not set | Skips the confirmation prompt |
 
 #### What the Script Creates
 
@@ -48,6 +55,12 @@ The `Invoke-HoneyTokenAccount.ps1` script automates the creation of a honeytoken
 ## Setup
 
 Use the [Invoke-HoneyTokenAccount.ps1](./Invoke-HoneyTokenAccount.ps1) script to create the honeytoken account and associated group.
+
+The disposable `adm_backup` account is not the hydrated `admin_bak` account.
+Hydration already creates `Remote IT Admin` and adds `admin_bak` to it; the
+scenario reuses that group. Its `-Cleanup` switch deletes the group even when
+it existed before the scenario, so **do not use that switch in this hydrated
+lab**. Use the account-only cleanup below to preserve deployment state.
 
 ### Usage Examples
 
@@ -91,14 +104,14 @@ HONEYTOKEN ACCOUNT CREATION
 ========================================
 This script will CREATE the following:
   + User: adm_backup
-  + UPN: adm_backup@contoso.com
-  + Path: CN=Users,DC=contoso,DC=com
+  + UPN: adm_backup@mayor.mcweeinc.com
+  + Path: CN=Users,DC=mayor,DC=mcweeinc,DC=com
   + Group: Remote IT Admin
   + Description: Decoy honeytoken - do not use (lab only)
 ========================================
 
 Do you want to continue? (Y/N): Y
-Created group: Remote IT Admin
+Group already exists: Remote IT Admin
 Added adm_backup to Remote IT Admin
 ```
 
@@ -118,7 +131,6 @@ After creating the honeytoken account, you must tag it in Microsoft Defender for
 
 > **Note:** It may take up to 2 hours for the tag to propagate to all sensors.
 
-
 ## Scenario Execution
 
 Use the following scenarios to trigger Honeytoken account detections.
@@ -130,10 +142,10 @@ Any authentication attempt against the honeytoken triggers an alert, regardless 
 From a testing machine, open a command prompt:
 
 ```cmd
-runas /user:CONTOSO\adm_backup cmd
+runas /user:mayor\adm_backup cmd
 ```
 
-> Replace `CONTOSO\adm_backup` with your domain and honeytoken account name.
+> Replace `mayor\adm_backup` if you changed the domain or honeytoken account name.
 
 When prompted, enter either the correct or an incorrect password—both scenarios generate a detection.
 
@@ -161,15 +173,20 @@ net user adm_backup /domain
 
 ### Scenario 3: Kerberos Ticket Request
 
-Request a Kerberos ticket for the honeytoken account:
+In a test session authenticated as `mayor\adm_backup`, request a ticket for
+the lab controller's host service:
 
 ```cmd
-klist get CONTOSO\adm_backup
+klist get host/LabSubAd1.mayor.mcweeinc.com
 ```
 
-This simulates an attacker attempting to use the honeytoken credentials.
+`klist get` takes a service principal name, not a `DOMAIN\user` login.
+Use the authentication scenario above to establish the decoy's test session;
+do not mistake `admin_bak` for this temporary honeytoken.
 
-## Expected MDI Alerts
+## Expected Alerts
+
+<a id="expected-mdi-alerts"></a>
 
 | Trigger | Alert Title | Severity | Timeline |
 | -- | -- | -- | -- |
@@ -177,7 +194,18 @@ This simulates an attacker attempting to use the honeytoken credentials.
 | LDAP query | Honeytoken user was queried via LDAP | Medium | 5-15 minutes |
 | Kerberos ticket | Honeytoken user authentication activity | High | 5-15 minutes |
 
-## Why Honeytokens are Effective
+### Detection Details
+
+<a id="detections"></a>
+
+| Alert Title | Alert Description | Alert Details |
+| -- | -- | -- |
+| Honeytoken authentication activity | *honey token account* performed *x* suspicious activities. | **Category:** Credential Access<br/>**MITRE ATT&CK Techniques:** T1087: Account Discovery, T1087.002: Domain Account<br/>**Service source:** MDI<br/>**Detection source:** MDI<br/>**Detection technology:** Behavioral analytics<br/>**Detection status:** Active |
+| Honeytoken user was queried via LDAP | A user queried the honeytoken account via LDAP. | **Category:** Discovery<br/>**MITRE ATT&CK Techniques:** T1087: Account Discovery<br/>**Service source:** MDI<br/>**Detection source:** MDI<br/>**Detection technology:** Behavioral analytics<br/>**Detection status:** Active |
+
+## Why Does This Matter
+
+<a id="why-honeytokens-are-effective"></a>
 
 1. **Zero false positives** - Legitimate users never use honeytoken accounts
 2. **Early detection** - Catches attackers during reconnaissance before damage occurs
@@ -185,7 +213,9 @@ This simulates an attacker attempting to use the honeytoken credentials.
 4. **Credential theft indicator** - Authentication attempts indicate stolen credential usage
 5. **Low maintenance** - No ongoing tuning required after initial setup
 
-## Best Practices for Honeytoken Accounts
+## Best Practices
+
+<a id="best-practices-for-honeytoken-accounts"></a>
 
 1. **Make them attractive** - Use names like `adm_backup`, `svc_sql`, `IT_Admin`
 2. **Place strategically** - Put them in OUs where attackers would look
@@ -196,23 +226,17 @@ This simulates an attacker attempting to use the honeytoken credentials.
 
 ## Clean-Up
 
-Remove the honeytoken account and group when testing is complete:
+In this hydrated lab, keep `Remote IT Admin` and its existing `admin_bak`
+membership. After verifying that `adm_backup` was created only for this exercise,
+remove just that decoy as an authorized first-forest administrator:
 
 ```powershell
-.\Invoke-HoneyTokenAccount.ps1 -Cleanup
+Remove-ADGroupMember -Identity "Remote IT Admin" -Members "adm_backup"
+Remove-ADUser -Identity "adm_backup"
 ```
 
-Or for a specific custom username:
-
-```powershell
-.\Invoke-HoneyTokenAccount.ps1 -Cleanup -Username "Admin2"
-```
+For a custom decoy name, substitute only that scenario-created account. The
+script's `-Cleanup` mode deletes the shared group and is not suitable for
+preserving this deployment's hydrated state.
 
 > **Remember:** Also remove the entity tag from the MDI portal if permanently removing the honeytoken.
-
-## Detections
-
-| Alert Title | Alert Description | Alert Details |
-| -- | -- | -- |
-| Honeytoken authentication activity | *honey token account* performed *x* suspicious activities. | **Category:** Credential Access<br/>**MITRE ATT&CK Techniques:** T1087: Account Discovery, T1087.002: Domain Account<br/>**Service source:** MDI<br/>**Detection source:** MDI<br/>**Detection technology:** Behavioral analytics<br/>**Detection status:** Active |
-| Honeytoken user was queried via LDAP | A user queried the honeytoken account via LDAP. | **Category:** Discovery<br/>**MITRE ATT&CK Techniques:** T1087: Account Discovery<br/>**Service source:** MDI<br/>**Detection source:** MDI<br/>**Detection technology:** Behavioral analytics<br/>**Detection status:** Active |

@@ -1,5 +1,10 @@
 # System Services: Service Execution
 
+> **Lab context:** On standalone MDE, start on `WinClient11` (`10.0.2.53`)
+> using deployment `username` (`.\cmadmin` by default) and the supplied
+> `password`. See [scenario setup and domain accounts](README.md#before-running-a-scenario)
+> before domain-dependent steps; domain joining and MDE onboarding are manual.
+
 ## Overview
 
 Service Execution is a technique where attackers abuse the Windows Service Control Manager (services.exe) to run malicious commands or payloads. The Service Control Manager, which allows the management of system services, can be accessed by attackers through both graphical interfaces and command-line utilities like sc.exe and net. This enables them to execute code with service-level privileges, which can aid in establishing persistence or elevating privileges.
@@ -11,12 +16,6 @@ Service Execution is a technique where attackers abuse the Windows Service Contr
 | Execution | T1569.002 | System Services: Service Execution |
 | Persistence | T1543.003 | Create or Modify System Process: Windows Service |
 | Defense Evasion | T1036.004 | Masquerading: Masquerade Task or Service |
-
-## Expected Alerts
-
-| Alert Title | Alert Description | Alert Details |
-| --- | --- | --- |
-| Suspicious service registration | A system program was registered as a service. This can indicate malicious intent to establish persistence or gain system privileges. | **Category:** Persistence<br/>**MITRE ATT&CK Techniques:** T1036: Masquerading, T1036.004: Masquerade Task or Service, T1543.003: Windows Service, T1569.002: Service Execution, T1574.011: Services Registry Permissions Weakness<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior<br/>**Detection status:** Detected |
 
 ## Attack Simulation
 
@@ -32,9 +31,9 @@ Service Execution is a technique where attackers abuse the Windows Service Contr
 
 | Parameter | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
-| `Path` | String | No | `$env:TEMP\MaliciousService` | Directory path where service artifacts will be created |
-| `CleanUp` | Switch | No | — | Remove the service and all created artifacts |
-| `Force` | Switch | No | — | Skip the confirmation prompt before execution |
+| `-Path` | String | No | `$env:TEMP\MaliciousService` | Directory path where service artifacts will be created |
+| `-CleanUp` | Switch | No | Not set | Remove the service and all created artifacts |
+| `-Force` | Switch | No | Not set | Skip the confirmation prompt before execution |
 
 #### What the Script Does
 
@@ -98,6 +97,12 @@ Check log file at: C:\...\service-log.txt
 6. Monitor the Microsoft Defender for Endpoint portal for service-related alerts.
 7. After testing, run `.\Invoke-ServiceExecutionSimulation.ps1 -CleanUp` to remove all artifacts.
 
+## Expected Alerts
+
+| Alert Title | Alert Description | Alert Details |
+| --- | --- | --- |
+| Suspicious service registration | A system program was registered as a service. This can indicate malicious intent to establish persistence or gain system privileges. | **Category:** Persistence<br/>**MITRE ATT&CK Techniques:** T1036: Masquerading, T1036.004: Masquerade Task or Service, T1543.003: Windows Service, T1569.002: Service Execution, T1574.011: Services Registry Permissions Weakness<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior<br/>**Detection status:** Detected |
+
 ## Why Does This Matter
 
 Malicious service creation is a powerful technique because:
@@ -132,14 +137,9 @@ sc.exe delete "MaliciousService"
 Remove-Item -Path "$env:TEMP\MaliciousService" -Recurse -Force
 ```
 
-## References
+## Manual Commands
 
-- [MITRE ATT&CK T1569.002 - Service Execution](https://attack.mitre.org/techniques/T1569/002/)
-- [MITRE ATT&CK T1543.003 - Windows Service](https://attack.mitre.org/techniques/T1543/003/)
-- [Microsoft Docs - sc.exe](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/sc-create)
-- [Microsoft Docs - New-Service](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/new-service)
-
-## Additional Manual Commands
+<a id="additional-manual-commands"></a>
 
 ### Service Execution (Manual Commands)
 
@@ -149,3 +149,10 @@ Remove-Item -Path "$env:TEMP\MaliciousService" -Recurse -Force
 sc.exe create "MaliciousService" binPath= "%COMSPEC% /c powershell.exe -nop -w hidden -command New-Item -ItemType File C:\art-marker.txt"
 sc.exe start "MaliciousService"
 ```
+
+## References
+
+- [MITRE ATT&CK T1569.002 - Service Execution](https://attack.mitre.org/techniques/T1569/002/)
+- [MITRE ATT&CK T1543.003 - Windows Service](https://attack.mitre.org/techniques/T1543/003/)
+- [Microsoft Docs - sc.exe](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/sc-create)
+- [Microsoft Docs - New-Service](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/new-service)

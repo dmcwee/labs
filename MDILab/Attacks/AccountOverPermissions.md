@@ -1,5 +1,11 @@
 # Account Over-Permissions (Privilege Escalation via Group Membership)
 
+> **Lab context:** Use `WinClient11` (`10.0.2.51`) and target
+> `LabSubAd1` (`10.0.2.15`) in the default `mayor.mcweeinc.com` forest.
+> Use `mayor\johna` for these privileged AD steps after verifying hydration.
+> Complete the [scenario setup](README.md#before-running-a-scenario) first;
+> VM administrator credentials, domain membership, and sensor onboarding are separate.
+
 ## Overview
 
 This attack simulation demonstrates a privilege escalation technique where an attacker creates or leverages an existing domain account and adds it to multiple highly privileged groups simultaneously. Unlike a targeted addition to a single group, this script escalates an account across several sensitive groups at once — including Domain Admins, Enterprise Admins, Schema Admins, Account Operators, and Backup Operators — mimicking an aggressive privilege escalation or insider threat scenario.
@@ -30,15 +36,15 @@ The `Invoke-AccountOverPermissions.ps1` script manages domain account group memb
 
 #### Parameters
 
-| Parameter | Type | Default | Description |
-| -- | -- | -- | -- |
-| `-UserName` | String | *(Required)* | The username of the domain account to manage |
-| `-CreateUser` | Switch | - | Creates a new domain user account if it doesn't exist |
-| `-Password` | SecureString | *(Auto-generated)* | Password for the new user account (used with `-CreateUser`) |
-| `-GroupList` | String[] | `Domain Admins`, `Enterprise Admins`, `Schema Admins`, `Account Operators`, `Backup Operators` | Array of domain groups to add the user to |
-| `-CleanUp` | Switch | - | Removes the user from all specified groups instead of adding |
-| `-DeleteUser` | Switch | - | Deletes the user account entirely (requires `-CleanUp`) |
-| `-DomainController` | String | - | Optional domain controller to target for operations |
+| Parameter | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `-UserName` | String | Yes | Not set | The username of the domain account to manage |
+| `-CreateUser` | Switch | No | Not set | Creates a new domain user account if it doesn't exist |
+| `-Password` | SecureString | No | *(Auto-generated)* | Password for the new user account (used with `-CreateUser`) |
+| `-GroupList` | String[] | No | `Domain Admins`, `Enterprise Admins`, `Schema Admins`, `Account Operators`, `Backup Operators` | Array of domain groups to add the user to |
+| `-CleanUp` | Switch | No | Not set | Removes the user from all specified groups instead of adding |
+| `-DeleteUser` | Switch | No | Not set | Deletes the user account entirely (requires `-CleanUp`) |
+| `-DomainController` | String | No | Not set | Optional domain controller to target for operations |
 
 #### What the Script Does
 
@@ -72,7 +78,7 @@ Adds an existing user to only the specified groups.
 #### Add user targeting a specific domain controller
 
 ```powershell
-.\Invoke-AccountOverPermissions.ps1 -UserName "testuser" -CreateUser -DomainController "DC01.contoso.com"
+.\Invoke-AccountOverPermissions.ps1 -UserName "testuser" -CreateUser -DomainController "LabSubAd1.mayor.mcweeinc.com"
 ```
 
 #### Clean up — remove user from all groups
@@ -93,12 +99,12 @@ Removes `testuser` from all default privileged groups.
 
 ```
 [2026-03-05 10:30:00] [Info] Importing Active Directory module...
-[2026-03-05 10:30:01] [Info] Working with domain: contoso.com
+[2026-03-05 10:30:01] [Info] Working with domain: mayor.mcweeinc.com
 [2026-03-05 10:30:01] [Info] Starting privilege escalation operations for user: testuser
 [2026-03-05 10:30:01] [Info] Creating new user account: testuser
 [2026-03-05 10:30:01] [Warning] Generated password for user 'testuser': xK#9mL$2pQ...
 [2026-03-05 10:30:01] [Warning] SAVE THIS PASSWORD - it will not be displayed again!
-[2026-03-05 10:30:02] [Success] User created successfully: CN=testuser,CN=Users,DC=contoso,DC=com
+[2026-03-05 10:30:02] [Success] User created successfully: CN=testuser,CN=Users,DC=mayor,DC=mcweeinc,DC=com
 [2026-03-05 10:30:02] [Info] Adding user to privileged groups...
 [2026-03-05 10:30:02] [Success] Added to group: Domain Admins
 [2026-03-05 10:30:02] [Success] Added to group: Enterprise Admins

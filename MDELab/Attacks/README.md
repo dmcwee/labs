@@ -1,20 +1,89 @@
 # MDE Lab Attack Scenarios
 
-| Users | Username | Password | Details |
-| ----- | -------- | -------- | ------- |
-| John Smith | jsmith | - | An Admin's normal account |
-| Ron HelpDesk | ronhd | - | A Helpdesk user account |
-| John Admin | johna | - | The domain account for John |
+## Deployment context
 
-| Machine Name | OS | IP Address |
-| ------------ | -- | ---------- |
-| LabAd | Windows Server 2016 | 10.0.2.5 |
-| Win2016 | Windows Server 2016 | 10.0.2.51 |
-| Win2022 | Windows Server 2022 | 10.0.2.52 |
-| LinuxUbuntu | Ubuntun 22.04 LTS | 10.0.2.53 |
-| WinClient11 | Windows 11 ENT | 10.0.2.54 |
+These instructions describe the standalone [MDE deployment](../README.md) and
+its [Bicep entrypoint](../modules/mdelab.bicep). Names and addresses below match
+that deployment, not the MDI, Linux, or OceanLotus environments. If you deployed
+the [unified Defender lab](../../Defender/README.md), use its inventory instead:
+for example, its `WinClient11` is `10.0.2.40`, not `10.0.2.53`.
 
-## Attack Scenarios
+Examples assume the default `domainName` of `mcweeinc.com` and
+`domainNetbiosName` of `mcwee`. Substitute your deployment values if overridden.
+Published templates and runtime scripts can lag source; check the
+[deployment alignment notes](../../docs/deployment-alignment.md) and actual
+machines before running a scenario.
+
+## Accounts and sign-in
+
+The `username` deployment parameter defaults to `cmadmin`. Use the supplied
+`password` to sign in to a non-domain-joined Windows member machine as
+`.\cmadmin`, or to `LinuxUbuntu` as `cmadmin`. Substitute your chosen username
+if you changed that parameter. This VM administrator is not one of the
+scenario users below.
+
+Azure deployment and Defender portal access use your own authorized tenant
+account. These VM/domain credentials do not create cloud identities or grant
+tenant roles.
+
+After `LabAd` promotion, restart, and sign-in complete the staged
+[DcHydrate.ps1](../../Common/DSC/DcHydrate.ps1), the `LabUsers` OU contains:
+
+| Display name | Account name | Additional groups assigned by hydration |
+| --- | --- | --- |
+| John Smith | `jsmith` | None. |
+| Jeff Leatherman | `jeffl` | None. |
+| Ron HelpDesk | `ronhd` | Helpdesk. |
+| John Admin | `johna` | Domain Admins. |
+| Samira Abbasi | `samiraa` | Domain Admins. |
+| Admin Backup | `admin_bak` | Remote IT Admin; Admin Backup. |
+
+With default domain parameters, domain sign-ins include `mcwee\jsmith` and
+`mcwee\johna`, or `jsmith@mcweeinc.com` and `johna@mcweeinc.com`. New hydrated
+accounts receive the deployment `password`; hydration does not reset passwords
+of accounts that already exist. Verify hydration before using these identities.
+Use `jsmith` for standard-user domain steps and `johna` only when domain
+administration is required. These accounts do not automatically gain local
+administrator rights on unjoined member machines.
+
+Accounts created by simulations, such as `BackdoorAdmin` or a user chosen for
+advanced hunting, are separate temporary test accounts. Do not substitute the
+deployment administrator or hydrated users into account-creation/deletion steps.
+
+## Machines and roles
+
+These are VM names and the computer names requested by the shared VM module.
+Windows scenario scripts do not run on `LinuxUbuntu`.
+
+| Machine | Operating system | Image SKU | Private IP | Scenario role |
+| --- | --- | --- | --- | --- |
+| `LabAd` | Windows Server 2022 Datacenter | `2022-Datacenter` | `10.0.2.5` | AD DS, DNS, and hydrated domain accounts; not the default host for local-account simulations. |
+| `Win2016` | Windows Server 2016 Datacenter | `2016-Datacenter` | `10.0.2.50` | Optional Windows server target when the scenario supports its OS/build. |
+| `Win2022` | Windows Server 2022 Datacenter | `2022-Datacenter` | `10.0.2.51` | Optional Windows server target when the scenario supports its OS/build. |
+| `LinuxUbuntu` | Ubuntu Server 22.04 LTS | `22_04-lts-gen2` | `10.0.2.52` | Linux onboarding/configuration exercises only; not the Windows PowerShell scenarios below. |
+| `WinClient11` | Windows 11 23H2 Enterprise | `win11-23h2-ent` | `10.0.2.53` | Starting host for Windows endpoint scenarios; verify OS/build compatibility first. |
+
+## Before running a scenario
+
+Connect to the lab VPN before using private IPs. Verify the machine name with
+`hostname` or `$env:COMPUTERNAME` and the signed-in identity with `whoami`.
+Use the VM administrator for elevated local steps on `WinClient11`; a domain
+account is needed only for steps that query or change AD.
+
+Hydration does not grant standard users RDP access to member machines. Use the
+deployment administrator for initial setup, and configure any required sign-in
+rights deliberately before using a domain user for a scenario.
+
+Domain joining and MDE onboarding are **not automatic**. For domain-dependent
+steps, configure member-machine DNS for `LabAd` (`10.0.2.5`), join the configured
+domain, and sign in with the appropriate domain account. Install and onboard MDE
+and verify device health before testing detection. Follow each script's OS,
+privilege, safety, and cleanup requirements; choosing a deployed machine does not
+guarantee that every technique works on that Windows build or generates an alert.
+
+<a id="attack-scenarios"></a>
+
+## Scenarios
 
 1. [MDE Demonstration Scenarios (MS Learn)](https://learn.microsoft.com/en-us/defender-endpoint/defender-endpoint-demonstrations)
 1. [Account Discovery](./AccountDiscovery.md)
@@ -26,7 +95,7 @@
 1. [Event Log Tampering](./EventLog.md)
 1. [Password Detection](./PasswordDetection.md)
 1. [Service Execution](./ServiceExecution.md)
-1. [Service Execution Embedded EXE](./Invoke-ServiceWithEmbeddedExeSimulation.ps1)
+1. [Service Execution Embedded EXE](./ServiceWithEmbeddedExe.md)
 1. [UAC Bypass](./UACBypass.md)
 1. [Account Advanced Hunting](./AccountAdvancedHunting.md)
 
@@ -73,3 +142,12 @@ This simulation demonstrates how an attacker can compile malicious C# code direc
 ### UAC Bypass
 
 UAC Bypass is a technique where attackers elevate their privileges to gain administrator-level permissions without triggering a User Account Control (UAC) prompt. This allows them to perform restricted tasks without user confirmation, bypassing security checks that would typically prevent unauthorized actions. This simulation uses the sdclt.exe method (Backup and Restore utility) which exploits registry handler hijacking.
+
+## Cleanup
+
+Use each scenario's cleanup on the same machine and with the same temporary
+account names used during execution. Preserve the deployment administrator and
+hydrated AD users; local test-account commands should not be run on `LabAd`.
+Restore any protections deliberately changed by a simulation. When finished
+with the whole environment, follow [lab teardown](../../docs/getting-started.md);
+VM shutdown alone does not remove billable disks and gateways.

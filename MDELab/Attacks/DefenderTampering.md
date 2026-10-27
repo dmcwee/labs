@@ -1,5 +1,10 @@
 # Defender Tampering Detection
 
+> **Lab context:** On standalone MDE, start on `WinClient11` (`10.0.2.53`)
+> using deployment `username` (`.\cmadmin` by default) and the supplied
+> `password`. See [scenario setup and domain accounts](README.md#before-running-a-scenario)
+> before domain-dependent steps; domain joining and MDE onboarding are manual.
+
 ## Overview
 
 Endpoint protection tampering refers to attempts by attackers to disable or modify security settings on a device to weaken its defenses. This can involve altering antivirus configurations, disabling real-time protection, adding broad exclusions, or modifying registry keys to bypass security controls. Attackers often perform these actions before deploying malware to avoid detection.
@@ -12,14 +17,6 @@ Endpoint protection tampering refers to attempts by attackers to disable or modi
 | Defense Evasion | T1562.001 | Impair Defenses: Disable or Modify Tools |
 | Defense Evasion | T1562.004 | Impair Defenses: Disable or Modify System Firewall |
 | Defense Evasion | T1112 | Modify Registry |
-
-## Expected Alerts
-
-| Alert Title | Alert Description | Alert Details |
-| --- | --- | --- |
-| Microsoft Defender Antivirus protection turned off | An attempt was made to turn off Microsoft Defender Antivirus protection. | **Category:** Defense evasion<br/>**MITRE ATT&CK Techniques:** T1562.001: Disable or Modify Tools<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior<br/>**Detection status:** Detected |
-| Attempt to stop Microsoft Defender for Endpoint sensor | An attempt was made to stop the Microsoft Defender for Endpoint sensor. | **Category:** Defense evasion<br/>**MITRE ATT&CK Techniques:** T1562.001: Disable or Modify Tools<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior<br/>**Detection status:** Detected |
-| Tampering with Microsoft Defender for Endpoint sensor settings | An attempt was made to modify Microsoft Defender settings that could impact security. | **Category:** Defense evasion<br/>**MITRE ATT&CK Techniques:** T1562.001: Disable or Modify Tools<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior<br/>**Detection status:** Detected |
 
 ## Attack Simulation
 
@@ -36,8 +33,8 @@ Endpoint protection tampering refers to attempts by attackers to disable or modi
 
 | Parameter | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
-| `cleanup` | Switch | No | — | Reverts all tampering changes back to secure defaults |
-| `Force` | Switch | No | — | Skip the confirmation prompt before execution |
+| `-cleanup` | Switch | No | Not set | Reverts all tampering changes back to secure defaults |
+| `-Force` | Switch | No | Not set | Skip the confirmation prompt before execution |
 
 #### What the Script Does
 
@@ -88,6 +85,14 @@ Proceeding with Defender tampering simulation...
 5. Monitor the Microsoft Defender for Endpoint portal for defense evasion alerts.
 6. After testing, run `.\Invoke-DefenderTamperingSimulation.ps1 -cleanup` to restore settings.
 
+## Expected Alerts
+
+| Alert Title | Alert Description | Alert Details |
+| --- | --- | --- |
+| Microsoft Defender Antivirus protection turned off | An attempt was made to turn off Microsoft Defender Antivirus protection. | **Category:** Defense evasion<br/>**MITRE ATT&CK Techniques:** T1562.001: Disable or Modify Tools<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior<br/>**Detection status:** Detected |
+| Attempt to stop Microsoft Defender for Endpoint sensor | An attempt was made to stop the Microsoft Defender for Endpoint sensor. | **Category:** Defense evasion<br/>**MITRE ATT&CK Techniques:** T1562.001: Disable or Modify Tools<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior<br/>**Detection status:** Detected |
+| Tampering with Microsoft Defender for Endpoint sensor settings | An attempt was made to modify Microsoft Defender settings that could impact security. | **Category:** Defense evasion<br/>**MITRE ATT&CK Techniques:** T1562.001: Disable or Modify Tools<br/>**Service source:** Microsoft Defender for Endpoint<br/>**Detection source:** EDR<br/>**Detection technology:** Behavior<br/>**Detection status:** Detected |
+
 ## Why Does This Matter
 
 Attackers prioritize disabling security tools because:
@@ -110,53 +115,6 @@ Tamper Protection is designed to prevent these attacks by blocking unauthorized 
 
 ## Clean-Up
 
-Microsoft Defender Tampering is a technique where attackers disable or interfere with Microsoft Defender to avoid detection of their malicious tools and activities. This may involve killing Defender processes, modifying registry keys, or blocking updates, which disrupts security scanning and prevents the latest security protections from being applied.
-
-Run the following commands in Windows Command Prompt on a test device to attempt to disable MDE EDR solution.
-
-```powershell
-net.exe stop Sense
-sc.exe delete Sense
-taskkill /F /IM MsSense.exe
-```
-
-### AV Tampering
-
-Microsoft Defender AV Tampering is a technique where attackers disable or interfere with Microsoft Defender Antivirus to avoid detection of their malicious tools and activities. This may involve killing Defender processes, modifying registry keys, or blocking updates, which disrupts security scanning and prevents the latest security protections from being applied.
-
-#### Attempt to disable using PowerShell
-
-```powershell
-Set-MpPreference -DisableRealtimeMonitoring $true
-Set-MpPreference -MAPSReporting 0
-Set-MpPreference -ExclusionExtension "exe" -ExclusionPath "C:\"
-```
-
-#### Attempt to disable using Registry Keys
-
-```powershell
-reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection" /v "DisableRealtimeMonitoring" /t REG_DWORD /d 1 /f
-reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\SpyNet" /v "SpynetReporting" /t REG_DWORD /d 0 /f
-reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Exclusions\Extensions" /v "exe" /t REG_SZ /d 0 /f
-reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Exclusions\Paths" /v "C:\\" /t REG_SZ /d "" /f
-```
-
-#### Attempt to disable using command
-
-```powershell
-sc stop WinDefend
-net stop WinDefend
-```
-
-#### Attempt to disable by killing tasks
-
-```powershell
-taskkill /IM MsMpEng.exe /F
-rmdir /s /q "C:\Program Files\Windows Defender"
-```
-
-## Clean-Up
-
 ```powershell
 # Using the script
 .\Invoke-DefenderTamperingSimulation.ps1 -cleanup
@@ -172,16 +130,9 @@ reg.exe delete "HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Exclusions\Ext
 reg.exe delete "HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Exclusions\Paths" /v "C:\" /f
 ```
 
-## References
+## Manual Commands
 
-- [MITRE ATT&CK T1562 - Impair Defenses](https://attack.mitre.org/techniques/T1562/)
-- [MITRE ATT&CK T1562.001 - Disable or Modify Tools](https://attack.mitre.org/techniques/T1562/001/)
-- [Microsoft Docs - Tamper Protection](https://docs.microsoft.com/en-us/microsoft-365/security/defender-endpoint/prevent-changes-to-security-settings-with-tamper-protection)
-- [Microsoft Docs - Configure Microsoft Defender Antivirus exclusions](https://docs.microsoft.com/en-us/microsoft-365/security/defender-endpoint/configure-exclusions-microsoft-defender-antivirus)
-
-## Additional Manual Commands
-
-### EDR Tampering (Manual Commands)
+### EDR Tampering
 
 Microsoft Defender Tampering is a technique where attackers disable or interfere with Microsoft Defender to avoid detection of their malicious tools and activities. This may involve killing Defender processes, modifying registry keys, or blocking updates, which disrupts security scanning and prevents the latest security protections from being applied.
 
@@ -214,6 +165,7 @@ reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Exclusions\Extens
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Exclusions\Paths" /v "C:\\" /t REG_SZ /d "" /f
 ```
 
+
 #### Attempt to disable by stopping services
 
 ```powershell
@@ -221,9 +173,9 @@ sc stop WinDefend
 net stop WinDefend
 ```
 
-#### Attempt to disable by killing processes
+## References
 
-```powershell
-taskkill /IM MsMpEng.exe /F
-rmdir /s /q "C:\Program Files\Windows Defender"
-```
+- [MITRE ATT&CK T1562 - Impair Defenses](https://attack.mitre.org/techniques/T1562/)
+- [MITRE ATT&CK T1562.001 - Disable or Modify Tools](https://attack.mitre.org/techniques/T1562/001/)
+- [Microsoft Docs - Tamper Protection](https://docs.microsoft.com/en-us/microsoft-365/security/defender-endpoint/prevent-changes-to-security-settings-with-tamper-protection)
+- [Microsoft Docs - Configure Microsoft Defender Antivirus exclusions](https://docs.microsoft.com/en-us/microsoft-365/security/defender-endpoint/configure-exclusions-microsoft-defender-antivirus)

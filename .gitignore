@@ -3,6 +3,7 @@ DSC-test
 IDAMLab_DSC.zip
 .vs/
 *.txt
+!requirements-docs.txt
 *.testing.*
 *.local.*
 .vscode/
@@ -14,3 +15,6 @@ CLAUDE.md
 modules/*.json
 MDILab/modules/mdilab.json
 MDELab/modules/mdelab.json
+.venv-docs/
+site/
+__pycache__/
