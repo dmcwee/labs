@@ -16,17 +16,8 @@ param size string
 var adServerName = 'LabAd'
 var labServers = [
   {
-    name:'Win2016'
-    sku:'2016-Datacenter'
-    offer: 'WindowsServer'
-    publisher: 'MicrosoftWindowsServer'
-    type: 'Windows'
-    size: size
-    ip: ''
-  }
-  {
     name:'Win2022'
-    sku:'2022-Datacenter'
+    sku: '2022-datacenter-g2'
     offer: 'WindowsServer'
     publisher: 'MicrosoftWindowsServer'
     type: 'Windows'
@@ -46,7 +37,7 @@ var labServers = [
     name:'WinClient11'
     publisher:'microsoftwindowsdesktop'
     offer: 'windows-11'
-    sku:'win11-23h2-ent'
+    sku:'win11-25h2-ent'
     type: 'Windows'
     size: size
     ip: ''
@@ -64,7 +55,7 @@ module network '../../Common/modules/network.bicep' = {
 module dcModule '../../Common/modules/virtualMachine.bicep' = {
   params: {
     name: adServerName
-    sku:'2022-Datacenter'
+    sku: '2022-datacenter-g2'
     offer: 'WindowsServer'
     publisher: 'MicrosoftWindowsServer'
     osType: 'Windows'

@@ -71,6 +71,7 @@ resource publicIp 'Microsoft.Network/publicIPAddresses@2024-05-01' = {
     publicIPAllocationMethod: 'Static'
     publicIPAddressVersion: 'IPv4'
   }
+  zones: [ '1', '2', '3' ]
 }
 
 resource gateway 'Microsoft.Network/virtualNetworkGateways@2024-05-01' = {
