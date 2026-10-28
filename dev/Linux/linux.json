@@ -5,8 +5,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.41.2.15936",
-      "templateHash": "13996233121239559850"
+      "version": "0.48.1.52935",
+      "templateHash": "7720125849790177127"
     }
   },
   "parameters": {
@@ -81,8 +81,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.41.2.15936",
-              "templateHash": "268313592840794325"
+              "version": "0.48.1.52935",
+              "templateHash": "13007995633619986591"
             }
           },
           "parameters": {
@@ -130,7 +130,7 @@
             },
             "gatewaySku": {
               "type": "string",
-              "defaultValue": "VpnGw1"
+              "defaultValue": "VpnGw1AZ"
             },
             "gatewayGeneration": {
               "type": "string",
@@ -230,7 +230,12 @@
               "properties": {
                 "publicIPAllocationMethod": "Static",
                 "publicIPAddressVersion": "IPv4"
-              }
+              },
+              "zones": [
+                "1",
+                "2",
+                "3"
+              ]
             },
             {
               "type": "Microsoft.Network/virtualNetworkGateways",
@@ -342,8 +347,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.41.2.15936",
-              "templateHash": "2067995219985810298"
+              "version": "0.48.1.52935",
+              "templateHash": "1263145151761022723"
             }
           },
           "parameters": {
@@ -492,8 +497,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.41.2.15936",
-                      "templateHash": "1937038184597547080"
+                      "version": "0.48.1.52935",
+                      "templateHash": "12613265673056467974"
                     }
                   },
                   "parameters": {
